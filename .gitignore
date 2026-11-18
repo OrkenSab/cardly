@@ -1,0 +1,31 @@
+# Environment & local secrets
+.env
+.env.local
+
+# User data & runtime artifacts
+data/
+*.anki2
+*.anki2-wal
+*.anki2-shm
+
+# Rust build outputs
+target/
+server/target/
+
+# Node / Web build outputs
+node_modules/
+web/node_modules/
+web/dist/
+web/.svelte-kit/
+
+# Test & screenshot outputs
+playwright-report/
+test-results/
+screenshots/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+*.swp
+.vscode/
+.idea/
