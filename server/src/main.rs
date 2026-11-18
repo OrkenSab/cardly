@@ -35,6 +35,32 @@ async fn main() -> anyhow::Result<()> {
     let state = AppState::new(config);
     let rpc_count = state.rpc.len();
 
+    if state.config.demo_mode {
+        let demo_user = state
+            .config
+            .demo_user
+            .as_deref()
+            .unwrap_or(cardly_server::demo::DEFAULT_DEMO_USER);
+        info!(user = %demo_user, "Demo mode active; checking sample collection...");
+        match state.users.get_or_init(demo_user) {
+            Ok(runtime) => {
+                if let Err(err) =
+                    cardly_server::demo::seed_demo_collection_if_empty(&state, &runtime).await
+                {
+                    tracing::warn!(error = ?err, "Failed to seed demo collection at startup");
+                }
+            }
+            Err(err) => {
+                tracing::warn!(error = ?err, "Failed to initialize demo user runtime");
+            }
+        }
+        let interval = state
+            .config
+            .demo_reset_interval_secs
+            .unwrap_or(cardly_server::demo::DEFAULT_RESET_INTERVAL_SECS);
+        cardly_server::demo::start_demo_reset_task(state.clone(), interval);
+    }
+
     let app = build_router(state);
     let listener = TcpListener::bind(addr).await?;
     let bound = listener.local_addr()?;

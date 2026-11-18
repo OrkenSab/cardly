@@ -66,16 +66,21 @@ export function installFetchInterceptor(): void {
 export async function checkAuth(): Promise<boolean> {
   try {
     const resp = await fetch("/api/auth/me", { credentials: "same-origin" });
+    const data = await resp.json().catch(() => ({}));
+    if (data.demo_mode !== undefined) {
+      store.demoMode = Boolean(data.demo_mode);
+    }
     if (!resp.ok) {
       store.authStatus = "unauthenticated";
       store.username = "";
       store.apiToken = "";
+      store.isDemoUser = false;
       window.__CARDLY_API_TOKEN__ = undefined;
       return false;
     }
-    const data = await resp.json();
     store.username = data.username;
     store.apiToken = data.api_token;
+    store.isDemoUser = Boolean(data.is_demo_user);
     window.__CARDLY_API_TOKEN__ = data.api_token;
     store.authStatus = "authenticated";
     void syncTimezone();
@@ -101,6 +106,8 @@ export async function login(username: string, password: string): Promise<{ ok: b
   const data = await resp.json();
   store.username = data.username;
   store.apiToken = data.api_token;
+  store.demoMode = Boolean(data.demo_mode);
+  store.isDemoUser = Boolean(data.is_demo_user);
   window.__CARDLY_API_TOKEN__ = data.api_token;
   store.authStatus = "authenticated";
   void syncTimezone();

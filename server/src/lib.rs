@@ -3,6 +3,7 @@
 
 pub mod auth;
 pub mod config;
+pub mod demo;
 pub mod files;
 pub mod media;
 pub mod rpc;
@@ -60,6 +61,8 @@ pub fn build_router(state: Arc<AppState>) -> Router {
         .route("/api/auth/login", post(auth::login_handler))
         .route("/api/auth/logout", post(auth::logout_handler))
         .route("/api/auth/me", get(auth::me_handler))
+        // Demo mode status
+        .route("/api/demo/status", get(demo::demo_status_handler))
         // Cardly auxiliary APIs (uploads, exports, batch browser rows, timezone, backups)
         .route(
             "/api/uploads",

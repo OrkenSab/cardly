@@ -1,0 +1,23 @@
+# Caddyfile for Cardly production reverse proxy with automatic TLS (Let's Encrypt / ZeroSSL)
+{
+    email {$CADDY_EMAIL}
+}
+
+{$DOMAIN:localhost} {
+    encode gzip zstd
+
+    # Reverse proxy to Cardly container
+    reverse_proxy cardly:8080 {
+        header_up X-Forwarded-Proto {scheme}
+        header_up X-Forwarded-Host {host}
+        header_up X-Real-IP {remote_host}
+    }
+
+    # Standard security headers
+    header {
+        Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+        X-Content-Type-Options "nosniff"
+        Referrer-Policy "strict-origin-when-cross-origin"
+        -Server
+    }
+}

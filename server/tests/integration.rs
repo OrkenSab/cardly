@@ -90,6 +90,41 @@ impl TestHarness {
         Self { _tmp: tmp, app }
     }
 
+    fn new_with_demo() -> (Self, std::sync::Arc<AppState>) {
+        let tmp = TempDir::new().expect("tempdir");
+        let upstream_web = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+            .join("../anki-upstream/out/qt/_aqt/data/web");
+        let users = parse_users(
+            &[
+                "demo:demo123".to_string(),
+                "alice:secret123".to_string(),
+            ],
+            false,
+        )
+        .expect("parse users");
+
+        let config = ServerConfig::build_with_all_options(
+            "127.0.0.1".parse::<IpAddr>().unwrap(),
+            0,
+            tmp.path().to_path_buf(),
+            upstream_web,
+            None,
+            b"test-session-secret-key-32-bytes!".to_vec(),
+            false,
+            64 * 1024 * 1024,
+            ClientIpSource::ConnectInfo,
+            users,
+            true,
+            Some("demo".to_string()),
+            Some(3600),
+        )
+        .expect("build config");
+
+        let state = AppState::new(config);
+        let app = build_router(state.clone());
+        (Self { _tmp: tmp, app }, state)
+    }
+
     async fn send(&self, mut req: Request<Body>) -> (StatusCode, axum::http::HeaderMap, Vec<u8>) {
         req.extensions_mut().insert(axum::extract::ConnectInfo(
             SocketAddr::from(([127, 0, 0, 1], 12345)),
@@ -704,4 +739,150 @@ async fn frontend_settings_image_convert_csv_import_export_and_backups() {
     assert_eq!(status, StatusCode::OK);
     let html_str = String::from_utf8_lossy(&html);
     assert!(html_str.contains("/_anki/cardly-bridge.js"));
+}
+
+#[tokio::test]
+async fn demo_mode_seeding_reset_status_and_abuse_protection() {
+    let (h, state) = TestHarness::new_with_demo();
+
+    // 1. Verify /api/demo/status
+    let (status, _, bytes) = h
+        .send(
+            Request::get("/api/demo/status")
+                .body(Body::empty())
+                .unwrap(),
+        )
+        .await;
+    assert_eq!(status, StatusCode::OK);
+    let demo_status: serde_json::Value = serde_json::from_slice(&bytes).unwrap();
+    assert_eq!(demo_status["demo_mode"], true);
+    assert_eq!(demo_status["demo_username"], "demo");
+    assert_eq!(demo_status["reset_interval_minutes"], 60);
+    assert!(demo_status["resets_in_seconds"].as_u64().unwrap() > 0);
+
+    // 2. Login as demo user
+    let (demo_cookie, demo_tok) = h.login("demo", "demo123").await;
+
+    // 3. Verify /api/auth/me returns demo_mode: true & is_demo_user: true
+    let (status, _, bytes) = h
+        .send(
+            Request::get("/api/auth/me")
+                .header(header::COOKIE, &demo_cookie)
+                .body(Body::empty())
+                .unwrap(),
+        )
+        .await;
+    assert_eq!(status, StatusCode::OK);
+    let me: serde_json::Value = serde_json::from_slice(&bytes).unwrap();
+    assert_eq!(me["authenticated"], true);
+    assert_eq!(me["username"], "demo");
+    assert_eq!(me["demo_mode"], true);
+    assert_eq!(me["is_demo_user"], true);
+
+    // 4. Seed sample decks for demo user
+    let runtime = state.users.get_or_init("demo").unwrap();
+    cardly_server::demo::seed_demo_collection_if_empty(&state, &runtime)
+        .await
+        .expect("seed demo collection");
+
+    // 5. Verify decks created (General Knowledge, Languages, Science)
+    let (status, bytes) = h
+        .rpc_raw(
+            &demo_cookie,
+            &demo_tok,
+            "getDeckNames",
+            anki_proto::decks::GetDeckNamesRequest {
+                skip_empty_default: false,
+                include_filtered: true,
+            }
+            .encode_to_vec(),
+        )
+        .await;
+    assert_eq!(status, StatusCode::OK);
+    let deck_names = anki_proto::decks::DeckNames::decode(bytes.as_slice()).unwrap();
+    let names: Vec<&str> = deck_names.entries.iter().map(|e| e.name.as_str()).collect();
+    assert!(names.contains(&"General Knowledge"), "missing General Knowledge deck");
+    assert!(names.contains(&"Languages::Spanish & Kazakh"), "missing Languages deck");
+    assert!(names.contains(&"Science & Mathematics"), "missing Science deck");
+
+    // 6. Verify notes exist in collection
+    let (status, bytes) = h
+        .rpc_raw(
+            &demo_cookie,
+            &demo_tok,
+            "searchNotes",
+            anki_proto::search::SearchRequest {
+                search: "".to_string(),
+                order: None,
+            }
+            .encode_to_vec(),
+        )
+        .await;
+    assert_eq!(status, StatusCode::OK);
+    let notes = anki_proto::search::SearchResponse::decode(bytes.as_slice()).unwrap();
+    assert!(notes.ids.len() >= 10, "expected at least 10 sample notes, got {}", notes.ids.len());
+
+    // 7. Verify abuse protection blocks dangerous actions for demo user:
+    // 7a. Block /api/import/colpkg
+    let (status, _, _) = h
+        .send(
+            Request::post("/api/import/colpkg")
+                .header(header::COOKIE, &demo_cookie)
+                .header(API_TOKEN_HEADER, &demo_tok)
+                .header(header::CONTENT_TYPE, "application/json")
+                .body(Body::from(r#"{"upload_id":"fake.colpkg"}"#))
+                .unwrap(),
+        )
+        .await;
+    assert_eq!(status, StatusCode::FORBIDDEN, "demo user must not import .colpkg");
+
+    // 7b. Block /api/backups/{name}/restore
+    let (status, _, _) = h
+        .send(
+            Request::post("/api/backups/test.colpkg/restore")
+                .header(header::COOKIE, &demo_cookie)
+                .header(API_TOKEN_HEADER, &demo_tok)
+                .body(Body::empty())
+                .unwrap(),
+        )
+        .await;
+    assert_eq!(status, StatusCode::FORBIDDEN, "demo user must not restore backups");
+
+    // 8. Test reset_demo_collection
+    cardly_server::demo::reset_demo_collection(&state)
+        .await
+        .expect("reset demo collection");
+
+    // Re-verify notes still present after reset (since reset re-seeds)
+    let (status, bytes) = h
+        .rpc_raw(
+            &demo_cookie,
+            &demo_tok,
+            "searchNotes",
+            anki_proto::search::SearchRequest {
+                search: "".to_string(),
+                order: None,
+            }
+            .encode_to_vec(),
+        )
+        .await;
+    assert_eq!(status, StatusCode::OK);
+    let notes_after = anki_proto::search::SearchResponse::decode(bytes.as_slice()).unwrap();
+    assert!(notes_after.ids.len() >= 10, "expected sample notes re-seeded after reset");
+
+    // 9. Verify regular user (alice) is NOT demo user
+    let (alice_cookie, _) = h.login("alice", "secret123").await;
+    let (status, _, bytes) = h
+        .send(
+            Request::get("/api/auth/me")
+                .header(header::COOKIE, &alice_cookie)
+                .body(Body::empty())
+                .unwrap(),
+        )
+        .await;
+    assert_eq!(status, StatusCode::OK);
+    let alice_me: serde_json::Value = serde_json::from_slice(&bytes).unwrap();
+    assert_eq!(alice_me["username"], "alice");
+    assert_eq!(alice_me["demo_mode"], true);
+    assert_eq!(alice_me["is_demo_user"], false);
 }

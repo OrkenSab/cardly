@@ -10,6 +10,18 @@
 
 ---
 
+## 🎬 Live Interactive Demo
+
+<p align="center">
+  <img src="./docs/demo/cardly-demo.gif" alt="Cardly Showcase Demo" width="800" />
+  <br />
+  <em>Complete workflow showcase: Login &rarr; Rich Text / Cloze Card Creation &rarr; Reviewer &rarr; 3-Pane Browser &rarr; Statistics</em>
+  <br />
+  <a href="./docs/demo/cardly-demo.mp4">▶ Download HD Video (MP4, 320 KB)</a>
+</p>
+
+---
+
 ## 📸 Interface Gallery
 
 Every screen in Cardly has been verified for visual and functional fidelity against official Anki Desktop across light and dark themes, as well as on mobile viewports:

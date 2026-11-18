@@ -47,6 +47,8 @@ pub struct AuthMeResponse {
     pub authenticated: bool,
     pub username: String,
     pub api_token: String,
+    pub demo_mode: bool,
+    pub is_demo_user: bool,
 }
 
 /// RFC 2104 HMAC-SHA256 using sha2::Sha256 (avoids crate version mismatch with digest 0.11).
@@ -232,10 +234,20 @@ pub async fn login_handler(
     let (signed, claims) = sign_session(&state.config.session_secret, &user.username);
     let cookie = build_session_cookie(&signed, SESSION_TTL_SECS as i64, state.config.cookie_secure);
 
+    let is_demo = state.config.demo_mode
+        && state
+            .config
+            .demo_user
+            .as_deref()
+            .map(|u| u == user.username)
+            .unwrap_or(false);
+
     let mut resp = Json(AuthMeResponse {
         authenticated: true,
         username: user.username.clone(),
         api_token: claims.tok,
+        demo_mode: state.config.demo_mode,
+        is_demo_user: is_demo,
     })
     .into_response();
     resp.headers_mut()
@@ -255,15 +267,28 @@ pub async fn me_handler(State(state): State<Arc<AppState>>, headers: HeaderMap) 
     let Some(claims) = authenticate_request(&state, &headers) else {
         return (
             StatusCode::UNAUTHORIZED,
-            Json(serde_json::json!({ "authenticated": false })),
+            Json(serde_json::json!({
+                "authenticated": false,
+                "demo_mode": state.config.demo_mode
+            })),
         )
             .into_response();
     };
+
+    let is_demo = state.config.demo_mode
+        && state
+            .config
+            .demo_user
+            .as_deref()
+            .map(|u| u == claims.u)
+            .unwrap_or(false);
 
     Json(AuthMeResponse {
         authenticated: true,
         username: claims.u,
         api_token: claims.tok,
+        demo_mode: state.config.demo_mode,
+        is_demo_user: is_demo,
     })
     .into_response()
 }

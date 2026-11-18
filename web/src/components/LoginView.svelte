@@ -1,13 +1,14 @@
 <script lang="ts">
   import { login } from "../lib/api";
+  import { store } from "../lib/store.svelte";
 
   let username = $state("");
   let password = $state("");
   let error = $state("");
   let submitting = $state(false);
 
-  async function handleSubmit(e: SubmitEvent) {
-    e.preventDefault();
+  async function handleSubmit(e?: Event) {
+    if (e) e.preventDefault();
     error = "";
     submitting = true;
     try {
@@ -58,6 +59,20 @@
       <button type="submit" class="anki-btn primary submit-btn" disabled={submitting}>
         {submitting ? "Signing in..." : "Sign In"}
       </button>
+      {#if store.demoMode}
+        <button
+          type="button"
+          class="anki-btn demo-btn"
+          disabled={submitting}
+          onclick={() => {
+            username = "demo";
+            password = "demo123";
+            handleSubmit();
+          }}
+        >
+          ⚡ Try Demo (demo / demo123)
+        </button>
+      {/if}
     </form>
   </div>
 </div>
@@ -121,5 +136,17 @@
     width: 100%;
     margin-top: 4px;
     padding: 9px 14px;
+  }
+  .demo-btn {
+    width: 100%;
+    margin-top: 8px;
+    padding: 8px 14px;
+    color: var(--accent-info, #0075ca);
+    background: rgba(0, 117, 202, 0.08);
+    border: 1px dashed rgba(0, 117, 202, 0.4);
+    font-weight: 600;
+  }
+  .demo-btn:hover {
+    background: rgba(0, 117, 202, 0.15);
   }
 </style>

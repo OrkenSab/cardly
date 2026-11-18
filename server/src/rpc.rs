@@ -233,6 +233,20 @@ pub async fn handle_anki_rpc(
         );
     }
 
+    let is_demo = state.config.demo_mode
+        && state
+            .config
+            .demo_user
+            .as_deref()
+            .map(|u| u == claims.u)
+            .unwrap_or(false);
+
+    if let Err((status, msg)) =
+        crate::demo::validate_demo_action(&claims.u, is_demo, &format!("/_anki/{method}"), None)
+    {
+        return text_error(status, msg);
+    }
+
     let runtime = match state.users.get_or_init(&claims.u) {
         Ok(rt) => rt,
         Err(e) => return text_error(StatusCode::INTERNAL_SERVER_ERROR, e.to_string()),

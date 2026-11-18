@@ -86,6 +86,21 @@ pub async fn upload_file_handler(
     if !has_valid_api_token(&headers, &claims) {
         return text_err(StatusCode::FORBIDDEN, "Missing or invalid Cardly API token");
     }
+
+    let is_demo = state.config.demo_mode
+        && state
+            .config
+            .demo_user
+            .as_deref()
+            .map(|u| u == claims.u)
+            .unwrap_or(false);
+
+    if let Err((status, msg)) =
+        crate::demo::validate_demo_action(&claims.u, is_demo, "/api/uploads", None)
+    {
+        return text_err(status, msg);
+    }
+
     let runtime = match state.users.get_or_init(&claims.u) {
         Ok(rt) => rt,
         Err(e) => return text_err(StatusCode::INTERNAL_SERVER_ERROR, e.to_string()),
@@ -100,8 +115,20 @@ pub async fn upload_file_handler(
             Ok(b) => b,
             Err(e) => return text_err(StatusCode::BAD_REQUEST, format!("Upload read error: {e}")),
         };
-        if data.len() > state.config.max_upload_bytes {
-            return text_err(StatusCode::PAYLOAD_TOO_LARGE, "Uploaded file exceeds limit");
+        let max_allowed = if is_demo {
+            crate::demo::DEMO_MAX_UPLOAD_BYTES
+        } else {
+            state.config.max_upload_bytes
+        };
+        if data.len() > max_allowed {
+            return text_err(
+                StatusCode::PAYLOAD_TOO_LARGE,
+                if is_demo {
+                    "Demo mode upload size limit is 10 MiB"
+                } else {
+                    "Uploaded file exceeds limit"
+                },
+            );
         }
         let ext = sanitize_ext(&orig_name);
         let upload_id = format!("up_{}.{}", random_token(), ext);
@@ -148,6 +175,21 @@ pub async fn import_colpkg_handler(
     if !has_valid_api_token(&headers, &claims) {
         return text_err(StatusCode::FORBIDDEN, "Missing or invalid Cardly API token");
     }
+
+    let is_demo = state.config.demo_mode
+        && state
+            .config
+            .demo_user
+            .as_deref()
+            .map(|u| u == claims.u)
+            .unwrap_or(false);
+
+    if let Err((status, msg)) =
+        crate::demo::validate_demo_action(&claims.u, is_demo, "/api/import/colpkg", None)
+    {
+        return text_err(status, msg);
+    }
+
     let runtime = match state.users.get_or_init(&claims.u) {
         Ok(rt) => rt,
         Err(e) => return text_err(StatusCode::INTERNAL_SERVER_ERROR, e.to_string()),
@@ -259,6 +301,21 @@ pub async fn export_handler(
     if !has_valid_api_token(&headers, &claims) {
         return text_err(StatusCode::FORBIDDEN, "Missing or invalid Cardly API token");
     }
+
+    let is_demo = state.config.demo_mode
+        && state
+            .config
+            .demo_user
+            .as_deref()
+            .map(|u| u == claims.u)
+            .unwrap_or(false);
+
+    if let Err((status, msg)) =
+        crate::demo::validate_demo_action(&claims.u, is_demo, "/api/import/colpkg", None)
+    {
+        return text_err(status, msg);
+    }
+
     let runtime = match state.users.get_or_init(&claims.u) {
         Ok(rt) => rt,
         Err(e) => return text_err(StatusCode::INTERNAL_SERVER_ERROR, e.to_string()),
@@ -463,6 +520,21 @@ pub async fn create_backup_handler(
     if !has_valid_api_token(&headers, &claims) {
         return text_err(StatusCode::FORBIDDEN, "Missing or invalid Cardly API token");
     }
+
+    let is_demo = state.config.demo_mode
+        && state
+            .config
+            .demo_user
+            .as_deref()
+            .map(|u| u == claims.u)
+            .unwrap_or(false);
+
+    if let Err((status, msg)) =
+        crate::demo::validate_demo_action(&claims.u, is_demo, "/api/import/colpkg", None)
+    {
+        return text_err(status, msg);
+    }
+
     let runtime = match state.users.get_or_init(&claims.u) {
         Ok(rt) => rt,
         Err(e) => return text_err(StatusCode::INTERNAL_SERVER_ERROR, e.to_string()),
@@ -531,6 +603,21 @@ pub async fn restore_backup_handler(
     if !has_valid_api_token(&headers, &claims) {
         return text_err(StatusCode::FORBIDDEN, "Missing or invalid Cardly API token");
     }
+
+    let is_demo = state.config.demo_mode
+        && state
+            .config
+            .demo_user
+            .as_deref()
+            .map(|u| u == claims.u)
+            .unwrap_or(false);
+
+    if let Err((status, msg)) =
+        crate::demo::validate_demo_action(&claims.u, is_demo, "/api/backups/restore", None)
+    {
+        return text_err(status, msg);
+    }
+
     let runtime = match state.users.get_or_init(&claims.u) {
         Ok(rt) => rt,
         Err(e) => return text_err(StatusCode::INTERNAL_SERVER_ERROR, e.to_string()),

@@ -114,6 +114,8 @@ class CardlyStore {
   authStatus = $state<"loading" | "authenticated" | "unauthenticated">("loading");
   username = $state<string>("");
   apiToken = $state<string>("");
+  demoMode = $state<boolean>(false);
+  isDemoUser = $state<boolean>(false);
 
   // Navigation
   view = $state<MainView>("decks");

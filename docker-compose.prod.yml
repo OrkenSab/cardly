@@ -1,0 +1,60 @@
+# Cardly Production Docker Compose
+# Includes Caddy reverse proxy for automated HTTPS (Let's Encrypt / ZeroSSL)
+services:
+  cardly:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: cardly:latest
+    container_name: cardly-app
+    restart: unless-stopped
+    env_file:
+      - path: .env
+        required: true
+    environment:
+      CARDLY_HOST: "0.0.0.0"
+      CARDLY_PORT: "8080"
+      CARDLY_DATA_DIR: "/data"
+      CARDLY_UPSTREAM_WEB_DIR: "/app/web-upstream"
+      CARDLY_SHELL_DIR: "/app/web-shell"
+      CARDLY_COOKIE_SECURE: "true"
+    volumes:
+      - cardly_data:/data
+    healthcheck:
+      test: ["CMD", "/app/cardly-server", "--healthcheck"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    networks:
+      - cardly_internal
+
+  caddy:
+    image: caddy:2-alpine
+    container_name: cardly-caddy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp" # HTTP/3 QUIC support
+    environment:
+      DOMAIN: ${DOMAIN:-localhost}
+      CADDY_EMAIL: ${CADDY_EMAIL:-}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      cardly:
+        condition: service_healthy
+    networks:
+      - cardly_internal
+
+networks:
+  cardly_internal:
+    driver: bridge
+
+volumes:
+  cardly_data:
+  caddy_data:
+  caddy_config:

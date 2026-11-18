@@ -44,6 +44,9 @@ pub struct ServerConfig {
     pub users: Vec<UserCredentials>,
     pub users_by_name: HashMap<String, usize>,
     pub users_by_hkey: HashMap<String, usize>,
+    pub demo_mode: bool,
+    pub demo_user: Option<String>,
+    pub demo_reset_interval_secs: Option<u64>,
 }
 
 /// Minimal `.env` loader that does not overwrite variables already set in the environment.
@@ -159,10 +162,35 @@ impl ServerConfig {
             .map(|v| !v.is_empty() && v != "0" && v.to_lowercase() != "false")
             .unwrap_or(false);
 
-        let raw_users = collect_users_from_env()?;
+        let demo_mode = env::var("CARDLY_DEMO_MODE")
+            .map(|v| matches!(v.as_str(), "1" | "true" | "TRUE" | "yes"))
+            .unwrap_or(false);
+
+        let demo_user_raw = env::var("CARDLY_DEMO_USER")
+            .unwrap_or_else(|_| "demo:demo123".to_string());
+
+        let demo_reset_interval_secs: u64 = env::var("CARDLY_DEMO_RESET_INTERVAL_SECS")
+            .ok()
+            .and_then(|v| v.parse().ok())
+            .unwrap_or(3600);
+
+        let mut raw_users = collect_users_from_env()?;
+        let mut demo_user_name = None;
+
+        if demo_mode {
+            let (name, _) = demo_user_raw
+                .split_once(':')
+                .unwrap_or(("demo", "demo123"));
+            let name = name.trim();
+            demo_user_name = Some(name.to_string());
+            if !raw_users.iter().any(|u| u.starts_with(&format!("{name}:"))) {
+                raw_users.push(demo_user_raw);
+            }
+        }
+
         let users = parse_users(&raw_users, passwords_hashed)?;
 
-        Self::build_with_users(
+        Self::build_with_all_options(
             host,
             port,
             data_dir,
@@ -173,6 +201,9 @@ impl ServerConfig {
             max_upload_mb * 1024 * 1024,
             ClientIpSource::ConnectInfo,
             users,
+            demo_mode,
+            demo_user_name,
+            Some(demo_reset_interval_secs),
         )
     }
 
@@ -188,6 +219,39 @@ impl ServerConfig {
         max_upload_bytes: usize,
         ip_source: ClientIpSource,
         users: Vec<UserCredentials>,
+    ) -> Result<Self> {
+        Self::build_with_all_options(
+            host,
+            port,
+            data_dir,
+            upstream_web_dir,
+            shell_dir,
+            session_secret,
+            cookie_secure,
+            max_upload_bytes,
+            ip_source,
+            users,
+            false,
+            None,
+            None,
+        )
+    }
+
+    #[allow(clippy::too_many_arguments)]
+    pub fn build_with_all_options(
+        host: IpAddr,
+        port: u16,
+        data_dir: PathBuf,
+        upstream_web_dir: PathBuf,
+        shell_dir: Option<PathBuf>,
+        session_secret: Vec<u8>,
+        cookie_secure: bool,
+        max_upload_bytes: usize,
+        ip_source: ClientIpSource,
+        users: Vec<UserCredentials>,
+        demo_mode: bool,
+        demo_user: Option<String>,
+        demo_reset_interval_secs: Option<u64>,
     ) -> Result<Self> {
         if users.is_empty() {
             bail!("No users configured; set CARDLY_USER1=username:password (or SYNC_USER1).");
@@ -214,6 +278,9 @@ impl ServerConfig {
             users,
             users_by_name,
             users_by_hkey,
+            demo_mode,
+            demo_user,
+            demo_reset_interval_secs,
         })
     }
 }

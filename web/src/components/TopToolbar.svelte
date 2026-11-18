@@ -54,10 +54,53 @@
       Sync
     </button>
   </div>
-  <div class="right-tray"></div>
+  <div class="right-tray">
+    {#if store.demoMode}
+      <div class="demo-pill" title="Cardly Demo Mode: sample collection resets automatically every hour">
+        <span class="demo-dot"></span>
+        <span class="demo-text">Demo Mode (resets hourly)</span>
+      </div>
+    {/if}
+  </div>
 </header>
 
 <style>
+  .right-tray {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+  }
+  .demo-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 10px;
+    margin-right: 12px;
+    margin-top: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--accent-info, #0075ca);
+    background: rgba(0, 117, 202, 0.1);
+    border: 1px solid rgba(0, 117, 202, 0.25);
+    border-radius: 999px;
+    user-select: none;
+  }
+  .demo-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--accent-info, #0075ca);
+    box-shadow: 0 0 6px var(--accent-info, #0075ca);
+  }
+  @media (max-width: 640px) {
+    .demo-text {
+      display: none;
+    }
+    .demo-pill {
+      padding: 4px 6px;
+      margin-right: 6px;
+    }
+  }
   .top-bar {
     display: grid;
     grid-template-columns: 1fr auto 1fr;
