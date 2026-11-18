@@ -1,0 +1,28 @@
+services:
+  cardly:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: cardly
+    restart: unless-stopped
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      CARDLY_HOST: "0.0.0.0"
+      CARDLY_PORT: "8080"
+      CARDLY_DATA_DIR: "/data"
+      CARDLY_UPSTREAM_WEB_DIR: "/app/web-upstream"
+    ports:
+      - "${CARDLY_PORT:-8080}:8080"
+    volumes:
+      - cardly_data:/data
+    healthcheck:
+      test: ["CMD", "/app/cardly-server", "--healthcheck"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+volumes:
+  cardly_data:

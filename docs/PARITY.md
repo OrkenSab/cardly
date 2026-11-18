@@ -7,15 +7,15 @@ Status legend:
 - `skipped` — Intentionally out of scope (desktop-only / add-ons).
 
 ## Phase 1 — Backend Server & Deployment
-- [ ] (`missing`) Rust Axum server hosting `rslib` directly (`server: true`)
-- [ ] (`missing`) Username + password login & session auth (per-user isolated collections)
-- [ ] (`missing`) Auto-dispatched `/_anki/*` protobuf RPC bridge (`anki_proto_gen`)
-- [ ] (`missing`) `FrontendService` server handlers (`profile.json`, `meta.json`, image conversion, uploads/exports)
-- [ ] (`missing`) Per-user media file serving with `UNTRUSTED_MEDIA_CSP`
-- [ ] (`missing`) Upstream `ts/` SvelteKit & reviewer static asset serving
-- [ ] (`missing`) Built-in Anki-compatible Sync Server (`/sync/*`, `/msync/*`)
-- [ ] (`missing`) Healthcheck (`/healthz`), `Dockerfile`, `docker-compose.yml`, `.env.example`
-- [ ] (`missing`) Automated Rust server integration tests
+- [x] (`done`) Rust Axum server hosting `rslib` directly (`server: true`)
+- [x] (`done`) Username + password login & session auth (per-user isolated collections)
+- [x] (`done`) Auto-dispatched `/_anki/*` protobuf RPC bridge (`anki_proto_gen`, 250+ RPCs)
+- [x] (`done`) `FrontendService` server handlers (`profile.json`, `meta.json`, image conversion, uploads/exports)
+- [x] (`done`) Per-user media file serving with `UNTRUSTED_MEDIA_CSP` & HTTP Range support
+- [x] (`done`) Upstream `ts/` SvelteKit & reviewer static asset serving (verified live on `/graphs` and `/deck-options/1`)
+- [x] (`done`) Built-in Anki-compatible Sync Server (`/sync/*`, `/msync/*`, verified with upstream `HttpSyncClient` + `sync_login`)
+- [x] (`done`) Healthcheck (`/healthz`, `--healthcheck`), `Dockerfile`, `docker-compose.yml`, `.env.example`
+- [x] (`done`) Automated Rust server integration tests (`4 passed, 0 failed`)
 
 ## Phase 2 — Core Screens & Behavior
 

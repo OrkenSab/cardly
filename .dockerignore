@@ -1,0 +1,13 @@
+.git
+.env
+data/
+target/
+server/target/
+anki-upstream/out/
+anki-upstream/node_modules/
+anki-upstream/target/
+web/node_modules/
+web/dist/
+playwright-report/
+test-results/
+screenshots/

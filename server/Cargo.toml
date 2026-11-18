@@ -1,0 +1,43 @@
+[package]
+name = "cardly-server"
+version = "0.1.0"
+edition = "2021"
+license = "AGPL-3.0-or-later"
+description = "Cardly HTTP backend & Anki-compatible sync server wrapping upstream rslib"
+
+[dependencies]
+anki = { path = "../anki-upstream/rslib" }
+anki_i18n = { path = "../anki-upstream/rslib/i18n" }
+anki_io = { path = "../anki-upstream/rslib/io" }
+anki_proto = { path = "../anki-upstream/rslib/proto" }
+anki_proto_gen = { path = "../anki-upstream/rslib/proto_gen" }
+
+anyhow = "1.0"
+async-trait = "0.1"
+axum = { version = "0.8.4", features = ["multipart", "macros"] }
+axum-client-ip = "1.1.3"
+base64 = "0.22"
+bytes = "1"
+hex = "0.4.3"
+image = { version = "0.25", default-features = false, features = ["png", "jpeg", "webp", "gif", "bmp"] }
+inflections = "1.1.1"
+pbkdf2 = { version = "0.12", features = ["simple"] }
+prost = "0.14"
+prost-reflect = "0.16.5"
+rand = "0.10.1"
+regex = "1.11.1"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+sha1 = "0.11.0"
+sha2 = "0.11.0"
+tokio = { version = "1.51.6", features = ["fs", "io-util", "rt-multi-thread", "macros", "signal", "sync"] }
+tokio-util = { version = "0.7.15", features = ["io"] }
+tower-http = { version = "0.7.1", features = ["trace"] }
+tracing = "0.1.41"
+tracing-subscriber = { version = "0.3.20", features = ["fmt", "env-filter"] }
+
+[dev-dependencies]
+http-body-util = "0.1"
+reqwest = { version = "0.12.20", default-features = false }
+tempfile = "3.20.0"
+tower = { version = "0.5", features = ["util"] }

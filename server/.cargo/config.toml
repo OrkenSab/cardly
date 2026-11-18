@@ -1,0 +1,6 @@
+[env]
+DESCRIPTORS_BIN = { value = "../anki-upstream/out/rslib/proto/descriptors.bin", relative = true }
+PROTOC = { value = "../anki-upstream/out/extracted/protoc/bin/protoc", relative = true }
+STRINGS_PY = { value = "../anki-upstream/out/pylib/anki/_fluent.py", relative = true }
+STRINGS_TS = { value = "../anki-upstream/out/ts/lib/generated/ftl.ts", relative = true }
+PYO3_NO_PYTHON = "1"

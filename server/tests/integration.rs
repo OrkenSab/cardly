@@ -1,0 +1,707 @@
+// Copyright: Cardly contributors
+// License: GNU AGPL, version 3 or later; https://www.gnu.org/licenses/agpl.html
+
+use std::net::IpAddr;
+use std::net::SocketAddr;
+use std::path::PathBuf;
+
+use anki::sync::collection::meta::MetaRequest;
+use anki::sync::collection::protocol::SyncProtocol;
+use anki::sync::http_client::HttpSyncClient;
+use anki::sync::login::sync_login;
+use anki::sync::media::begin::SyncBeginRequest;
+use anki::sync::media::changes::MediaChangesRequest;
+use anki::sync::media::protocol::MediaSyncProtocol;
+use anki::sync::request::IntoSyncRequest;
+use anki::sync::version::SYNC_VERSION_MAX;
+use anki_proto::decks::DeckTreeNode;
+use anki_proto::decks::DeckTreeRequest;
+use anki_proto::generic;
+use cardly_server::rpc::ConvertPastedImageRequest;
+use cardly_server::rpc::ConvertPastedImageResponse;
+use cardly_server::rpc::SetSettingJsonRequest;
+use anki_proto::import_export::CsvMetadata;
+use anki_proto::import_export::CsvMetadataRequest;
+use anki_proto::import_export::ImportCsvRequest;
+use anki_proto::import_export::ImportResponse;
+use anki_proto::media::AddMediaFileRequest;
+use anki_proto::notes::AddNoteRequest;
+use anki_proto::notes::Note;
+use anki_proto::notetypes::NotetypeNames;
+use anki_proto::scheduler::card_answer::Rating;
+use anki_proto::scheduler::CardAnswer;
+use anki_proto::scheduler::GetQueuedCardsRequest;
+use anki_proto::scheduler::QueuedCards;
+use anki_proto::search::SearchRequest;
+use anki_proto::search::SearchResponse;
+use axum::body::Body;
+use axum::http::header;
+use axum::http::Method;
+use axum::http::Request;
+use axum::http::StatusCode;
+use axum::Router;
+use axum_client_ip::ClientIpSource;
+use cardly_server::auth::API_TOKEN_HEADER;
+use cardly_server::build_router;
+use cardly_server::config::parse_users;
+use cardly_server::config::ServerConfig;
+use cardly_server::media::UNTRUSTED_MEDIA_CSP;
+use cardly_server::AppState;
+use http_body_util::BodyExt;
+use prost::Message;
+use tempfile::TempDir;
+use tower::ServiceExt;
+
+struct TestHarness {
+    _tmp: TempDir,
+    app: Router,
+}
+
+impl TestHarness {
+    fn new() -> Self {
+        let tmp = TempDir::new().expect("tempdir");
+        let upstream_web = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+            .join("../anki-upstream/out/qt/_aqt/data/web");
+        let users = parse_users(
+            &[
+                "alice:secret123".to_string(),
+                "bob:otherpass".to_string(),
+            ],
+            false,
+        )
+        .expect("parse users");
+
+        let config = ServerConfig::build_with_users(
+            "127.0.0.1".parse::<IpAddr>().unwrap(),
+            0,
+            tmp.path().to_path_buf(),
+            upstream_web,
+            None,
+            b"test-session-secret-key-32-bytes!".to_vec(),
+            false,
+            64 * 1024 * 1024,
+            ClientIpSource::ConnectInfo,
+            users,
+        )
+        .expect("build config");
+
+        let state = AppState::new(config);
+        let app = build_router(state);
+        Self { _tmp: tmp, app }
+    }
+
+    async fn send(&self, mut req: Request<Body>) -> (StatusCode, axum::http::HeaderMap, Vec<u8>) {
+        req.extensions_mut().insert(axum::extract::ConnectInfo(
+            SocketAddr::from(([127, 0, 0, 1], 12345)),
+        ));
+        let resp = self.app.clone().oneshot(req).await.expect("router oneshot");
+        let status = resp.status();
+        let headers = resp.headers().clone();
+        let bytes = resp
+            .into_body()
+            .collect()
+            .await
+            .expect("collect body")
+            .to_bytes()
+            .to_vec();
+        (status, headers, bytes)
+    }
+
+    async fn login(&self, username: &str, password: &str) -> (String, String) {
+        let body = serde_json::json!({ "username": username, "password": password }).to_string();
+        let req = Request::builder()
+            .method(Method::POST)
+            .uri("/api/auth/login")
+            .header(header::CONTENT_TYPE, "application/json")
+            .body(Body::from(body))
+            .unwrap();
+        let (status, headers, bytes) = self.send(req).await;
+        assert_eq!(status, StatusCode::OK, "login failed: {}", String::from_utf8_lossy(&bytes));
+        let cookie = headers
+            .get(header::SET_COOKIE)
+            .expect("set-cookie")
+            .to_str()
+            .unwrap()
+            .split(';')
+            .next()
+            .unwrap()
+            .to_string();
+        let json: serde_json::Value = serde_json::from_slice(&bytes).unwrap();
+        let token = json["api_token"].as_str().unwrap().to_string();
+        (cookie, token)
+    }
+
+    async fn rpc_raw(
+        &self,
+        cookie: &str,
+        token: &str,
+        method: &str,
+        payload: Vec<u8>,
+    ) -> (StatusCode, Vec<u8>) {
+        let req = Request::builder()
+            .method(Method::POST)
+            .uri(format!("/_anki/{method}"))
+            .header(header::COOKIE, cookie)
+            .header(API_TOKEN_HEADER, token)
+            .header(header::CONTENT_TYPE, "application/binary")
+            .body(Body::from(payload))
+            .unwrap();
+        let (status, _headers, bytes) = self.send(req).await;
+        (status, bytes)
+    }
+}
+
+#[tokio::test]
+async fn healthcheck_and_auth_guards() {
+    let h = TestHarness::new();
+
+    // Health endpoints
+    let (status, _, bytes) = h
+        .send(Request::get("/healthz").body(Body::empty()).unwrap())
+        .await;
+    assert_eq!(status, StatusCode::OK);
+    assert!(String::from_utf8_lossy(&bytes).contains("ok"));
+
+    // Unauthenticated RPC must be rejected
+    let (status, _, _) = h
+        .send(
+            Request::post("/_anki/deckTree")
+                .header(header::CONTENT_TYPE, "application/binary")
+                .body(Body::empty())
+                .unwrap(),
+        )
+        .await;
+    assert_eq!(status, StatusCode::UNAUTHORIZED);
+
+    // Wrong password rejected
+    let (status, _, _) = h
+        .send(
+            Request::post("/api/auth/login")
+                .header(header::CONTENT_TYPE, "application/json")
+                .body(Body::from(r#"{"username":"alice","password":"wrong"}"#))
+                .unwrap(),
+        )
+        .await;
+    assert_eq!(status, StatusCode::UNAUTHORIZED);
+
+    // Valid login succeeds and /api/auth/me works
+    let (cookie, token) = h.login("alice", "secret123").await;
+    let (status, _, bytes) = h
+        .send(
+            Request::get("/api/auth/me")
+                .header(header::COOKIE, &cookie)
+                .body(Body::empty())
+                .unwrap(),
+        )
+        .await;
+    assert_eq!(status, StatusCode::OK);
+    let me: serde_json::Value = serde_json::from_slice(&bytes).unwrap();
+    assert_eq!(me["username"], "alice");
+
+    // Missing API token on mutating/non-whitelisted RPC must be 403 (card JS isolation)
+    let (status, _, _) = h
+        .send(
+            Request::post("/_anki/deckTree")
+                .header(header::COOKIE, &cookie)
+                .header(header::CONTENT_TYPE, "application/binary")
+                .body(Body::empty())
+                .unwrap(),
+        )
+        .await;
+    assert_eq!(status, StatusCode::FORBIDDEN);
+
+    // Blocked server-path RPC must be 403 even with valid API token
+    let (status, _) = h.rpc_raw(&cookie, &token, "openCollection", vec![]).await;
+    assert_eq!(status, StatusCode::FORBIDDEN);
+}
+
+#[tokio::test]
+async fn end_to_end_add_card_review_and_multiuser_isolation() {
+    let h = TestHarness::new();
+    let (alice_cookie, alice_tok) = h.login("alice", "secret123").await;
+    let (bob_cookie, bob_tok) = h.login("bob", "otherpass").await;
+
+    // 1. Fetch Basic notetype ID for Alice
+    let (status, bytes) = h
+        .rpc_raw(&alice_cookie, &alice_tok, "getNotetypeNames", vec![])
+        .await;
+    assert_eq!(status, StatusCode::OK);
+    let nt_names = NotetypeNames::decode(bytes.as_slice()).unwrap();
+    let basic = nt_names
+        .entries
+        .iter()
+        .find(|e| e.name == "Basic")
+        .expect("Basic notetype exists");
+
+    // 2. Add a note to Alice's Default deck (id = 1)
+    let add_req = AddNoteRequest {
+        note: Some(Note {
+            id: 0,
+            guid: String::new(),
+            notetype_id: basic.id,
+            mtime_secs: 0,
+            usn: 0,
+            tags: vec!["phase1".to_string()],
+            fields: vec!["Capital of France?".to_string(), "Paris".to_string()],
+        }),
+        deck_id: 1,
+    };
+    let (status, bytes) = h
+        .rpc_raw(&alice_cookie, &alice_tok, "addNote", add_req.encode_to_vec())
+        .await;
+    assert_eq!(status, StatusCode::OK, "addNote failed: {}", String::from_utf8_lossy(&bytes));
+
+    // 3. Search cards for Alice vs Bob (verify strict per-user isolation)
+    let search_req = SearchRequest {
+        search: "tag:phase1".to_string(),
+        order: None,
+    };
+    let (status, alice_search) = h
+        .rpc_raw(
+            &alice_cookie,
+            &alice_tok,
+            "searchCards",
+            search_req.encode_to_vec(),
+        )
+        .await;
+    assert_eq!(status, StatusCode::OK);
+    let alice_ids = SearchResponse::decode(alice_search.as_slice()).unwrap().ids;
+    assert_eq!(alice_ids.len(), 1);
+
+    let (status, bob_search) = h
+        .rpc_raw(
+            &bob_cookie,
+            &bob_tok,
+            "searchCards",
+            search_req.encode_to_vec(),
+        )
+        .await;
+    assert!(
+        status == StatusCode::OK || status == StatusCode::NO_CONTENT,
+        "unexpected status for empty bob search: {status}"
+    );
+    let bob_ids = SearchResponse::decode(bob_search.as_slice()).unwrap().ids;
+    assert_eq!(bob_ids.len(), 0, "Bob must not see Alice's cards");
+
+    // 4. Fetch queued card and answer it with GOOD via real rslib v3 scheduler
+    let queue_req = GetQueuedCardsRequest {
+        fetch_limit: 5,
+        intraday_learning_only: false,
+    };
+    let (status, q_bytes) = h
+        .rpc_raw(
+            &alice_cookie,
+            &alice_tok,
+            "getQueuedCards",
+            queue_req.encode_to_vec(),
+        )
+        .await;
+    assert_eq!(status, StatusCode::OK);
+    let queued = QueuedCards::decode(q_bytes.as_slice()).unwrap();
+    assert_eq!(queued.cards.len(), 1);
+    assert_eq!(queued.new_count, 1);
+
+    let top = &queued.cards[0];
+    let card = top.card.as_ref().unwrap();
+    let next_good = top.states.as_ref().unwrap().good.clone();
+    let now_millis = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .unwrap()
+        .as_millis() as i64;
+    let answer = CardAnswer {
+        card_id: card.id,
+        current_state: top.states.as_ref().unwrap().current.clone(),
+        new_state: next_good,
+        rating: Rating::Good as i32,
+        answered_at_millis: now_millis,
+        milliseconds_taken: 2500,
+    };
+    let (status, _) = h
+        .rpc_raw(
+            &alice_cookie,
+            &alice_tok,
+            "answerCard",
+            answer.encode_to_vec(),
+        )
+        .await;
+    assert_eq!(status, StatusCode::OK);
+
+    // 5. Verify deck tree counts updated (0 new, 1 learning on Default deck)
+    let now_secs = now_millis / 1000;
+    let (status, tree_bytes) = h
+        .rpc_raw(
+            &alice_cookie,
+            &alice_tok,
+            "deckTree",
+            DeckTreeRequest { now: now_secs }.encode_to_vec(),
+        )
+        .await;
+    assert_eq!(status, StatusCode::OK);
+    let tree = DeckTreeNode::decode(tree_bytes.as_slice()).unwrap();
+    let default_deck = tree
+        .children
+        .iter()
+        .find(|d| d.deck_id == 1)
+        .expect("Default deck present in deckTree");
+    assert_eq!(default_deck.new_count, 0);
+    assert_eq!(default_deck.learn_count, 1);
+
+    // 6. Configure active browser columns and verify batch browser rows endpoint works
+    let cols_req = generic::StringList {
+        vals: vec![
+            "noteFld".to_string(),
+            "deck".to_string(),
+            "cardDue".to_string(),
+        ],
+    };
+    let (status, _) = h
+        .rpc_raw(
+            &alice_cookie,
+            &alice_tok,
+            "setActiveBrowserColumns",
+            cols_req.encode_to_vec(),
+        )
+        .await;
+    assert!(status == StatusCode::OK || status == StatusCode::NO_CONTENT);
+
+    let batch_req = Request::builder()
+        .method(Method::POST)
+        .uri("/api/browser/rows")
+        .header(header::COOKIE, &alice_cookie)
+        .header(API_TOKEN_HEADER, &alice_tok)
+        .header(header::CONTENT_TYPE, "application/json")
+        .body(Body::from(
+            serde_json::json!({ "ids": alice_ids }).to_string(),
+        ))
+        .unwrap();
+    let (status, _, bytes) = h.send(batch_req).await;
+    assert_eq!(status, StatusCode::OK);
+    let rows_json: serde_json::Value = serde_json::from_slice(&bytes).unwrap();
+    let rows = rows_json["rows"].as_array().unwrap();
+    assert_eq!(rows.len(), 1);
+    assert_eq!(rows[0]["cells"][0]["text"], "Capital of France?");
+}
+
+#[tokio::test]
+async fn media_serving_csp_range_and_sync_protocol_interop() {
+    let h = TestHarness::new();
+    let (alice_cookie, alice_tok) = h.login("alice", "secret123").await;
+    let (bob_cookie, _) = h.login("bob", "otherpass").await;
+
+    // 1. Add a media file via rslib `addMediaFile` RPC
+    let add_media = AddMediaFileRequest {
+        desired_name: "hello.txt".to_string(),
+        data: b"0123456789abcdef".to_vec(),
+    };
+    let (status, out) = h
+        .rpc_raw(
+            &alice_cookie,
+            &alice_tok,
+            "addMediaFile",
+            add_media.encode_to_vec(),
+        )
+        .await;
+    assert_eq!(status, StatusCode::OK);
+    let saved_name = generic::String::decode(out.as_slice()).unwrap().val;
+    assert_eq!(saved_name, "hello.txt");
+
+    // 2. Serve media to Alice -> 200 OK with UNTRUSTED_MEDIA_CSP
+    let (status, headers, body) = h
+        .send(
+            Request::get("/hello.txt")
+                .header(header::COOKIE, &alice_cookie)
+                .body(Body::empty())
+                .unwrap(),
+        )
+        .await;
+    assert_eq!(status, StatusCode::OK);
+    assert_eq!(body, b"0123456789abcdef");
+    assert_eq!(
+        headers
+            .get(header::CONTENT_SECURITY_POLICY)
+            .unwrap()
+            .to_str()
+            .unwrap(),
+        UNTRUSTED_MEDIA_CSP
+    );
+
+    // 3. HTTP Range request -> 206 Partial Content
+    let (status, headers, body) = h
+        .send(
+            Request::get("/hello.txt")
+                .header(header::COOKIE, &alice_cookie)
+                .header(header::RANGE, "bytes=2-5")
+                .body(Body::empty())
+                .unwrap(),
+        )
+        .await;
+    assert_eq!(status, StatusCode::PARTIAL_CONTENT);
+    assert_eq!(body, b"2345");
+    assert_eq!(
+        headers.get(header::CONTENT_RANGE).unwrap().to_str().unwrap(),
+        "bytes 2-5/16"
+    );
+
+    // 4. Bob cannot read Alice's media
+    let (status, _, _) = h
+        .send(
+            Request::get("/hello.txt")
+                .header(header::COOKIE, &bob_cookie)
+                .body(Body::empty())
+                .unwrap(),
+        )
+        .await;
+    assert_eq!(status, StatusCode::NOT_FOUND);
+
+    // 5. Verify real Anki Sync Client interoperability against a live TCP listener
+    let listener = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
+    let addr = listener.local_addr().unwrap();
+    let app_for_serve = h.app.clone();
+    let server_task = tokio::spawn(async move {
+        let _ = axum::serve(
+            listener,
+            app_for_serve.into_make_service_with_connect_info::<SocketAddr>(),
+        )
+        .await;
+    });
+
+    let endpoint = format!("http://{addr}/");
+    let http_client = reqwest::Client::builder().http1_only().build().unwrap();
+
+    // Real rslib `sync_login` hits `/sync/hostKey` with Anki's exact zstd wire format
+    let mut auth = sync_login(
+        "alice",
+        "secret123",
+        Some(endpoint.parse().unwrap()),
+        http_client.clone(),
+    )
+    .await
+    .expect("rslib sync_login against Cardly failed");
+    assert!(!auth.hkey.is_empty());
+    // `sync_login` clears endpoint back to None (AnkiWeb default), so re-attach our custom server URL.
+    auth.endpoint = Some(endpoint.parse().unwrap());
+
+    let sync_client = HttpSyncClient::new(auth, http_client);
+
+    // `/msync/begin` should report media_usn >= 1 because Alice added `hello.txt` via web!
+    let begin_resp = sync_client
+        .begin(
+            SyncBeginRequest {
+                client_version: "anki-test,25.0".to_string(),
+            }
+            .try_into_sync_request()
+            .unwrap(),
+        )
+        .await
+        .expect("msync/begin failed")
+        .json_result()
+        .unwrap();
+    assert!(begin_resp.usn.0 >= 1);
+
+    // `/msync/mediaChanges` should include `hello.txt` added via the web app!
+    let changes = sync_client
+        .media_changes(
+            MediaChangesRequest {
+                last_usn: anki::prelude::Usn(0),
+            }
+            .try_into_sync_request()
+            .unwrap(),
+        )
+        .await
+        .expect("msync/mediaChanges failed")
+        .json_result()
+        .unwrap();
+    assert!(
+        changes.iter().any(|c| c.fname == "hello.txt"),
+        "expected hello.txt in mediaChanges, got: {changes:?}"
+    );
+
+    // `/sync/meta` switches collection cleanly from Web -> Sync and returns matching media_usn
+    let meta = sync_client
+        .meta(
+            MetaRequest {
+                sync_version: SYNC_VERSION_MAX,
+                client_version: "anki-test,25.0".to_string(),
+            }
+            .try_into_sync_request()
+            .unwrap(),
+        )
+        .await
+        .expect("sync/meta failed")
+        .json()
+        .unwrap();
+    assert!(meta.media_usn.0 >= 1);
+
+    server_task.abort();
+
+    // Switching back to Web RPC after sync/meta must seamlessly reopen Web collection
+    let (status, _) = h
+        .rpc_raw(&alice_cookie, &alice_tok, "deckTree", vec![])
+        .await;
+    assert_eq!(status, StatusCode::OK);
+}
+
+#[tokio::test]
+async fn frontend_settings_image_convert_csv_import_export_and_backups() {
+    let h = TestHarness::new();
+    let (cookie, token) = h.login("alice", "secret123").await;
+
+    // 1. Profile JSON round-trip
+    let set_req = SetSettingJsonRequest {
+        key: "theme".to_string(),
+        value_json: br#""dark""#.to_vec(),
+    };
+    let (status, _) = h
+        .rpc_raw(&cookie, &token, "setProfileConfigJson", set_req.encode_to_vec())
+        .await;
+    assert_eq!(status, StatusCode::NO_CONTENT);
+
+    let (status, out) = h
+        .rpc_raw(
+            &cookie,
+            &token,
+            "getProfileConfigJson",
+            generic::String {
+                val: "theme".to_string(),
+            }
+            .encode_to_vec(),
+        )
+        .await;
+    assert_eq!(status, StatusCode::OK);
+    let val = generic::Json::decode(out.as_slice()).unwrap();
+    assert_eq!(val.json, br#""dark""#);
+
+    // 2. Convert pasted image (1x1 PNG -> JPEG)
+    let mut png_bytes = Vec::new();
+    {
+        use image::ImageEncoder;
+        let enc = image::codecs::png::PngEncoder::new(&mut png_bytes);
+        enc.write_image(&[255, 0, 0, 255], 1, 1, image::ExtendedColorType::Rgba8)
+            .unwrap();
+    }
+    let (status, out) = h
+        .rpc_raw(
+            &cookie,
+            &token,
+            "convertPastedImage",
+            ConvertPastedImageRequest {
+                data: png_bytes,
+                ext: "jpg".to_string(),
+            }
+            .encode_to_vec(),
+        )
+        .await;
+    assert_eq!(status, StatusCode::OK);
+    let converted = ConvertPastedImageResponse::decode(out.as_slice()).unwrap();
+    assert!(converted.data.starts_with(&[0xFF, 0xD8])); // JPEG SOI magic bytes
+
+    // 3. Upload a CSV via multipart, inspect metadata, import it, and export .apkg
+    let boundary = "----CardlyTestBoundary";
+    let multipart_body = format!(
+        "--{boundary}\r\nContent-Disposition: form-data; name=\"file\"; filename=\"vocab.csv\"\r\nContent-Type: text/csv\r\n\r\nbonjour\thello\nmerci\tthank you\n\r\n--{boundary}--\r\n"
+    );
+    let (status, _, bytes) = h
+        .send(
+            Request::post("/api/uploads")
+                .header(header::COOKIE, &cookie)
+                .header(API_TOKEN_HEADER, &token)
+                .header(
+                    header::CONTENT_TYPE,
+                    format!("multipart/form-data; boundary={boundary}"),
+                )
+                .body(Body::from(multipart_body))
+                .unwrap(),
+        )
+        .await;
+    assert_eq!(status, StatusCode::OK, "upload failed: {}", String::from_utf8_lossy(&bytes));
+    let up: serde_json::Value = serde_json::from_slice(&bytes).unwrap();
+    let upload_id = up["upload_id"].as_str().unwrap().to_string();
+
+    let (status, meta_bytes) = h
+        .rpc_raw(
+            &cookie,
+            &token,
+            "getCsvMetadata",
+            CsvMetadataRequest {
+                path: upload_id.clone(),
+                ..Default::default()
+            }
+            .encode_to_vec(),
+        )
+        .await;
+    assert_eq!(status, StatusCode::OK, "getCsvMetadata failed: {}", String::from_utf8_lossy(&meta_bytes));
+    let csv_meta = CsvMetadata::decode(meta_bytes.as_slice()).unwrap();
+
+    let (status, imp_bytes) = h
+        .rpc_raw(
+            &cookie,
+            &token,
+            "importCsv",
+            ImportCsvRequest {
+                path: upload_id,
+                metadata: Some(csv_meta),
+            }
+            .encode_to_vec(),
+        )
+        .await;
+    assert_eq!(status, StatusCode::OK, "importCsv failed: {}", String::from_utf8_lossy(&imp_bytes));
+    let imp = ImportResponse::decode(imp_bytes.as_slice()).unwrap();
+    assert_eq!(imp.log.unwrap().new.len(), 2);
+
+    // Export .apkg
+    let (status, headers, apkg_bytes) = h
+        .send(
+            Request::post("/api/export")
+                .header(header::COOKIE, &cookie)
+                .header(API_TOKEN_HEADER, &token)
+                .header(header::CONTENT_TYPE, "application/json")
+                .body(Body::from(r#"{"format":"apkg","filename":"french"}"#))
+                .unwrap(),
+        )
+        .await;
+    assert_eq!(status, StatusCode::OK);
+    assert!(headers
+        .get(header::CONTENT_DISPOSITION)
+        .unwrap()
+        .to_str()
+        .unwrap()
+        .contains("french.apkg"));
+    assert!(apkg_bytes.starts_with(b"PK")); // ZIP header
+
+    // Create and list backups
+    let (status, _, _) = h
+        .send(
+            Request::post("/api/backups/create")
+                .header(header::COOKIE, &cookie)
+                .header(API_TOKEN_HEADER, &token)
+                .body(Body::empty())
+                .unwrap(),
+        )
+        .await;
+    assert_eq!(status, StatusCode::OK);
+
+    let (status, _, bytes) = h
+        .send(
+            Request::get("/api/backups")
+                .header(header::COOKIE, &cookie)
+                .body(Body::empty())
+                .unwrap(),
+        )
+        .await;
+    assert_eq!(status, StatusCode::OK);
+    let backups: serde_json::Value = serde_json::from_slice(&bytes).unwrap();
+    assert!(!backups["backups"].as_array().unwrap().is_empty());
+
+    // Upstream SvelteKit page served with cardly-bridge.js injected
+    let (status, _, html) = h
+        .send(
+            Request::get("/graphs")
+                .header(header::COOKIE, &cookie)
+                .body(Body::empty())
+                .unwrap(),
+        )
+        .await;
+    assert_eq!(status, StatusCode::OK);
+    let html_str = String::from_utf8_lossy(&html);
+    assert!(html_str.contains("/_anki/cardly-bridge.js"));
+}
