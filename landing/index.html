@@ -1,0 +1,471 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cardly — The Open-Source Spaced Repetition App for Web & Mobile</title>
+    <meta
+      name="description"
+      content="Pixel-perfect Anki Desktop web clone powered directly by official Anki Rust core (rslib). FSRS v4/v5 scheduling, mobile PWA, and built-in AnkiDroid sync."
+    />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Cardly — The Open-Source Spaced Repetition App" />
+    <meta
+      property="og:description"
+      content="Pixel-perfect Anki Desktop web clone powered directly by official Anki Rust core (rslib). FSRS v4/v5 scheduling, mobile PWA, and built-in AnkiDroid sync."
+    />
+    <meta property="og:image" content="assets/social-preview.png" />
+    <meta property="og:image:width" content="1280" />
+    <meta property="og:image:height" content="640" />
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Cardly — The Open-Source Spaced Repetition App" />
+    <meta
+      name="twitter:description"
+      content="Pixel-perfect Anki Desktop web clone powered directly by official Anki Rust core (rslib). FSRS v4/v5 scheduling, mobile PWA, and built-in AnkiDroid sync."
+    />
+    <meta name="twitter:image" content="assets/social-preview.png" />
+
+    <link rel="icon" type="image/x-icon" href="assets/favicon.ico" />
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16x16.png" />
+    <link rel="icon" type="image/svg+xml" href="assets/cardly-icon.svg" />
+    <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <!-- Navigation Bar -->
+    <header class="navbar">
+      <div class="nav-container">
+        <a href="#" class="brand-link">
+          <img src="assets/cardly-icon.svg" alt="Cardly Emblem" class="brand-icon" />
+          <span class="brand-name">Card<span class="accent">ly</span></span>
+        </a>
+
+        <nav class="nav-menu">
+          <a href="#features" data-i18n="nav_features">Features</a>
+          <a href="#demo" data-i18n="nav_demo">Showcase</a>
+          <a href="#comparison" data-i18n="nav_comparison">Comparison</a>
+          <a href="#faq" data-i18n="nav_faq">FAQ</a>
+        </nav>
+
+        <div class="nav-actions">
+          <!-- Language Switcher -->
+          <div class="lang-switch" role="group" aria-label="Language Switcher">
+            <button type="button" class="lang-btn active" data-lang="en">EN</button>
+            <button type="button" class="lang-btn" data-lang="ru">RU</button>
+            <button type="button" class="lang-btn" data-lang="kk">KK</button>
+          </div>
+
+          <!-- Theme Toggle -->
+          <button type="button" class="icon-btn theme-toggle" id="themeToggle" title="Toggle Theme" aria-label="Toggle Theme">
+            <svg class="sun-icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="5"></circle>
+              <line x1="12" y1="1" x2="12" y2="3"></line>
+              <line x1="12" y1="21" x2="12" y2="23"></line>
+              <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+              <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+              <line x1="1" y1="12" x2="3" y2="12"></line>
+              <line x1="21" y1="12" x2="23" y2="12"></line>
+              <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+              <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+            </svg>
+            <svg class="moon-icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+            </svg>
+          </button>
+
+          <!-- GitHub Link -->
+          <a href="https://github.com/ankitects/anki" target="_blank" rel="noopener noreferrer" class="btn btn-secondary nav-gh" title="Star on GitHub">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+              <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/>
+            </svg>
+            <span>GitHub</span>
+          </a>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main>
+      <!-- Hero Section -->
+      <section class="hero-section">
+        <div class="hero-container">
+          <!-- Badges -->
+          <div class="badge-row">
+            <span class="pill-badge pill-blue" data-i18n="badge_anki">100% Anki Compatible</span>
+            <span class="pill-badge pill-amber" data-i18n="badge_fsrs">FSRS v4/v5 Core</span>
+            <span class="pill-badge pill-emerald" data-i18n="badge_selfhosted">Self-Hosted Docker</span>
+            <span class="pill-badge pill-purple" data-i18n="badge_agpl">GNU AGPL-3.0</span>
+          </div>
+
+          <!-- Hero Headings -->
+          <h1 class="hero-title" data-i18n="hero_title">
+            The Open-Source Spaced Repetition App <br /><span class="gradient-text">for Web &amp; Mobile</span>
+          </h1>
+
+          <p class="hero-subtitle" data-i18n="hero_subtitle">
+            A pixel-perfect self-hosted web clone of Anki Desktop powered directly by Anki's official Rust core (<code class="inline-code">rslib</code>).
+            Zero algorithmic rewrites, modern FSRS retention optimization, installable PWA, and direct sync with AnkiDroid &amp; AnkiMobile.
+          </p>
+
+          <!-- Hero CTAs -->
+          <div class="hero-ctas">
+            <a href="http://localhost:8080" class="btn btn-primary cta-btn" data-i18n="cta_demo">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+                <path d="M8 5v14l11-7z"/>
+              </svg>
+              <span>Try Live Demo</span>
+            </a>
+
+            <a href="#quickstart" class="btn btn-secondary cta-btn" data-i18n="cta_quickstart">
+              <span>Quickstart via Docker</span>
+            </a>
+          </div>
+
+          <!-- Quickstart Snippet -->
+          <div class="snippet-box" id="quickstart">
+            <div class="snippet-header">
+              <span class="dot dot-red"></span>
+              <span class="dot dot-yellow"></span>
+              <span class="dot dot-green"></span>
+              <span class="snippet-title" data-i18n="snippet_label">One-Command Quickstart</span>
+            </div>
+            <div class="snippet-content">
+              <code>docker compose up -d</code>
+              <button type="button" class="copy-btn" id="copyBtn" title="Copy to clipboard" aria-label="Copy to clipboard">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                  <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                </svg>
+                <span class="copy-text" data-i18n="copy_btn">Copy</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Video / GIF Showcase Section -->
+      <section class="demo-section" id="demo">
+        <div class="section-container">
+          <div class="section-heading">
+            <span class="kicker" data-i18n="demo_kicker">SHOWCASE &amp; EXPERIENCE</span>
+            <h2 data-i18n="demo_title">Pixel-Perfect Desktop Parity in Your Browser</h2>
+            <p data-i18n="demo_desc">Watch a complete study workflow: login, rich card creation, review with FSRS ease intervals, 3-pane browser search, and statistics.</p>
+          </div>
+
+          <!-- Browser Mockup -->
+          <div class="browser-mockup">
+            <div class="mockup-chrome">
+              <div class="mockup-controls">
+                <span class="dot dot-red"></span>
+                <span class="dot dot-yellow"></span>
+                <span class="dot dot-green"></span>
+              </div>
+              <div class="mockup-url-bar">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" class="lock-icon">
+                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                  <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                </svg>
+                <span>https://cardly.local:8080/study</span>
+              </div>
+              <div class="mockup-meta">
+                <span class="fps-badge">60 FPS</span>
+              </div>
+            </div>
+
+            <div class="mockup-viewport">
+              <video autoplay loop muted playsinline poster="assets/cardly-demo.gif" class="demo-video">
+                <source src="assets/cardly-demo.mp4" type="video/mp4" />
+                <img src="assets/cardly-demo.gif" alt="Cardly Interactive Showcase" class="demo-fallback" />
+              </video>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Feature Grid -->
+      <section class="features-section" id="features">
+        <div class="section-container">
+          <div class="section-heading">
+            <span class="kicker" data-i18n="feat_kicker">CORE CAPABILITIES</span>
+            <h2 data-i18n="feat_title">Engineered with Zero Compromises</h2>
+            <p data-i18n="feat_desc">Cardly does not rewrite or approximate Anki's algorithms. It links directly against upstream Rust binaries and reusable Svelte components.</p>
+          </div>
+
+          <div class="features-grid">
+            <!-- Feature 1 -->
+            <div class="feature-card">
+              <div class="feature-icon icon-blue">
+                <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+                </svg>
+              </div>
+              <h3 data-i18n="feat_1_title">Official Anki Core (rslib)</h3>
+              <p data-i18n="feat_1_desc">Directly links the official Rust core. Every schedule calculation, database schema mutation, and SQLite transaction is executed by upstream Anki code.</p>
+            </div>
+
+            <!-- Feature 2 -->
+            <div class="feature-card">
+              <div class="feature-icon icon-amber">
+                <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <polyline points="12 6 12 12 16 14"></polyline>
+                </svg>
+              </div>
+              <h3 data-i18n="feat_2_title">FSRS v4 / v5 Scheduler</h3>
+              <p data-i18n="feat_2_desc">Full support for the modern Free Spaced Repetition Scheduler with live in-browser weight optimization and future retention simulation.</p>
+            </div>
+
+            <!-- Feature 3 -->
+            <div class="feature-card">
+              <div class="feature-icon icon-emerald">
+                <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                  <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+                </svg>
+              </div>
+              <h3 data-i18n="feat_3_title">MathJax 3, Cloze &amp; Audio</h3>
+              <p data-i18n="feat_3_desc">Client-side MathJax formulas, nested cloze deletions, typed answer character diffing, HTML5 audio, video, and Web Speech API text-to-speech.</p>
+            </div>
+
+            <!-- Feature 4 -->
+            <div class="feature-card">
+              <div class="feature-icon icon-purple">
+                <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                  <line x1="9" y1="3" x2="9" y2="21"></line>
+                  <line x1="9" y1="9" x2="21" y2="9"></line>
+                </svg>
+              </div>
+              <h3 data-i18n="feat_4_title">3-Pane Virtualized Browser</h3>
+              <p data-i18n="feat_4_desc">Desktop-grade card browser with full search syntax (<code class="inline-code">deck:</code>, <code class="inline-code">tag:</code>, <code class="inline-code">is:due</code>), sortable columns, and bulk batch actions.</p>
+            </div>
+
+            <!-- Feature 5 -->
+            <div class="feature-card">
+              <div class="feature-icon icon-cyan">
+                <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect>
+                  <line x1="12" y1="18" x2="12.01" y2="18"></line>
+                </svg>
+              </div>
+              <h3 data-i18n="feat_5_title">Mobile PWA &amp; Touch Controls</h3>
+              <p data-i18n="feat_5_desc">Installable on iPhone and Android with standalone display, service worker offline shell, safe area insets, and ergonomic 44px touch rating buttons.</p>
+            </div>
+
+            <!-- Feature 6 -->
+            <div class="feature-card">
+              <div class="feature-icon icon-rose">
+                <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="23 4 23 10 17 10"></polyline>
+                  <polyline points="1 20 1 14 7 14"></polyline>
+                  <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+                </svg>
+              </div>
+              <h3 data-i18n="feat_6_title">Built-in Sync Server</h3>
+              <p data-i18n="feat_6_desc">Full implementation of Anki's sync protocol (<code class="inline-code">/sync/*</code> and <code class="inline-code">/msync/*</code>). AnkiDroid and AnkiMobile sync directly with your self-hosted server.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Comparison Matrix -->
+      <section class="comparison-section" id="comparison">
+        <div class="section-container">
+          <div class="section-heading">
+            <span class="kicker" data-i18n="comp_kicker">HONEST ARCHITECTURE</span>
+            <h2 data-i18n="comp_title">How Cardly Compares</h2>
+            <p data-i18n="comp_desc">A transparent look at the differences between Cardly, official AnkiWeb, and desktop Anki.</p>
+          </div>
+
+          <div class="table-wrapper">
+            <table class="comparison-table">
+              <thead>
+                <tr>
+                  <th data-i18n="th_feature">Feature / Dimension</th>
+                  <th class="col-cardly">
+                    <span class="th-badge">Recommended</span>
+                    Cardly (This Project)
+                  </th>
+                  <th>Official AnkiWeb</th>
+                  <th>Official Desktop Anki</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="row-name" data-i18n="r_deployment">Deployment &amp; Access</td>
+                  <td class="col-cardly" data-i18n="r_deployment_cardly">Self-hosted Web &amp; Mobile PWA</td>
+                  <td data-i18n="r_deployment_ankiweb">Proprietary Anki Cloud</td>
+                  <td data-i18n="r_deployment_desktop">Native OS Install (PyQt6/Python)</td>
+                </tr>
+                <tr>
+                  <td class="row-name" data-i18n="r_engine">Core Scheduling Engine</td>
+                  <td class="col-cardly" data-i18n="r_engine_cardly">Official Rust <code class="inline-code">rslib</code> linked directly</td>
+                  <td data-i18n="r_engine_ankiweb">Custom Web Backend</td>
+                  <td data-i18n="r_engine_desktop">Native Rust <code class="inline-code">rslib</code></td>
+                </tr>
+                <tr>
+                  <td class="row-name" data-i18n="r_fsrs">FSRS v4/v5 &amp; Optimizer</td>
+                  <td class="col-cardly" data-i18n="r_fsrs_cardly">Full support + online optimizer &amp; simulator</td>
+                  <td data-i18n="r_fsrs_ankiweb">Review only (no optimizer)</td>
+                  <td data-i18n="r_fsrs_desktop">Full support + optimizer</td>
+                </tr>
+                <tr>
+                  <td class="row-name" data-i18n="r_browser">Card Browser</td>
+                  <td class="col-cardly" data-i18n="r_browser_cardly">Full 3-pane virtualized with bulk actions</td>
+                  <td data-i18n="r_browser_ankiweb">Read-only basic search list</td>
+                  <td data-i18n="r_browser_desktop">Full 3-pane Qt browser</td>
+                </tr>
+                <tr>
+                  <td class="row-name" data-i18n="r_templates">Card Template Editor</td>
+                  <td class="col-cardly" data-i18n="r_templates_cardly">Full split-view HTML/CSS editor with live preview</td>
+                  <td data-i18n="r_templates_ankiweb">Very limited</td>
+                  <td data-i18n="r_templates_desktop">Full split-view editor</td>
+                </tr>
+                <tr>
+                  <td class="row-name" data-i18n="r_sync">Mobile Sync Protocol</td>
+                  <td class="col-cardly" data-i18n="r_sync_cardly">Built-in Sync Server for AnkiDroid / AnkiMobile</td>
+                  <td data-i18n="r_sync_ankiweb">Sync server for all apps</td>
+                  <td data-i18n="r_sync_desktop">Sync client</td>
+                </tr>
+                <tr>
+                  <td class="row-name" data-i18n="r_privacy">Data Privacy &amp; Control</td>
+                  <td class="col-cardly" data-i18n="r_privacy_cardly">100% self-hosted on your hardware</td>
+                  <td data-i18n="r_privacy_ankiweb">Stored on AnkiWeb servers</td>
+                  <td data-i18n="r_privacy_desktop">Stored locally on computer</td>
+                </tr>
+                <tr>
+                  <td class="row-name" data-i18n="r_addons">Add-on Support</td>
+                  <td class="col-cardly" data-i18n="r_addons_cardly">Web-safe components &amp; Svelte extensions</td>
+                  <td data-i18n="r_addons_ankiweb">No add-ons</td>
+                  <td data-i18n="r_addons_desktop">Full Python / PyQt add-ons</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- FAQ Accordion -->
+      <section class="faq-section" id="faq">
+        <div class="section-container">
+          <div class="section-heading">
+            <span class="kicker" data-i18n="faq_kicker">FREQUENTLY ASKED QUESTIONS</span>
+            <h2 data-i18n="faq_title">Got Questions? We Have Answers</h2>
+          </div>
+
+          <div class="accordion">
+            <!-- FAQ Item 1 -->
+            <div class="accordion-item">
+              <button class="accordion-trigger" aria-expanded="false">
+                <span data-i18n="faq_1_q">Is Cardly an official Anki product?</span>
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" class="chevron">
+                  <polyline points="6 9 12 15 18 9"></polyline>
+                </svg>
+              </button>
+              <div class="accordion-panel">
+                <p data-i18n="faq_1_a">No. Cardly is an independent, open-source project. It is not affiliated with, sponsored by, or endorsed by Damien Elmes or Ankitects Pty Ltd. It links directly against the open-source Rust libraries of Anki in full compliance with GNU AGPL-3.0.</p>
+              </div>
+            </div>
+
+            <!-- FAQ Item 2 -->
+            <div class="accordion-item">
+              <button class="accordion-trigger" aria-expanded="false">
+                <span data-i18n="faq_2_q">Does Cardly compute intervals identically to Anki Desktop?</span>
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" class="chevron">
+                  <polyline points="6 9 12 15 18 9"></polyline>
+                </svg>
+              </button>
+              <div class="accordion-panel">
+                <p data-i18n="faq_2_a">Yes. Unlike other web flashcard apps that reimplement spaced repetition math in JavaScript, Cardly directly invokes Anki's official Rust core (<code class="inline-code">rslib</code>). Every interval, FSRS power formula, and scheduling state transition runs through upstream Anki code.</p>
+              </div>
+            </div>
+
+            <!-- FAQ Item 3 -->
+            <div class="accordion-item">
+              <button class="accordion-trigger" aria-expanded="false">
+                <span data-i18n="faq_3_q">How much does it cost to self-host Cardly?</span>
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" class="chevron">
+                  <polyline points="6 9 12 15 18 9"></polyline>
+                </svg>
+              </button>
+              <div class="accordion-panel">
+                <p data-i18n="faq_3_a">Cardly is 100% free software. You can host it on any cheap cloud VPS ($4–$5/month on Hetzner, DigitalOcean, Linode), deploy it on a home Raspberry Pi, or run it on modern serverless containers (Fly.io, Railway) within their free/hobby tiers.</p>
+              </div>
+            </div>
+
+            <!-- FAQ Item 4 -->
+            <div class="accordion-item">
+              <button class="accordion-trigger" aria-expanded="false">
+                <span data-i18n="faq_4_q">How does sync work with AnkiDroid (Android) and AnkiMobile (iOS)?</span>
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" class="chevron">
+                  <polyline points="6 9 12 15 18 9"></polyline>
+                </svg>
+              </button>
+              <div class="accordion-panel">
+                <p data-i18n="faq_4_a">Cardly embeds Anki's official HTTP sync server protocol. In AnkiDroid or AnkiMobile settings, simply enable "Custom Sync Server" and point it to your Cardly instance URL (<code class="inline-code">http://&lt;IP&gt;:8080/sync/</code>). Your collections and media sync automatically!</p>
+              </div>
+            </div>
+
+            <!-- FAQ Item 5 -->
+            <div class="accordion-item">
+              <button class="accordion-trigger" aria-expanded="false">
+                <span data-i18n="faq_5_q">What open-source license does Cardly use?</span>
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" class="chevron">
+                  <polyline points="6 9 12 15 18 9"></polyline>
+                </svg>
+              </button>
+              <div class="accordion-panel">
+                <p data-i18n="faq_5_a">Cardly is licensed under the GNU Affero General Public License v3 or later (AGPL-3.0-or-later), matching the upstream licensing of the Anki project. See the NOTICE file for complete contributor and third-party credits.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <div class="footer-container">
+        <div class="footer-brand">
+          <div class="brand-row">
+            <img src="assets/cardly-icon.svg" alt="Cardly" class="footer-icon" />
+            <span class="footer-logo">Card<span class="accent">ly</span></span>
+          </div>
+          <p class="footer-desc" data-i18n="footer_desc">The open-source spaced repetition app for web and mobile. Built with love on official Anki core.</p>
+        </div>
+
+        <div class="footer-links">
+          <div class="link-col">
+            <h4 data-i18n="col_project">Project</h4>
+            <a href="https://github.com/ankitects/anki" target="_blank" rel="noopener noreferrer">Upstream Repository</a>
+            <a href="../README.md">English README</a>
+            <a href="../README.ru.md">README (Русский)</a>
+            <a href="../README.kk.md">README (Қазақша)</a>
+          </div>
+
+          <div class="link-col">
+            <h4 data-i18n="col_community">Community</h4>
+            <a href="../CONTRIBUTING.md">Contributing</a>
+            <a href="../CODE_OF_CONDUCT.md">Code of Conduct</a>
+            <a href="../SECURITY.md">Security Policy</a>
+            <a href="../NOTICE">License &amp; Notice</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <p>&copy; 2026 Cardly Contributors. Licensed under GNU AGPL-3.0-or-later. Anki is a trademark of Anki Software, LLC.</p>
+      </div>
+    </footer>
+
+    <!-- Toast Notification -->
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+    <script src="app.js"></script>
+  </body>
+</html>
