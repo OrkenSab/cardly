@@ -67,7 +67,7 @@
   // Mode & layout
   let notesMode = $state(false);
   let verticalSplit = $state(false);
-  let sidebarVisible = $state(true);
+  let sidebarVisible = $state(typeof window !== "undefined" ? window.innerWidth > 768 : true);
 
   // Search & results
   let searchText = $state(store.browser.initialSearch || "");
@@ -1709,5 +1709,37 @@
     cursor: pointer;
     padding: 0;
     font-size: 10px;
+  }
+  @media (max-width: 768px) {
+    .sidebar {
+      position: absolute;
+      top: 40px;
+      bottom: 0;
+      left: 0;
+      width: min(280px, 85vw);
+      background: var(--canvas-overlay);
+      box-shadow: 4px 0 16px rgba(0, 0, 0, 0.25);
+      z-index: 50;
+    }
+    .right-area {
+      flex-direction: column !important;
+    }
+    .table-pane {
+      flex: 1;
+      min-height: 220px;
+    }
+    .editor-pane {
+      flex: 1;
+      min-height: 220px;
+    }
+    .search-bar {
+      padding: 6px 8px;
+      flex-wrap: wrap;
+    }
+    .search-input {
+      order: 3;
+      width: 100%;
+      min-width: 100%;
+    }
   }
 </style>

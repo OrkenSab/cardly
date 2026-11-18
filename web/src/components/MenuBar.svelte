@@ -152,6 +152,12 @@
       </button>
       {#if openMenu === "help"}
         <div class="menu-dropdown" role="menu">
+          {#if store.canInstall}
+            <button class="context-menu-item" role="menuitem" onclick={() => run(() => store.installCardly())}>
+              <span>Install Cardly App...</span>
+            </button>
+            <div class="context-menu-sep"></div>
+          {/if}
           <button class="context-menu-item" role="menuitem" onclick={() => run(() => (store.syncInfoOpen = true))}>
             <span>Mobile &amp; Desktop Sync Setup...</span>
           </button>
@@ -164,6 +170,18 @@
   </div>
 
   <div class="menubar-right">
+    {#if !store.isOnline}
+      <span class="offline-pill" title="Network disconnected">Offline</span>
+    {/if}
+    {#if store.canInstall}
+      <button
+        class="install-pill-btn"
+        title="Install Cardly as a desktop/mobile app"
+        onclick={() => store.installCardly()}
+      >
+        Install App
+      </button>
+    {/if}
     <button
       class="theme-toggle"
       title={store.isDark ? "Switch to light mode" : "Switch to dark mode"}
@@ -241,5 +259,28 @@
     color: var(--fg-subtle);
     font-size: 12px;
     padding: 0 6px;
+  }
+  .offline-pill {
+    background: var(--accent-danger);
+    color: #ffffff;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 1px 6px;
+    border-radius: 4px;
+    margin-right: 4px;
+  }
+  .install-pill-btn {
+    background: var(--button-primary-bg);
+    color: #ffffff;
+    border: none;
+    font-size: 11.5px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-right: 4px;
+  }
+  .install-pill-btn:hover {
+    filter: brightness(1.1);
   }
 </style>

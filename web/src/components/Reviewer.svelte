@@ -1275,4 +1275,54 @@
     font-size: 13px;
     padding-bottom: 6px;
   }
+  @media (max-width: 640px) {
+    .reviewer-bottom {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      padding: 6px 10px calc(8px + env(safe-area-inset-bottom, 0));
+      min-height: auto;
+    }
+    .bottom-left,
+    .bottom-right {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .bottom-center {
+      width: 100%;
+      order: 2;
+    }
+    .show-answer-wrap {
+      width: 100%;
+    }
+    .show-answer-btn {
+      width: 100%;
+      min-height: 44px;
+      font-size: 15px;
+    }
+    .ease-row {
+      width: 100%;
+      gap: 5px;
+    }
+    .ease-col {
+      flex: 1;
+    }
+    .ease-btn {
+      width: 100%;
+      min-width: 0;
+      min-height: 44px;
+      padding: 6px 2px;
+      font-size: 13px;
+    }
+    .ivl-label {
+      font-size: 11px;
+    }
+    .more-menu {
+      right: 0;
+      bottom: calc(100% + 4px);
+      max-width: 92vw;
+    }
+  }
 </style>

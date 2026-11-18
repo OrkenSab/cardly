@@ -518,4 +518,43 @@
     border-top: 1px solid var(--border-subtle);
     background: var(--canvas);
   }
+  @media (max-width: 640px) {
+    .deck-scroll {
+      padding: 10px 8px 16px;
+    }
+    .deck-table-wrap {
+      padding: 0;
+    }
+    .deck-table {
+      font-size: 13.5px;
+    }
+    .decktd {
+      min-width: 0;
+      max-width: calc(100vw - 160px);
+    }
+    th {
+      padding: 4px 6px 6px;
+      font-size: 12px;
+    }
+    .deck-row td {
+      padding: 9px 6px;
+    }
+    .col-count {
+      min-width: 2.2em;
+    }
+    .gear-btn {
+      opacity: 0.85;
+      padding: 4px 6px;
+      font-size: 16px;
+    }
+    .bottom-bar {
+      padding: 8px 12px;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .bottom-bar .anki-btn {
+      flex: 1;
+      min-width: 120px;
+    }
+  }
 </style>

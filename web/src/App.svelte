@@ -523,4 +523,17 @@
     width: min(720px, 94vw);
     height: min(620px, 86vh);
   }
+  @media (max-width: 640px) {
+    .add-window,
+    .stats-window,
+    .deck-opts-window,
+    .card-info-window,
+    .change-nt-window {
+      width: 100vw !important;
+      max-width: 100vw !important;
+      height: 100% !important;
+      max-height: 100vh !important;
+      border-radius: 0 !important;
+    }
+  }
 </style>

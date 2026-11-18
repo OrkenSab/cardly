@@ -276,6 +276,20 @@
           <input type="checkbox" bind:checked={hideBottomBar} />
           Hide bottom bar during review
         </label>
+
+        <div class="pref-section-title">Standalone App (PWA)</div>
+        {#if store.isStandalone}
+          <div class="pref-desc">Running as installed standalone application.</div>
+        {:else if store.canInstall}
+          <div class="pref-desc">Install Cardly to your home screen or desktop for full-screen review:</div>
+          <button type="button" class="anki-btn primary" onclick={() => store.installCardly()}>
+            Install Cardly Application
+          </button>
+        {:else}
+          <div class="pref-desc">
+            To install Cardly as an app, open your browser menu and choose <strong>"Install app"</strong> or <strong>"Add to Home Screen"</strong>.
+          </div>
+        {/if}
       {:else if activeTab === "review"}
         <div class="form-row">
           <label for="pref-rollover">Next day starts at:</label>
@@ -485,6 +499,15 @@
     align-items: center;
     gap: 10px;
     font-size: 13px;
+  }
+  .pref-section-title {
+    font-weight: 700;
+    font-size: 13.5px;
+    margin-top: 14px;
+    margin-bottom: 2px;
+    color: var(--fg);
+    border-top: 1px solid var(--border-subtle);
+    padding-top: 10px;
   }
   .form-row label {
     min-width: 170px;

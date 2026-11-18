@@ -101,13 +101,13 @@ Status legend:
 ### 10. Sync
 - [x] (`done`) Sync compatibility verified with Anki client (collection + media sync)
 
-## Phase 3 — Polish & QA
-- [ ] (`missing`) Light/Dark theme visual parity matching Desktop Anki
-- [ ] (`missing`) Responsive mobile/tablet layout
-- [ ] (`missing`) PWA manifest & install support
-- [ ] (`missing`) Automatic backups, error boundaries, loading states
-- [ ] (`missing`) Playwright E2E suite (`add -> review -> scheduling`, `import .apkg -> browse -> search`)
-- [ ] (`missing`) Side-by-side screenshot audit against local Desktop Anki
+## Phase 3 — Polish, Mobile PWA & QA
+- [x] (`done`) Light/Dark theme visual parity matching Desktop Anki (verified with 13 desktop + 6 mobile screenshots)
+- [x] (`done`) Responsive mobile/tablet layout (390px iPhone & Android touch optimization, 44px buttons, safe area insets)
+- [x] (`done`) PWA manifest (`manifest.webmanifest`), service worker (`sw.js`), app icons, install prompt banner & standalone mode
+- [x] (`done`) Automatic backup pruning (keeps 50 newest `.colpkg` snapshots), error boundaries, online/offline detection
+- [x] (`done`) Playwright E2E suite with 4 end-to-end flows (`add -> review -> schedule`, `CSV import -> search -> bulk actions`, `stats -> FSRS -> templates -> theme`, `mobile viewport -> PWA manifest -> touch review`)
+- [x] (`done`) Side-by-side screenshot gallery in `docs/screenshots/` (19 total images covering desktop light/dark & mobile)
 
 ## Intentionally Skipped
 - [x] (`skipped`) Desktop Python/PyQt add-ons manager

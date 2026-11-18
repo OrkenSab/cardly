@@ -125,4 +125,30 @@
   :global(body.minimalist) .top-bar {
     grid-template-columns: 0 1fr 0;
   }
+  @media (max-width: 640px) {
+    .top-bar {
+      grid-template-columns: 0 1fr 0;
+      width: 100%;
+    }
+    .toolbar {
+      width: 100%;
+      border-radius: 0;
+      border-left: none;
+      border-right: none;
+      display: flex;
+      justify-content: space-around;
+    }
+    .hitem {
+      padding: 8px 4px;
+      font-size: 13px;
+      flex: 1;
+      text-align: center;
+    }
+    .hitem:first-child {
+      padding-left: 4px;
+    }
+    .hitem:last-child {
+      padding-right: 4px;
+    }
+  }
 </style>

@@ -321,4 +321,30 @@
     border-top: 1px solid var(--border-subtle);
     background: var(--canvas);
   }
+  @media (max-width: 640px) {
+    .center-box {
+      padding: 16px 12px;
+    }
+    .overview-card {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 16px;
+      padding: 16px;
+      width: 100%;
+      max-width: 340px;
+    }
+    .study-btn {
+      width: 100%;
+      min-height: 44px;
+    }
+    .bottom-bar {
+      padding: 8px 12px;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .bottom-bar .anki-btn {
+      flex: 1;
+      min-width: 80px;
+    }
+  }
 </style>

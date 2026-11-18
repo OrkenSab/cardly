@@ -380,6 +380,35 @@ pub struct BackupEntry {
     pub modified_secs: u64,
 }
 
+pub fn prune_old_backups(backups_dir: &std::path::Path, max_keep: usize) {
+    let Ok(read_dir) = fs::read_dir(backups_dir) else {
+        return;
+    };
+    let mut files: Vec<(std::path::PathBuf, u64)> = Vec::new();
+    for entry in read_dir.flatten() {
+        if let Ok(meta) = entry.metadata() {
+            if meta.is_file() {
+                let name = entry.file_name().to_string_lossy().to_string();
+                if name.ends_with(".colpkg") {
+                    let mtime = meta
+                        .modified()
+                        .ok()
+                        .and_then(|t| t.duration_since(UNIX_EPOCH).ok())
+                        .map(|d| d.as_secs())
+                        .unwrap_or(0);
+                    files.push((entry.path(), mtime));
+                }
+            }
+        }
+    }
+    if files.len() > max_keep {
+        files.sort_by(|a, b| b.1.cmp(&a.1)); // newest first
+        for (path, _) in &files[max_keep..] {
+            let _ = fs::remove_file(path);
+        }
+    }
+}
+
 pub async fn list_backups_handler(
     State(state): State<Arc<AppState>>,
     headers: HeaderMap,
@@ -450,6 +479,7 @@ pub async fn create_backup_handler(
 
     match call_rslib_method(&state, &runtime, "createBackup", payload).await {
         Ok(_) => {
+            prune_old_backups(&runtime.backups_dir, 50);
             let now = SystemTime::now()
                 .duration_since(UNIX_EPOCH)
                 .unwrap_or_default()

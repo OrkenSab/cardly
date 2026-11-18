@@ -174,6 +174,53 @@ class CardlyStore {
   dialog = $state<DialogRequest | null>(null);
   private toastSeq = 0;
 
+  // Network & PWA
+  isOnline = $state<boolean>(typeof navigator !== "undefined" ? navigator.onLine : true);
+  deferredInstallPrompt = $state<any>(null);
+  isStandalone = $state<boolean>(
+    typeof window !== "undefined" &&
+      (window.matchMedia("(display-mode: standalone)").matches || (window.navigator as any).standalone === true)
+  );
+  lastGlobalError = $state<string | null>(null);
+
+  get canInstall(): boolean {
+    return this.deferredInstallPrompt !== null && !this.isStandalone;
+  }
+
+  setInstallPrompt(ev: any) {
+    this.deferredInstallPrompt = ev;
+  }
+
+  async installCardly(): Promise<boolean> {
+    if (!this.deferredInstallPrompt) return false;
+    try {
+      this.deferredInstallPrompt.prompt();
+      const choice = await this.deferredInstallPrompt.userChoice;
+      if (choice.outcome === "accepted") {
+        this.deferredInstallPrompt = null;
+        this.toast("Cardly installed successfully!");
+        return true;
+      }
+    } catch (err) {
+      console.warn("PWA install error:", err);
+    }
+    return false;
+  }
+
+  setOnline(online: boolean) {
+    this.isOnline = online;
+    if (online) {
+      this.toast("Connection restored", "info");
+      this.bumpOpRevision();
+    } else {
+      this.toast("Network disconnected — offline mode", "warning");
+    }
+  }
+
+  setGlobalError(msg: string | null) {
+    this.lastGlobalError = msg;
+  }
+
   get isDark(): boolean {
     if (this.theme === "dark") return true;
     if (this.theme === "light") return false;

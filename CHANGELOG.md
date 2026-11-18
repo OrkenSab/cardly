@@ -4,6 +4,31 @@ All notable changes to Cardly will be documented in this file.
 
 ## [Unreleased]
 
+### Phase 3 — Polish, Mobile PWA & Production Deployment (2026-11-18)
+- **PWA & Standalone App Support:**
+  - Added Web App Manifest (`web/public/manifest.webmanifest`) with full metadata, standalone mode, and app shortcuts (Study, Add, Browse).
+  - Generated crisp multi-resolution PNG and maskable icons (`icon-192.png`, `icon-512.png`, `icon-maskable-192.png`, `icon-maskable-512.png`, `apple-touch-icon.png`).
+  - Implemented lightweight Service Worker (`web/public/sw.js`) with cache-first static shell strategy and background update notification.
+  - Added PWA installation banner in `MenuBar.svelte` and standalone app settings in `PreferencesModal.svelte`.
+  - Added network status detection with offline indicator and auto-reconnect toasts.
+- **Mobile Responsive Layout & Touch Experience:**
+  - Optimized viewport for mobile smartphones (tested on iPhone 390×844 and Android devices).
+  - Rebuilt reviewer bottom bar for mobile screens: large touch-friendly buttons (height 44px, full-width distribution), status counters above buttons, and safe area insets.
+  - Adapted Deck Browser and Deck Overview with responsive table columns, compact padding, and full-width touch actions.
+  - Implemented collapsible drawer sidebar for Card Browser on screens <= 768px.
+  - Fullscreen bottom-sheet modal behavior on mobile screens (< 640px).
+- **Backups & Reliability:**
+  - Added automatic backup pruning in `server/src/files.rs` (`prune_old_backups`) enforcing a maximum of 50 historical `.colpkg` snapshots to protect disk space.
+  - Added global uncaught error boundaries and promise rejection handlers in `main.ts` and `App.svelte`.
+- **E2E Testing & Visual Verification:**
+  - Added Flow 4 to Playwright E2E suite (`tests/cardly.spec.ts`) testing mobile viewport (390×844), manifest retrieval, touch review, and layout responsiveness.
+  - All 4 Playwright E2E tests pass (100% green, 45.8s).
+  - All 4 Rust server integration tests pass (`cargo test --test integration`).
+  - Added 6 mobile screenshots to gallery (`14-mobile-deck-list-light.png` through `19-mobile-browser-light.png`), bringing the verified screenshot gallery to 19 total images.
+- **Documentation & Deployment:**
+  - Authored comprehensive [README.md](./README.md) with architecture overview, screenshot table, one-command Docker Compose setup, and step-by-step sync guides for AnkiDroid and AnkiMobile.
+  - Updated `docker-compose.yml` with explicit `CARDLY_SHELL_DIR`.
+
 ### Phase 2 — Core Web Shell, Screens & Quality Loop (2026-11-18)
 - Built complete Svelte 5 web shell (`web/`) with exact Desktop Anki visual and behavioral parity:
   - `web/src/styles/anki-tokens.css`: Desktop Anki light and dark mode CSS variables, system font stack, buttons, inputs, context menus, shortcuts badges.

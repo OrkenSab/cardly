@@ -410,3 +410,44 @@ body.minimalist .anki-btn {
 ::-webkit-scrollbar-thumb:hover {
   background: var(--scrollbar-bg-hover);
 }
+
+/* Responsive Mobile & Touch Optimizations */
+@media (max-width: 640px) {
+  :root {
+    --font-size: 14px;
+  }
+
+  body {
+    padding-top: env(safe-area-inset-top, 0);
+    padding-bottom: env(safe-area-inset-bottom, 0);
+  }
+
+  .modal-backdrop {
+    padding: 0 !important;
+    align-items: flex-end;
+  }
+
+  .modal-window {
+    width: 100vw !important;
+    max-width: 100vw !important;
+    height: 100% !important;
+    max-height: 100vh !important;
+    border-radius: 0 !important;
+    border: none !important;
+  }
+
+  .modal-header {
+    padding: 12px 14px;
+  }
+
+  .modal-footer {
+    padding: 10px 14px calc(10px + env(safe-area-inset-bottom, 0));
+  }
+
+  .anki-btn {
+    min-height: 38px;
+    padding: 6px 14px;
+    font-size: 14px;
+  }
+}
+

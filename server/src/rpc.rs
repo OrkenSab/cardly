@@ -538,7 +538,10 @@ async fn handle_create_backup_rpc(
     let mut buf = Vec::new();
     req.encode(&mut buf).unwrap();
     match call_rslib_method(state, runtime, "createBackup", buf).await {
-        Ok(out) => binary_response(out),
+        Ok(out) => {
+            crate::files::prune_old_backups(&runtime.backups_dir, 50);
+            binary_response(out)
+        }
         Err((s, m)) => text_error(s, m),
     }
 }

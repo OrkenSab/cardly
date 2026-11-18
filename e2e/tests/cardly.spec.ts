@@ -221,4 +221,73 @@ test.describe("Cardly Phase 2 E2E", () => {
 
     expect(errors).toEqual([]);
   });
+
+  test("Flow 4: Mobile Responsive Viewport, PWA Manifest & Touch Review", async ({ page }) => {
+    const errors: string[] = [];
+    page.on("pageerror", (e) => errors.push(e.message));
+
+    // 1. Set mobile smartphone viewport (iPhone 14 standard: 390x844)
+    await page.setViewportSize({ width: 390, height: 844 });
+
+    await login(page);
+
+    // 2. Verify PWA manifest and icons are present in DOM and accessible
+    const manifestLink = page.locator('link[rel="manifest"]');
+    await expect(manifestLink).toHaveAttribute("href", "/manifest.webmanifest");
+    const manifestRes = await page.request.get("/manifest.webmanifest");
+    expect(manifestRes.status()).toBe(200);
+    const manifestJson = await manifestRes.json();
+    expect(manifestJson.name).toBe("Cardly");
+    expect(manifestJson.display).toBe("standalone");
+
+    // Check service worker script and icons
+    const swRes = await page.request.get("/sw.js");
+    expect(swRes.status()).toBe(200);
+    const iconRes = await page.request.get("/icon-192.png");
+    expect(iconRes.status()).toBe(200);
+
+    // 3. Verify mobile TopToolbar layout
+    const toolbar = page.locator("header.top-bar .toolbar");
+    await expect(toolbar).toBeVisible();
+    const toolbarBox = await toolbar.boundingBox();
+    expect(toolbarBox).not.toBeNull();
+    // Toolbar should span almost the entire 390px mobile width
+    expect(toolbarBox!.width).toBeGreaterThan(340);
+
+    // 4. Verify Deck list on mobile
+    const defaultRow = page.locator(".deck-row", { hasText: "Default" });
+    await expect(defaultRow).toBeVisible();
+
+    // 5. Open Deck Overview and start Review
+    await defaultRow.locator(".deck-link").click();
+    const studyBtn = page.getByRole("button", { name: "Study Now" });
+    await expect(studyBtn).toBeVisible();
+    await studyBtn.click();
+
+    // 6. Reviewer on mobile: bottom bar should adapt
+    const showAnsBtn = page.getByRole("button", { name: /Show Answer/ });
+    await expect(showAnsBtn).toBeVisible();
+    const showAnsBox = await showAnsBtn.boundingBox();
+    expect(showAnsBox).not.toBeNull();
+    // Button should be large and full-width on mobile (> 300px)
+    expect(showAnsBox!.width).toBeGreaterThan(300);
+
+    // Reveal answer and test ease buttons on mobile
+    await showAnsBtn.click();
+    const goodBtn = page.locator("button.ease-btn", { hasText: "Good" });
+    await expect(goodBtn).toBeVisible();
+    const goodBox = await goodBtn.boundingBox();
+    expect(goodBox).not.toBeNull();
+    // Touch targets should have comfortable height (>= 40px)
+    expect(goodBox!.height).toBeGreaterThanOrEqual(40);
+
+    // Click Good button
+    await goodBtn.click();
+
+    // Return to decks
+    await page.getByRole("button", { name: "Decks", exact: true }).click();
+    await expect(defaultRow).toBeVisible();
+
+    expect(errors).toEqual([]);
+  });
 });
