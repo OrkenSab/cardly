@@ -1,0 +1,214 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 640" width="1280" height="640">
+  <defs>
+    <!-- Background Gradients -->
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0B0F19"/>
+      <stop offset="50%" stop-color="#0F172A"/>
+      <stop offset="100%" stop-color="#090D16"/>
+    </linearGradient>
+
+    <radialGradient id="ambientGlowBlue" cx="20%" cy="30%" r="50%">
+      <stop offset="0%" stop-color="#1D4ED8" stop-opacity="0.25"/>
+      <stop offset="100%" stop-color="#0B0F19" stop-opacity="0"/>
+    </radialGradient>
+
+    <radialGradient id="ambientGlowAmber" cx="85%" cy="35%" r="45%">
+      <stop offset="0%" stop-color="#F59E0B" stop-opacity="0.18"/>
+      <stop offset="100%" stop-color="#0B0F19" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- Card Gradients -->
+    <linearGradient id="mockupCardGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1E293B"/>
+      <stop offset="100%" stop-color="#0F172A"/>
+    </linearGradient>
+
+    <linearGradient id="mockupInnerGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0F172A"/>
+      <stop offset="100%" stop-color="#111827"/>
+    </linearGradient>
+
+    <linearGradient id="sparkGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FEF08A"/>
+      <stop offset="50%" stop-color="#FBBF24"/>
+      <stop offset="100%" stop-color="#F59E0B"/>
+    </linearGradient>
+
+    <!-- Drop Shadows -->
+    <filter id="shadowLarge" x="-20%" y="-20%" width="150%" height="150%">
+      <feDropShadow dx="0" dy="24" stdDeviation="32" flood-color="#000000" flood-opacity="0.65"/>
+    </filter>
+
+    <filter id="badgeGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#000000" flood-opacity="0.3"/>
+    </filter>
+  </defs>
+
+  <style>
+    .title { font-family: system-ui, -apple-system, 'Inter', 'Segoe UI', Roboto, sans-serif; font-weight: 800; font-size: 76px; letter-spacing: -1.5px; fill: #FFFFFF; }
+    .tagline { font-family: system-ui, -apple-system, 'Inter', 'Segoe UI', Roboto, sans-serif; font-weight: 600; font-size: 26px; fill: #94A3B8; letter-spacing: -0.3px; }
+    .subtag { font-family: system-ui, -apple-system, 'Inter', 'Segoe UI', Roboto, sans-serif; font-weight: 400; font-size: 18px; fill: #64748B; }
+    .badge-text { font-family: system-ui, -apple-system, sans-serif; font-weight: 700; font-size: 13px; letter-spacing: 0.3px; }
+    .card-title { font-family: system-ui, -apple-system, sans-serif; font-weight: 700; font-size: 20px; fill: #F8FAFC; }
+    .card-text { font-family: system-ui, -apple-system, sans-serif; font-weight: 400; font-size: 15px; fill: #94A3B8; line-height: 1.5; }
+    .pill-text { font-family: system-ui, -apple-system, sans-serif; font-weight: 700; font-size: 12px; }
+    .footer-text { font-family: system-ui, -apple-system, sans-serif; font-weight: 500; font-size: 14px; fill: #475569; }
+  </style>
+
+  <!-- 1. Background Fill and Ambient Lights -->
+  <rect width="1280" height="640" fill="url(#bgGrad)"/>
+  <rect width="1280" height="640" fill="url(#ambientGlowBlue)"/>
+  <rect width="1280" height="640" fill="url(#ambientGlowAmber)"/>
+
+  <!-- Subtle Architectural Grid Pattern -->
+  <g opacity="0.08" stroke="#FFFFFF" stroke-width="1">
+    <line x1="80" y1="0" x2="80" y2="640"/>
+    <line x1="240" y1="0" x2="240" y2="640"/>
+    <line x1="400" y1="0" x2="400" y2="640"/>
+    <line x1="560" y1="0" x2="560" y2="640"/>
+    <line x1="720" y1="0" x2="720" y2="640"/>
+    <line x1="880" y1="0" x2="880" y2="640"/>
+    <line x1="1040" y1="0" x2="1040" y2="640"/>
+    <line x1="1200" y1="0" x2="1200" y2="640"/>
+
+    <line x1="0" y1="80" x2="1280" y2="80"/>
+    <line x1="0" y1="200" x2="1280" y2="200"/>
+    <line x1="0" y1="320" x2="1280" y2="320"/>
+    <line x1="0" y1="440" x2="1280" y2="440"/>
+    <line x1="0" y1="560" x2="1280" y2="560"/>
+  </g>
+
+  <!-- 2. Left Hero Content Section -->
+  <g transform="translate(80, 100)">
+    <!-- Brand Emblem Mini -->
+    <g transform="translate(0, 0) scale(0.12)">
+      <!-- Back card -->
+      <g transform="translate(256, 256) rotate(-7) translate(-256, -256)" opacity="0.85">
+        <rect x="96" y="96" width="300" height="320" rx="36" fill="#1E293B" stroke="#38BDF8" stroke-width="6"/>
+      </g>
+      <!-- Front card -->
+      <rect x="116" y="116" width="300" height="320" rx="36" fill="#2563EB"/>
+      <rect x="126" y="126" width="280" height="300" rx="28" fill="#FFFFFF"/>
+      <rect x="160" y="160" width="84" height="22" rx="11" fill="#DBEAFE"/>
+      <rect x="160" y="210" width="212" height="18" rx="9" fill="#0F172A"/>
+      <line x1="160" y1="310" x2="372" y2="310" stroke="#E2E8F0" stroke-width="4"/>
+      <!-- Spark -->
+      <g transform="translate(390, 116)">
+        <path d="M 0 -44 Q 0 0 44 0 Q 0 0 0 44 Q 0 0 -44 0 Q 0 0 0 -44 Z" fill="url(#sparkGrad)"/>
+      </g>
+    </g>
+
+    <!-- Version / Status pill -->
+    <rect x="74" y="12" width="144" height="28" rx="14" fill="#1E293B" stroke="#334155" stroke-width="1"/>
+    <circle cx="88" cy="26" r="4" fill="#10B981"/>
+    <text x="100" y="30" font-family="system-ui, sans-serif" font-size="12" font-weight="700" fill="#E2E8F0" letter-spacing="0.5px">AGPL-3.0 CORE</text>
+
+    <!-- Main Title -->
+    <text x="0" y="130" class="title">
+      Card<tspan fill="#3B82F6">ly</tspan>
+    </text>
+
+    <!-- Tagline -->
+    <text x="0" y="180" class="tagline">
+      The Open-Source Spaced Repetition App
+    </text>
+    <text x="0" y="215" class="tagline">
+      for Web &amp; Mobile
+    </text>
+
+    <!-- Technical Pitch -->
+    <text x="0" y="260" class="subtag">
+      Pixel-perfect self-hosted web client powered directly by official Anki Rust core (rslib).
+    </text>
+
+    <!-- Key Badges Horizontal Row -->
+    <g transform="translate(0, 305)" filter="url(#badgeGlow)">
+      <!-- Badge 1: 100% Anki Compatible -->
+      <g transform="translate(0, 0)">
+        <rect width="168" height="34" rx="8" fill="#0C4A6E" stroke="#0284C7" stroke-width="1.2"/>
+        <text x="84" y="21.5" class="badge-text" fill="#38BDF8" text-anchor="middle">100% Anki Compatible</text>
+      </g>
+
+      <!-- Badge 2: FSRS Scheduler -->
+      <g transform="translate(178, 0)">
+        <rect width="148" height="34" rx="8" fill="#451A03" stroke="#D97706" stroke-width="1.2"/>
+        <text x="74" y="21.5" class="badge-text" fill="#FBBF24" text-anchor="middle">FSRS Scheduler</text>
+      </g>
+
+      <!-- Badge 3: Self-Hosted -->
+      <g transform="translate(336, 0)">
+        <rect width="120" height="34" rx="8" fill="#064E3B" stroke="#059669" stroke-width="1.2"/>
+        <text x="60" y="21.5" class="badge-text" fill="#34D399" text-anchor="middle">Self-Hosted</text>
+      </g>
+
+      <!-- Badge 4: Mobile PWA -->
+      <g transform="translate(466, 0)">
+        <rect width="124" height="34" rx="8" fill="#3B0764" stroke="#7C3AED" stroke-width="1.2"/>
+        <text x="62" y="21.5" class="badge-text" fill="#C084FC" text-anchor="middle">Mobile PWA</text>
+      </g>
+    </g>
+  </g>
+
+  <!-- 3. Right Visual Mockup (Interactive Reviewer Card in Perspective) -->
+  <g transform="translate(720, 100)" filter="url(#shadowLarge)">
+    <!-- Outer Card Shell with Gradient Border -->
+    <rect x="0" y="0" width="480" height="420" rx="20" fill="url(#mockupCardGrad)" stroke="#38BDF8" stroke-width="1.5" stroke-opacity="0.4"/>
+
+    <!-- Inner Browser / Reviewer Window Header -->
+    <rect x="0" y="0" width="480" height="44" rx="20" fill="#1E293B"/>
+    <rect x="0" y="32" width="480" height="12" fill="#1E293B"/> <!-- square bottom corners of header -->
+    <circle cx="24" cy="22" r="6" fill="#EF4444"/>
+    <circle cx="44" cy="22" r="6" fill="#F59E0B"/>
+    <circle cx="64" cy="22" r="6" fill="#10B981"/>
+
+    <text x="240" y="27" font-family="system-ui, sans-serif" font-size="12" font-weight="600" fill="#94A3B8" text-anchor="middle">Default :: Advanced Computer Science</text>
+
+    <!-- Card Body Area -->
+    <rect x="20" y="64" width="440" height="260" rx="12" fill="url(#mockupInnerGrad)" stroke="#334155" stroke-width="1"/>
+
+    <!-- Question -->
+    <g transform="translate(44, 96)">
+      <text x="0" y="20" class="card-title">What is the core optimization algorithm in FSRS?</text>
+      <line x1="0" y1="45" x2="392" y2="45" stroke="#334155" stroke-width="1.5"/>
+
+      <!-- Answer -->
+      <text x="0" y="80" class="card-text">
+        <tspan fill="#38BDF8" font-weight="700">Free Spaced Repetition Scheduler (FSRS)</tspan> optimizes
+      </text>
+      <text x="0" y="105" class="card-text">
+        memory retention probabilities using a 19-parameter power model
+      </text>
+      <text x="0" y="130" class="card-text">
+        fitted directly from your personal review logs.
+      </text>
+    </g>
+
+    <!-- Bottom Action Reviewer Buttons (Again, Hard, Good, Easy) -->
+    <g transform="translate(20, 344)">
+      <!-- Again -->
+      <rect x="0" y="0" width="102" height="48" rx="8" fill="#3B1219" stroke="#991B1B" stroke-width="1"/>
+      <text x="51" y="22" class="pill-text" fill="#F87171" text-anchor="middle">Again</text>
+      <text x="51" y="38" font-family="system-ui, sans-serif" font-size="10" font-weight="500" fill="#FCA5A5" text-anchor="middle">&lt; 1 min</text>
+
+      <!-- Hard -->
+      <rect x="112" y="0" width="102" height="48" rx="8" fill="#381E11" stroke="#9A3412" stroke-width="1"/>
+      <text x="163" y="22" class="pill-text" fill="#FB923C" text-anchor="middle">Hard</text>
+      <text x="163" y="38" font-family="system-ui, sans-serif" font-size="10" font-weight="500" fill="#FDBA74" text-anchor="middle">12 hours</text>
+
+      <!-- Good (Active / Selected) -->
+      <rect x="224" y="0" width="102" height="48" rx="8" fill="#064E3B" stroke="#10B981" stroke-width="1.8"/>
+      <text x="275" y="22" class="pill-text" fill="#34D399" text-anchor="middle">Good</text>
+      <text x="275" y="38" font-family="system-ui, sans-serif" font-size="10" font-weight="500" fill="#A7F3D0" text-anchor="middle">1 day</text>
+
+      <!-- Easy -->
+      <rect x="336" y="0" width="102" height="48" rx="8" fill="#082F49" stroke="#0284C7" stroke-width="1"/>
+      <text x="387" y="22" class="pill-text" fill="#38BDF8" text-anchor="middle">Easy</text>
+      <text x="387" y="38" font-family="system-ui, sans-serif" font-size="10" font-weight="500" fill="#BAE6FD" text-anchor="middle">4 days</text>
+    </g>
+  </g>
+
+  <!-- 4. Footer Metadata Line -->
+  <g transform="translate(80, 580)">
+    <text x="0" y="0" class="footer-text">Built on official Anki core (rslib) • Licensed under GNU AGPL-3.0 • Direct sync with AnkiDroid &amp; AnkiMobile</text>
+  </g>
+</svg>

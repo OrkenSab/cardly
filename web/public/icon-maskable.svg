@@ -1,6 +1,80 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80">
-  <rect width="80" height="80" fill="#1e3a8a"/>
-  <rect x="14" y="18" width="52" height="44" rx="10" fill="#2563eb"/>
-  <rect x="21" y="25" width="38" height="30" rx="6" fill="#ffffff" opacity="0.95"/>
-  <path d="M29 36h22M29 44h14" stroke="#2563eb" stroke-width="4" stroke-linecap="round"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <!-- Maskable full-bleed background -->
+    <linearGradient id="maskBgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1E293B"/>
+      <stop offset="100%" stop-color="#0F172A"/>
+    </linearGradient>
+
+    <linearGradient id="maskBackCardGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#334155"/>
+      <stop offset="100%" stop-color="#1E293B"/>
+    </linearGradient>
+
+    <linearGradient id="maskFrontCardGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#3B82F6"/>
+      <stop offset="60%" stop-color="#2563EB"/>
+      <stop offset="100%" stop-color="#1D4ED8"/>
+    </linearGradient>
+
+    <linearGradient id="maskCardFaceGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF"/>
+      <stop offset="100%" stop-color="#F8FAFC"/>
+    </linearGradient>
+
+    <linearGradient id="maskSparkGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FEF08A"/>
+      <stop offset="40%" stop-color="#FBBF24"/>
+      <stop offset="100%" stop-color="#F59E0B"/>
+    </linearGradient>
+
+    <filter id="maskShadow" x="-20%" y="-20%" width="150%" height="150%">
+      <feDropShadow dx="0" dy="12" stdDeviation="16" flood-color="#000000" flood-opacity="0.4"/>
+    </filter>
+  </defs>
+
+  <!-- Full-bleed background for maskable viewport -->
+  <rect width="512" height="512" fill="url(#maskBgGrad)"/>
+
+  <!-- Scaled Emblem positioned securely in the safe zone -->
+  <g transform="translate(256, 256) scale(0.78) translate(-256, -256)">
+    <!-- Back card -->
+    <g transform="translate(256, 256) rotate(-7) translate(-256, -256)" opacity="0.85">
+      <rect x="96" y="96" width="300" height="320" rx="36" fill="url(#maskBackCardGrad)" stroke="#38BDF8" stroke-width="4" stroke-opacity="0.5"/>
+      <rect x="136" y="146" width="130" height="14" rx="7" fill="#64748B" opacity="0.5"/>
+      <rect x="136" y="176" width="200" height="10" rx="5" fill="#64748B" opacity="0.4"/>
+      <rect x="136" y="198" width="160" height="10" rx="5" fill="#64748B" opacity="0.4"/>
+    </g>
+
+    <!-- Front card -->
+    <g filter="url(#maskShadow)">
+      <rect x="116" y="116" width="300" height="320" rx="36" fill="url(#maskFrontCardGrad)"/>
+      <rect x="126" y="126" width="280" height="300" rx="28" fill="url(#maskCardFaceGrad)"/>
+
+      <rect x="160" y="160" width="84" height="20" rx="10" fill="#DBEAFE"/>
+      <rect x="172" y="166" width="60" height="8" rx="4" fill="#2563EB"/>
+
+      <rect x="160" y="210" width="212" height="16" rx="8" fill="#0F172A"/>
+
+      <rect x="160" y="246" width="160" height="10" rx="5" fill="#64748B" opacity="0.6"/>
+      <rect x="160" y="268" width="186" height="10" rx="5" fill="#64748B" opacity="0.4"/>
+
+      <line x1="160" y1="310" x2="372" y2="310" stroke="#E2E8F0" stroke-width="3" stroke-linecap="round"/>
+
+      <rect x="160" y="342" width="46" height="22" rx="11" fill="#FEE2E2"/>
+      <rect x="174" y="350" width="18" height="6" rx="3" fill="#EF4444"/>
+
+      <rect x="216" y="342" width="60" height="22" rx="11" fill="#DCFCE7"/>
+      <rect x="230" y="350" width="32" height="6" rx="3" fill="#10B981"/>
+
+      <rect x="286" y="342" width="56" height="22" rx="11" fill="#E0F2FE"/>
+      <rect x="300" y="350" width="28" height="6" rx="3" fill="#0284C7"/>
+    </g>
+
+    <!-- Spark -->
+    <g transform="translate(390, 116)">
+      <path d="M 0 -44 Q 0 0 44 0 Q 0 0 0 44 Q 0 0 -44 0 Q 0 0 0 -44 Z" fill="url(#maskSparkGrad)"/>
+      <circle cx="0" cy="0" r="8" fill="#FFFFFF"/>
+    </g>
+  </g>
 </svg>

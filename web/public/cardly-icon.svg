@@ -1,5 +1,85 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <rect x="6" y="10" width="52" height="44" rx="10" fill="#2563eb"/>
-  <rect x="13" y="17" width="38" height="30" rx="6" fill="#ffffff" opacity="0.95"/>
-  <path d="M21 28h22M21 36h14" stroke="#2563eb" stroke-width="4" stroke-linecap="round"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <!-- Background / Back card gradient -->
+    <linearGradient id="backCardGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1E293B"/>
+      <stop offset="100%" stop-color="#0F172A"/>
+    </linearGradient>
+
+    <!-- Front card gradient: Electric Sapphire / Cobalt -->
+    <linearGradient id="frontCardGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#3B82F6"/>
+      <stop offset="60%" stop-color="#2563EB"/>
+      <stop offset="100%" stop-color="#1D4ED8"/>
+    </linearGradient>
+
+    <!-- Inner face gradient -->
+    <linearGradient id="cardFaceGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF"/>
+      <stop offset="100%" stop-color="#F1F5F9"/>
+    </linearGradient>
+
+    <!-- Mnemonic Spark gold gradient -->
+    <linearGradient id="sparkGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FEF08A"/>
+      <stop offset="40%" stop-color="#FBBF24"/>
+      <stop offset="100%" stop-color="#F59E0B"/>
+    </linearGradient>
+
+    <!-- Soft drop shadow -->
+    <filter id="cardShadow" x="-20%" y="-20%" width="150%" height="150%">
+      <feDropShadow dx="0" dy="16" stdDeviation="20" flood-color="#0F172A" flood-opacity="0.35"/>
+    </filter>
+
+    <filter id="sparkGlow" x="-50%" y="-50%" width="200%" height="200%">
+      <feDropShadow dx="0" dy="0" stdDeviation="12" flood-color="#F59E0B" flood-opacity="0.65"/>
+    </filter>
+  </defs>
+
+  <!-- 1. Layered Back Card (angled -7 degrees for dynamic flashcard effect) -->
+  <g transform="translate(256, 256) rotate(-7) translate(-256, -256)" opacity="0.85">
+    <rect x="96" y="96" width="300" height="320" rx="36" fill="url(#backCardGrad)" stroke="#38BDF8" stroke-width="4" stroke-opacity="0.4"/>
+    <!-- Abstract card skeleton lines on back card -->
+    <rect x="136" y="146" width="130" height="14" rx="7" fill="#64748B" opacity="0.4"/>
+    <rect x="136" y="176" width="200" height="10" rx="5" fill="#64748B" opacity="0.3"/>
+    <rect x="136" y="198" width="160" height="10" rx="5" fill="#64748B" opacity="0.3"/>
+  </g>
+
+  <!-- 2. Main Front Flashcard (upright, elevated with rich drop shadow) -->
+  <g filter="url(#cardShadow)">
+    <!-- Base card container -->
+    <rect x="116" y="116" width="300" height="320" rx="36" fill="url(#frontCardGrad)"/>
+    <!-- Inner face with rounded border -->
+    <rect x="126" y="126" width="280" height="300" rx="28" fill="url(#cardFaceGrad)"/>
+
+    <!-- Top header badge inside card (representing deck indicator) -->
+    <rect x="160" y="160" width="84" height="20" rx="10" fill="#DBEAFE"/>
+    <rect x="172" y="166" width="60" height="8" rx="4" fill="#2563EB"/>
+
+    <!-- Question line (bold prompt) -->
+    <rect x="160" y="210" width="212" height="16" rx="8" fill="#0F172A"/>
+
+    <!-- Answer preview lines -->
+    <rect x="160" y="246" width="160" height="10" rx="5" fill="#64748B" opacity="0.6"/>
+    <rect x="160" y="268" width="186" height="10" rx="5" fill="#64748B" opacity="0.4"/>
+
+    <!-- Divider -->
+    <line x1="160" y1="310" x2="372" y2="310" stroke="#E2E8F0" stroke-width="3" stroke-linecap="round"/>
+
+    <!-- Bottom Spaced Repetition interval pills (Again / Good / Easy indicators) -->
+    <rect x="160" y="342" width="46" height="22" rx="11" fill="#FEE2E2"/>
+    <rect x="174" y="350" width="18" height="6" rx="3" fill="#EF4444"/>
+
+    <rect x="216" y="342" width="60" height="22" rx="11" fill="#DCFCE7"/>
+    <rect x="230" y="350" width="32" height="6" rx="3" fill="#10B981"/>
+
+    <rect x="286" y="342" width="56" height="22" rx="11" fill="#E0F2FE"/>
+    <rect x="300" y="350" width="28" height="6" rx="3" fill="#0284C7"/>
+  </g>
+
+  <!-- 3. Mnemonic Spark of Recall (Top-Right Floating 4-Point Star) -->
+  <g transform="translate(390, 116)" filter="url(#sparkGlow)">
+    <path d="M 0 -44 Q 0 0 44 0 Q 0 0 0 44 Q 0 0 -44 0 Q 0 0 0 -44 Z" fill="url(#sparkGrad)"/>
+    <circle cx="0" cy="0" r="8" fill="#FFFFFF"/>
+  </g>
 </svg>
