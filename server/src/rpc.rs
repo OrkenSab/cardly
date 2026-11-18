@@ -285,6 +285,16 @@ pub async fn handle_anki_rpc(
             mirror_media_mutation(&runtime, &method, &input_vec, &out);
             binary_response(out)
         }
+        Err((_, msg)) if method == "getConfigJson" && msg.contains("No such value") => {
+            // Match Qt/tslib `getColConfig(key) ?? default` behavior when an optional config key is unset.
+            let mut out = Vec::new();
+            generic::Json {
+                json: b"null".to_vec(),
+            }
+            .encode(&mut out)
+            .unwrap();
+            binary_response(out)
+        }
         Err((status, msg)) => text_error(status, msg),
     }
 }

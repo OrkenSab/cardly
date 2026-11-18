@@ -15,13 +15,17 @@ server/target/
 # Node / Web build outputs
 node_modules/
 web/node_modules/
+web/.npm-cache/
 web/dist/
 web/.svelte-kit/
 
 # Test & screenshot outputs
+e2e/node_modules/
+e2e/playwright-report/
+e2e/test-results/
 playwright-report/
 test-results/
-screenshots/
+/screenshots/
 
 # OS / editor
 .DS_Store

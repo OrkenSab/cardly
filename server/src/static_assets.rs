@@ -156,10 +156,11 @@ pub const CARDLY_BRIDGE_JS: &str = r#"// Cardly Web Bridge (AGPL-3.0-or-later)
     window.pycmd = window.bridgeCommand;
   }
 
-  // Apply parent theme class (light / nightMode) on load.
+  // Apply parent theme class (light / dark / auto) on load.
   try {
-    const theme = localStorage.getItem('cardly-theme');
-    if (theme === 'dark') {
+    const theme = localStorage.getItem('cardly-theme') || 'auto';
+    const isDark = theme === 'dark' || (theme === 'auto' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    if (isDark) {
       document.documentElement.classList.add('night-mode', 'nightMode');
       if (document.body) document.body.classList.add('night-mode', 'nightMode');
     }
@@ -384,7 +385,7 @@ fn serve_builtin_web_file(
             data = inject_bridge_script(&data);
             if is_untrusted_sveltekit_route(route) {
                 let hash = extract_sveltekit_csp_hash(&data);
-                let mut script_src = "'self' /_anki/ /_app/".to_string();
+                let mut script_src = "'self'".to_string();
                 if let Some(h) = hash {
                     script_src.push(' ');
                     script_src.push_str(&h);

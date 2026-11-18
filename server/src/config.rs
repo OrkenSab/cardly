@@ -136,7 +136,13 @@ impl ServerConfig {
         let shell_dir = env::var("CARDLY_SHELL_DIR")
             .ok()
             .filter(|s| !s.trim().is_empty())
-            .map(PathBuf::from);
+            .map(PathBuf::from)
+            .or_else(|| {
+                ["./web/dist", "../web/dist"]
+                    .iter()
+                    .map(PathBuf::from)
+                    .find(|p| p.join("index.html").is_file())
+            });
 
         let session_secret = load_or_create_session_secret(&data_dir)?;
 

@@ -43,7 +43,21 @@ ENV STRINGS_TS=/build/anki-upstream/out/ts/lib/generated/ftl.ts
 RUN cargo build --release --locked || cargo build --release
 
 # ============================================================================
-# Stage 2: Minimal runtime image
+# Stage 2: Build Cardly Svelte 5 Web Shell (`web/`)
+# ============================================================================
+FROM node:22-bookworm-slim AS web-builder
+
+WORKDIR /build
+COPY --from=builder /build/anki-upstream/out/ts/lib/generated ./anki-upstream/out/ts/lib/generated
+COPY --from=builder /build/anki-upstream/out/node_modules/@bufbuild ./anki-upstream/out/node_modules/@bufbuild
+COPY web ./web
+
+WORKDIR /build/web
+RUN npm ci || npm install
+RUN npm run build
+
+# ============================================================================
+# Stage 3: Minimal runtime image
 # ============================================================================
 FROM debian:bookworm-slim AS runtime
 
@@ -57,6 +71,7 @@ RUN useradd --create-home --shell /usr/sbin/nologin cardly
 WORKDIR /app
 COPY --from=builder /build/server/target/release/cardly-server /app/cardly-server
 COPY --from=builder /build/anki-upstream/out/qt/_aqt/data/web /app/web-upstream
+COPY --from=web-builder /build/web/dist /app/web-shell
 COPY LICENSE /app/LICENSE
 
 RUN mkdir -p /data && chown -R cardly:cardly /app /data
@@ -67,6 +82,7 @@ ENV CARDLY_HOST=0.0.0.0
 ENV CARDLY_PORT=8080
 ENV CARDLY_DATA_DIR=/data
 ENV CARDLY_UPSTREAM_WEB_DIR=/app/web-upstream
+ENV CARDLY_SHELL_DIR=/app/web-shell
 ENV RUST_LOG=cardly_server=info,anki=info
 
 EXPOSE 8080

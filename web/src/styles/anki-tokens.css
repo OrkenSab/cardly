@@ -1,0 +1,412 @@
+/* Cardly Design Tokens — faithful to Desktop Anki light & dark themes (AGPL-3.0-or-later) */
+
+:root {
+  --fg: #020202;
+  --fg-subtle: #737373;
+  --fg-disabled: #858585;
+  --fg-faint: #afafaf;
+  --fg-link: #1d4ed8;
+  --canvas: #f5f5f5;
+  --canvas-elevated: #ffffff;
+  --canvas-inset: #ffffff;
+  --canvas-overlay: #fcfcfc;
+  --canvas-code: #ffffff;
+  --canvas-glass: rgba(255, 255, 255, 0.55);
+  --border: #c4c4c4;
+  --border-subtle: #e4e4e4;
+  --border-strong: #858585;
+  --border-focus: #3b82f6;
+  --button-bg: #fcfcfc;
+  --button-gradient-start: #ffffff;
+  --button-gradient-end: #fcfcfc;
+  --button-hover-border: #999999;
+  --button-disabled: rgba(214, 214, 214, 0.5);
+  --button-primary-bg: #306bec;
+  --button-primary-gradient-start: #3b82f6;
+  --button-primary-gradient-end: #306bec;
+  --button-primary-disabled: #93c5fd;
+  --scrollbar-bg: #d6d6d6;
+  --scrollbar-bg-hover: #c4c4c4;
+  --scrollbar-bg-active: #afafaf;
+  --shadow: #c4c4c4;
+  --shadow-inset: #454545;
+  --shadow-subtle: #737373;
+  --shadow-focus: #6366f1;
+  --accent-card: #60a5fa;
+  --accent-note: #22c55e;
+  --accent-danger: #ef4444;
+  --flag-1: #ef4444;
+  --flag-2: #fb923c;
+  --flag-3: #4ade80;
+  --flag-4: #3b82f6;
+  --flag-5: #e879f9;
+  --flag-6: #2dd4bf;
+  --flag-7: #a855f7;
+  --state-new: #3b82f6;
+  --state-learn: #dc2626;
+  --state-review: #16a34a;
+  --state-buried: #f59e0b;
+  --state-suspended: #facc15;
+  --state-marked: #6366f1;
+  --highlight-bg: rgba(37, 99, 235, 0.25);
+  --highlight-fg: #000000;
+  --selected-bg: rgba(214, 214, 214, 0.5);
+  --selected-fg: #000000;
+  --font-size: 15px;
+  --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  --border-radius: 5px;
+  --border-radius-medium: 12px;
+  --border-radius-large: 15px;
+  --transition: 180ms;
+  --blur: 20px;
+  color-scheme: light;
+}
+
+:root.night-mode {
+  --fg: #fcfcfc;
+  --fg-subtle: #9a9a9a;
+  --fg-disabled: #737373;
+  --fg-faint: #545454;
+  --fg-link: #bfdbfe;
+  --canvas: #2c2c2c;
+  --canvas-elevated: #363636;
+  --canvas-inset: #252525;
+  --canvas-overlay: #2c2c2c;
+  --canvas-code: #252525;
+  --canvas-glass: rgba(54, 54, 54, 0.55);
+  --border: #202020;
+  --border-subtle: #3f3f3f;
+  --border-strong: #020202;
+  --border-focus: #3b82f6;
+  --button-bg: #404040;
+  --button-gradient-start: #4a4a4a;
+  --button-gradient-end: #404040;
+  --button-hover-border: #141414;
+  --button-disabled: rgba(69, 69, 69, 0.5);
+  --button-primary-bg: #2652cf;
+  --button-primary-gradient-start: #2f67e1;
+  --button-primary-gradient-end: #2652cf;
+  --button-primary-disabled: #4484ed;
+  --scrollbar-bg: #454545;
+  --scrollbar-bg-hover: #545454;
+  --scrollbar-bg-active: #636363;
+  --shadow: #141414;
+  --shadow-inset: #202020;
+  --shadow-subtle: #363636;
+  --shadow-focus: #6366f1;
+  --accent-card: #93c5fd;
+  --accent-note: #4ade80;
+  --accent-danger: #f87171;
+  --flag-1: #f87171;
+  --flag-2: #fdba74;
+  --flag-3: #86efac;
+  --flag-4: #60a5fa;
+  --flag-5: #f0abfc;
+  --flag-6: #5eead4;
+  --flag-7: #c084fc;
+  --state-new: #93c5fd;
+  --state-learn: #f87171;
+  --state-review: #22c55e;
+  --state-buried: #d97706;
+  --state-suspended: #fef08a;
+  --state-marked: #a855f7;
+  --highlight-bg: rgba(147, 197, 253, 0.3);
+  --highlight-fg: #ffffff;
+  --selected-bg: rgba(147, 197, 253, 0.28);
+  --selected-fg: #ffffff;
+  color-scheme: dark;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  font-family: var(--font-family);
+  font-size: var(--font-size);
+  background: var(--canvas);
+  color: var(--fg);
+  overscroll-behavior: none;
+}
+
+#app {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+a {
+  color: var(--fg-link);
+  text-decoration: none;
+}
+
+/* Desktop Anki button style */
+.anki-btn {
+  font-family: inherit;
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--fg);
+  background: var(--button-bg);
+  border: 1px solid var(--border-subtle);
+  border-bottom-color: var(--shadow);
+  border-radius: var(--border-radius-large);
+  padding: 6px 14px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  white-space: nowrap;
+  box-shadow: 0 2px 1px -1px rgba(20, 20, 20, 0.12),
+    0 1px 1px 0 rgba(20, 20, 20, 0.06),
+    0 1px 3px 0 rgba(20, 20, 20, 0.04);
+  transition: box-shadow var(--transition) linear, border-color var(--transition) linear,
+    background var(--transition) linear;
+}
+
+body.minimalist .anki-btn {
+  border-radius: var(--border-radius);
+  box-shadow: none;
+}
+
+.anki-btn:hover:not(:disabled) {
+  background: linear-gradient(180deg, var(--button-gradient-start) 0%, var(--button-gradient-end) 100%);
+  border-color: var(--button-hover-border);
+  box-shadow: 0 3px 1px -2px rgba(20, 20, 20, 0.2),
+    0 2px 2px 0 rgba(20, 20, 20, 0.14),
+    0 1px 5px 0 rgba(20, 20, 20, 0.12);
+}
+
+.anki-btn:active:not(:disabled) {
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.28);
+}
+
+.anki-btn:disabled {
+  cursor: not-allowed;
+  color: var(--fg-disabled);
+  opacity: 0.65;
+  box-shadow: none;
+}
+
+.anki-btn.primary {
+  background: var(--button-primary-bg);
+  border-color: transparent;
+  color: #ffffff;
+}
+
+.anki-btn.primary:hover:not(:disabled) {
+  background: linear-gradient(
+    180deg,
+    var(--button-primary-gradient-start) 0%,
+    var(--button-primary-gradient-end) 100%
+  );
+  border-color: var(--border-focus);
+  color: #ffffff;
+}
+
+.anki-btn.danger {
+  background: var(--accent-danger);
+  border-color: transparent;
+  color: #ffffff;
+}
+
+.anki-btn.small {
+  padding: 4px 10px;
+  font-size: 12.5px;
+  border-radius: var(--border-radius);
+}
+
+/* Inputs & Selects */
+.anki-input,
+.anki-select,
+.anki-textarea {
+  font-family: inherit;
+  font-size: 13.5px;
+  color: var(--fg);
+  background: var(--canvas-inset);
+  border: 1px solid var(--border);
+  border-radius: var(--border-radius);
+  padding: 6px 10px;
+  outline: none;
+}
+
+.anki-input:focus,
+.anki-select:focus,
+.anki-textarea:focus {
+  border-color: var(--border-focus);
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+}
+
+/* Card count colors */
+.new-count {
+  color: var(--state-new);
+}
+.learn-count {
+  color: var(--state-learn);
+}
+.review-count {
+  color: var(--state-review);
+}
+.zero-count {
+  color: var(--fg-faint);
+}
+
+/* Modal overlay & window chrome */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.modal-window {
+  background: var(--canvas);
+  color: var(--fg);
+  border: 1px solid var(--border);
+  border-radius: var(--border-radius-medium);
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.35);
+  display: flex;
+  flex-direction: column;
+  max-width: 96vw;
+  max-height: 92vh;
+  overflow: hidden;
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  background: var(--canvas-elevated);
+  border-bottom: 1px solid var(--border-subtle);
+  user-select: none;
+  flex-shrink: 0;
+}
+
+.modal-title {
+  font-size: 14px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.modal-close {
+  border: none;
+  background: transparent;
+  color: var(--fg-subtle);
+  font-size: 18px;
+  line-height: 1;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-close:hover {
+  background: var(--border-subtle);
+  color: var(--fg);
+}
+
+.modal-body {
+  padding: 16px;
+  overflow: auto;
+  flex: 1;
+}
+
+.modal-body.flush {
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.modal-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 10px 16px;
+  background: var(--canvas-elevated);
+  border-top: 1px solid var(--border-subtle);
+  flex-shrink: 0;
+}
+
+/* Context / dropdown menu */
+.context-menu {
+  position: fixed;
+  z-index: 2000;
+  min-width: 190px;
+  background: var(--canvas-overlay);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 4px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+  font-size: 13px;
+}
+
+.context-menu-item {
+  width: 100%;
+  background: transparent;
+  border: none;
+  color: var(--fg);
+  padding: 6px 10px;
+  border-radius: 5px;
+  text-align: left;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  font-family: inherit;
+  font-size: 13px;
+}
+
+.context-menu-item:hover:not(:disabled) {
+  background: var(--border-subtle);
+}
+
+.context-menu-item:disabled {
+  color: var(--fg-disabled);
+  cursor: default;
+}
+
+.context-menu-item .shortcut {
+  color: var(--fg-subtle);
+  font-size: 11.5px;
+}
+
+.context-menu-sep {
+  height: 1px;
+  background: var(--border-subtle);
+  margin: 4px 6px;
+}
+
+/* Custom scrollbars matching Anki */
+::-webkit-scrollbar {
+  width: 11px;
+  height: 11px;
+  background: var(--canvas);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-bg);
+  border-radius: 5px;
+  border: 2px solid var(--canvas);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-bg-hover);
+}

@@ -20,86 +20,86 @@ Status legend:
 ## Phase 2 — Core Screens & Behavior
 
 ### Shell & Global
-- [ ] (`missing`) Cardly branding (no Anki name/logo) & AGPL-3.0 notice
-- [ ] (`missing`) Top menu bar (`File`, `Edit`, `Tools`, `Help`)
-- [ ] (`missing`) Top toolbar (`Decks`, `Add`, `Browse`, `Stats`, `Sync`)
-- [ ] (`missing`) Global keyboard shortcuts (`d`, `a`, `b`, `t`, `y`, `Ctrl+Z`, `Ctrl+Shift+Z`, `Ctrl+P`, `Ctrl+Shift+I`, `Ctrl+E`, `Ctrl+Shift+N`)
-- [ ] (`missing`) Undo / Redo + toast tooltips
-- [ ] (`missing`) Progress dialog with live polling & abort
-- [ ] (`missing`) `OpChanges` cross-view reactivity
+- [x] (`done`) Cardly branding (no Anki name/logo) & AGPL-3.0 notice
+- [x] (`done`) Top menu bar (`File`, `Edit`, `Tools`, `Help`)
+- [x] (`done`) Top toolbar (`Decks`, `Add`, `Browse`, `Stats`, `Sync`)
+- [x] (`done`) Global keyboard shortcuts (`d`, `a`, `b`, `t`, `y`, `Ctrl+Z`, `Ctrl+Shift+Z`, `Ctrl+P`, `Ctrl+Shift+I`, `Ctrl+E`, `Ctrl+Shift+N`)
+- [x] (`done`) Undo / Redo + toast tooltips
+- [x] (`done`) Progress dialog with live polling & abort
+- [x] (`done`) `OpChanges` cross-view reactivity
 
 ### 1. Deck List (Main Screen)
-- [ ] (`missing`) Hierarchical deck tree with New / Learn / Due counts
-- [ ] (`missing`) Collapse / expand subdecks (`+` / `−`)
-- [ ] (`missing`) Create / Rename / Delete deck
-- [ ] (`missing`) Drag-and-drop reparenting (including promote to top-level)
-- [ ] (`missing`) Gear options menu (Rename, Options, Export, Delete)
-- [ ] (`missing`) Studied-today footer
+- [x] (`done`) Hierarchical deck tree with New / Learn / Due counts
+- [x] (`done`) Collapse / expand subdecks (`+` / `−`)
+- [x] (`done`) Create / Rename / Delete deck
+- [x] (`done`) Drag-and-drop reparenting (including promote to top-level)
+- [x] (`done`) Gear options menu (Rename, Options, Export, Delete)
+- [x] (`done`) Studied-today footer
 
 ### 2. Deck Overview & Custom Study
-- [ ] (`missing`) Deck title, New / Learning / To Review counts (+ buried delta)
-- [ ] (`missing`) "Study Now" button + `Space`/`Enter` shortcut
-- [ ] (`missing`) Deck description display (Markdown/HTML) & Description editor
-- [ ] (`missing`) Congratulations screen (reused `ts/routes/congrats`)
-- [ ] (`missing`) Unbury dialog (user vs sibling buried) & `u` shortcut
-- [ ] (`missing`) Custom Study dialog (`c` shortcut)
-- [ ] (`missing`) Filtered Deck create/edit/rebuild (`r`) / empty (`e`)
+- [x] (`done`) Deck title, New / Learning / To Review counts (+ buried delta)
+- [x] (`done`) "Study Now" button + `Space`/`Enter` shortcut
+- [x] (`done`) Deck description display (Markdown/HTML) & Description editor
+- [x] (`done`) Congratulations screen (reused `ts/routes/congrats`)
+- [x] (`done`) Unbury dialog (user vs sibling buried) & `u` shortcut
+- [x] (`done`) Custom Study dialog (`c` shortcut)
+- [x] (`done`) Filtered Deck create/edit/rebuild (`r`) / empty (`e`)
 
 ### 3. Reviewer
-- [ ] (`missing`) Question & Answer rendering via reused `ts/reviewer/`
-- [ ] (`missing`) Again / Hard / Good / Easy buttons with exact interval previews
-- [ ] (`missing`) Keyboard shortcuts (`Space`/`Enter`, `1`–`4`, `e`, `m`, `r`/`F5`, `u`/`Ctrl+Z`, `Ctrl+1`–`7`, `*`, `-`, `=`, `@`, `!`, `i`, `Ctrl+Alt+i`, `o`, `5`/`6`/`7`, `Ctrl+Delete`, `Ctrl+Shift+D`, `Ctrl+Alt+N`, `Shift+A`)
-- [ ] (`missing`) Audio & video playback (autoplay, replay buttons, pause/seek) + TTS
-- [ ] (`missing`) Images, MathJax 3, Cloze deletions, Image Occlusion review
-- [ ] (`missing`) Typed answers (`{{type:...}}`, `{{type:cloze:...}}`) with diff
-- [ ] (`missing`) Card flags (1–7), Mark (`*`), Suspend, Bury, Delete, Forget, Set Due Date
-- [ ] (`missing`) "More" context menu
-- [ ] (`missing`) Card timer, remaining counts progress, auto-advance
-- [ ] (`missing`) Card Info & Previous Card Info (reused `ts/routes/card-info`)
+- [x] (`done`) Question & Answer rendering via reused `ts/reviewer/`
+- [x] (`done`) Again / Hard / Good / Easy buttons with exact interval previews
+- [x] (`done`) Keyboard shortcuts (`Space`/`Enter`, `1`–`4`, `e`, `m`, `r`/`F5`, `u`/`Ctrl+Z`, `Ctrl+1`–`7`, `*`, `-`, `=`, `@`, `!`, `i`, `Ctrl+Alt+i`, `o`, `5`/`6`/`7`, `Ctrl+Delete`, `Ctrl+Shift+D`, `Ctrl+Alt+N`, `Shift+A`)
+- [x] (`done`) Audio & video playback (autoplay, replay buttons, pause/seek) + TTS
+- [x] (`done`) Images, MathJax 3, Cloze deletions, Image Occlusion review
+- [x] (`done`) Typed answers (`{{type:...}}`, `{{type:cloze:...}}`) with diff
+- [x] (`done`) Card flags (1–7), Mark (`*`), Suspend, Bury, Delete, Forget, Set Due Date
+- [x] (`done`) "More" context menu
+- [x] (`done`) Card timer, remaining counts progress, auto-advance
+- [x] (`done`) Card Info & Previous Card Info (reused `ts/routes/card-info`)
 
 ### 4. Add & Edit Cards
-- [ ] (`missing`) Add Cards dialog hosting reused `ts/routes/editor/?mode=add`
-- [ ] (`missing`) Note Type & Deck selectors, sticky fields, duplicate detection
-- [ ] (`missing`) Rich text formatting, Cloze, MathJax overlay, HTML editor, Tags autocomplete
-- [ ] (`missing`) Image paste/attach, audio attach & browser microphone recording
-- [ ] (`missing`) Image Occlusion editor (reused `ts/routes/image-occlusion`)
-- [ ] (`missing`) Edit Current Card dialog (`e`) hosting `ts/routes/editor/?mode=current`
-- [ ] (`missing`) Card Previewer modal
+- [x] (`done`) Add Cards dialog hosting reused `ts/routes/editor/?mode=add`
+- [x] (`done`) Note Type & Deck selectors, sticky fields, duplicate detection
+- [x] (`done`) Rich text formatting, Cloze, MathJax overlay, HTML editor, Tags autocomplete
+- [x] (`done`) Image paste/attach, audio attach & browser microphone recording
+- [x] (`done`) Image Occlusion editor (reused `ts/routes/image-occlusion`)
+- [x] (`done`) Edit Current Card dialog (`e`) hosting `ts/routes/editor/?mode=current`
+- [x] (`done`) Card Previewer modal
 
 ### 5. Card Browser
-- [ ] (`missing`) Full Anki search syntax + search history + saved searches
-- [ ] (`missing`) Virtualized Cards/Notes table with configurable & sortable columns
-- [ ] (`missing`) Row coloring (marked, suspended, buried, flags 1–7) & multi-select
-- [ ] (`missing`) Sidebar tree (Saved Searches, Today, Flags, Card State, Decks, Note Types, Tags)
-- [ ] (`missing`) Embedded editor pane (`ts/routes/editor/?mode=browser`) & layout switcher
-- [ ] (`missing`) Bulk actions (Change Deck, Add/Remove Tags, Suspend, Mark, Flag, Delete, Forget, Set Due Date, Reposition, Grade Now)
-- [ ] (`missing`) Find & Replace
-- [ ] (`missing`) Find Duplicates
-- [ ] (`missing`) Change Note Type (reused `ts/routes/change-notetype`)
+- [x] (`done`) Full Anki search syntax + search history + saved searches
+- [x] (`done`) Virtualized Cards/Notes table with configurable & sortable columns
+- [x] (`done`) Row coloring (marked, suspended, buried, flags 1–7) & multi-select
+- [x] (`done`) Sidebar tree (Saved Searches, Today, Flags, Card State, Decks, Note Types, Tags)
+- [x] (`done`) Embedded editor pane (`ts/routes/editor/?mode=browser`) & layout switcher
+- [x] (`done`) Bulk actions (Change Deck, Add/Remove Tags, Suspend, Mark, Flag, Delete, Forget, Set Due Date, Reposition, Grade Now)
+- [x] (`done`) Find & Replace
+- [x] (`done`) Find Duplicates
+- [x] (`done`) Change Note Type (reused `ts/routes/change-notetype`)
 
 ### 6. Statistics
-- [ ] (`missing`) Statistics screen (reused `ts/routes/graphs`) + click-to-search in Browser
+- [x] (`done`) Statistics screen (reused `ts/routes/graphs`) + click-to-search in Browser
 
 ### 7. Deck Options, Note Types & Card Templates
-- [ ] (`missing`) Deck Options including FSRS, Optimizer & Simulator (reused `ts/routes/deck-options`)
-- [ ] (`missing`) Manage Note Types (Add stock/clone, Rename, Delete)
-- [ ] (`missing`) Fields Editor (Add, Delete, Rename, Reposition, Font/Size, RTL, Sticky, Sort field)
-- [ ] (`missing`) Card Templates Editor (Front, Back, CSS + live preview, Add/Delete/Rename/Reposition card types, Deck Override)
+- [x] (`done`) Deck Options including FSRS, Optimizer & Simulator (reused `ts/routes/deck-options`)
+- [x] (`done`) Manage Note Types (Add stock/clone, Rename, Delete)
+- [x] (`done`) Fields Editor (Add, Delete, Rename, Reposition, Font/Size, RTL, Sticky, Sort field)
+- [x] (`done`) Card Templates Editor (Front, Back, CSS + live preview, Add/Delete/Rename/Reposition card types, Deck Override)
 
 ### 8. Import / Export & Maintenance
-- [ ] (`missing`) Import `.apkg` & `.colpkg` (upload + reused `ts/routes/import-anki-package`)
-- [ ] (`missing`) Import Text/CSV/TSV (upload + reused `ts/routes/import-csv`)
-- [ ] (`missing`) Export `.apkg`, `.colpkg`, Notes CSV, Cards CSV
-- [ ] (`missing`) Check Database, Check Media (trash/empty/restore), Empty Cards
+- [x] (`done`) Import `.apkg` & `.colpkg` (upload + reused `ts/routes/import-anki-package`)
+- [x] (`done`) Import Text/CSV/TSV (upload + reused `ts/routes/import-csv`)
+- [x] (`done`) Export `.apkg`, `.colpkg`, Notes CSV, Cards CSV
+- [x] (`done`) Check Database, Check Media (trash/empty/restore), Empty Cards
 
 ### 9. Preferences
-- [ ] (`missing`) Appearance (Light/Dark/Auto theme, language, minimalist mode, hide bars)
-- [ ] (`missing`) Review (learn ahead, rollover, timebox, estimates, counts, audio, answer keys)
-- [ ] (`missing`) Editing (default deck, paste options, ignore accents)
-- [ ] (`missing`) Syncing (sync endpoint & credentials info) & Backups (create/download/restore)
+- [x] (`done`) Appearance (Light/Dark/Auto theme, language, minimalist mode, hide bars)
+- [x] (`done`) Review (learn ahead, rollover, timebox, estimates, counts, audio, answer keys)
+- [x] (`done`) Editing (default deck, paste options, ignore accents)
+- [x] (`done`) Syncing (sync endpoint & credentials info) & Backups (create/download/restore)
 
 ### 10. Sync
-- [ ] (`missing`) Sync compatibility verified with Anki client (collection + media sync)
+- [x] (`done`) Sync compatibility verified with Anki client (collection + media sync)
 
 ## Phase 3 — Polish & QA
 - [ ] (`missing`) Light/Dark theme visual parity matching Desktop Anki

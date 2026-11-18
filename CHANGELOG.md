@@ -4,7 +4,32 @@ All notable changes to Cardly will be documented in this file.
 
 ## [Unreleased]
 
-### Phase 1 — Backend Server, Sync & Docker Deployment (2026-11-18)
+### Phase 2 — Core Web Shell, Screens & Quality Loop (2026-11-18)
+- Built complete Svelte 5 web shell (`web/`) with exact Desktop Anki visual and behavioral parity:
+  - `web/src/styles/anki-tokens.css`: Desktop Anki light and dark mode CSS variables, system font stack, buttons, inputs, context menus, shortcuts badges.
+  - Global reactive store (`web/src/lib/store.svelte.ts`) with Svelte 5 runes (`$state`, `$derived`, `$effect`), auth, view routing (`deckBrowser`, `deckOverview`, `reviewer`, `browser`, `stats`), modals management, undo/redo state, opRevision reactivity.
+  - Protobuf RPC and bridge interceptors (`web/src/lib/api.ts`, `web/src/lib/bridge.ts`, `web/src/lib/renderCard.ts`): Client-side bridge for `FrontendService` (file picker, audio playback, dialogs, clipboard, tag completion), auto-sync of browser timezone, batch row loading, robust sandbox `srcdoc` iframe isolation with origin-safe `postMessage` protocol.
+  - Core desktop screens and dialogs:
+    1. **Deck List** (`DeckBrowser.svelte`): Hierarchical deck tree with New/Learn/Due counts, collapse/expand subdecks, create/rename/delete deck, drag-and-drop reparenting, gear options menu, studied-today footer.
+    2. **Deck Overview** (`DeckOverview.svelte`): Deck title, live New/Learn/Review counts, "Study Now" button, Markdown/HTML description display, Custom Study dialog (`c`), Filtered Deck rebuild/empty.
+    3. **Reviewer** (`Reviewer.svelte`): Reused upstream `ts/reviewer/` inside sandboxed iframe with MathJax 3, Cloze, typed answer diffing, HTML5 audio + TTS, 4 rating buttons (Again/Hard/Good/Easy) with interval previews, full desktop keyboard shortcuts (`Space`, `1`–`4`, `u`/`Ctrl+Z`, flags `1`–`7`, mark `*`, bury `-`/`=`, suspend `@`/`!`, delete `Ctrl+Del`, forget, set due date, card info, timer, auto-advance).
+    4. **Add / Edit Cards** (`UpstreamEditor.svelte`): Embedded upstream `ts/routes/editor` (Add mode, Current mode, Browser mode) with rich text, MathJax overlay, Cloze, tags, sticky fields, duplicate detection, image occlusion support.
+    5. **Card Browser** (`Browser.svelte`): 3-pane resizable layout, full Anki search syntax with history & saved searches, virtualized Cards/Notes table with configurable sortable columns, row coloring (flags, suspended, marked), full sidebar tree (Saved Searches, Today, Flags, Card State, Decks, Note Types, Tags), embedded note editor, bulk actions (Change Deck, Tags, Suspend, Flag, Delete, Find & Replace, Find Duplicates, Grade Now, Export).
+    6. **Statistics** (`ts/routes/graphs`): Fully embedded upstream statistics screen.
+    7. **Deck Options** (`ts/routes/deck-options`): Fully embedded upstream SvelteKit deck options with FSRS parameters, optimizer, and simulator.
+    8. **Note Types & Templates**: Manage Note Types modal, Fields modal, and Card Templates split editor with live Front/Back preview, night mode toggle, and deck override.
+    9. **Import / Export & Maintenance**: Drag-and-drop `.apkg`, `.colpkg`, `.csv`/`.tsv` import, export dialog, Check Database, Check Media with Trash, Empty Cards.
+    10. **Preferences**: Appearance (Light/Dark/Auto theme), Review (limits, intervals, timebox), Editing, Syncing guide, Backups snapshot & restore.
+    11. **Menu Bar & Toolbar**: Top menu bar (`File`, `Edit`, `Tools`, `Help`) with keyboard mnemonics, top toolbar (`Decks`, `Add`, `Browse`, `Stats`, `Sync`), global shortcuts (`d`, `a`, `b`, `t`, `y`, `Ctrl+Z`, `Ctrl+P`, etc.).
+- Backend server integration (`server/`):
+  - Auto-serving of `web/dist` when `CARDLY_SHELL_DIR` is set or `./web/dist` exists.
+  - Fallback `null` response for unset `getConfigJson` keys (e.g. `renderMathjax`).
+  - Added multi-stage Docker build step for `web/` producing `/app/web-shell`.
+- Testing & Quality Verification:
+  - `web/`: `npm run check` passed (`0 errors` in `web/src`), `npm run build` passed (`dist/` generated).
+  - `server/`: `cargo test` passed (**4 passed, 0 failed**).
+  - `e2e/`: **All 3 Playwright E2E tests passed (100% green, 30.9s)** covering add/review/schedule flow, CSV import/search/bulk tag/suspend flow, and stats/deck options/templates/theme toggle flow.
+  - Visual verification with Playwright browser subagent and full 13-screenshot gallery in `docs/screenshots/` (Light and Dark mode for every screen).
 - Built `server/` (`cardly-server`), a Rust Axum backend linking directly against upstream `anki-upstream/rslib` (zero fork).
 - Implemented per-user runtime (`server/src/user_runtime.rs`) with `server: true` collection mode, shared Web/Sync `RwLock` coordination, isolated user folders (`collection.anki2`, `media/`, `media.db`, `backups/`, `tmp/`, `profile.json`, `meta.json`), and web-to-sync media mirroring.
 - Implemented automatic protobuf-over-HTTP RPC dispatch (`POST /_anki/{method}`) from embedded `anki_descriptors.bin`, server-side `FrontendService` handlers, safe path-isolated upload/import/export/backups APIs, batch browser row endpoint (`/api/browser/rows`), and timezone sync (`/api/timezone`).
