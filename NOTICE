@@ -1,0 +1,107 @@
+Cardly
+Copyright (C) 2026 The Cardly Contributors
+
+This project incorporates and builds upon software from the Anki open-source
+project (https://github.com/ankitects/anki), developed by Damien Elmes and the
+Anki contributors.
+
+================================================================================
+UPSTREAM ATTRIBUTION & COPYRIGHT NOTICE
+================================================================================
+
+Anki is Copyright (C) 2006-Present Damien Elmes <https://github.com/dae>
+and contributors.
+
+Upstream Repository: https://github.com/ankitects/anki
+Upstream Documentation: https://docs.ankiweb.net
+
+Cardly and the upstream Anki codebase are licensed under the GNU Affero General
+Public License, version 3 or later (GNU AGPL-3.0-or-later).
+A copy of this license is available in the LICENSE file.
+
+Portions of the upstream Anki codebase are contributed by Anki community members
+under the 3-Clause BSD License (see anki-upstream/CONTRIBUTORS).
+
+================================================================================
+UPSTREAM THIRD-PARTY LICENSES
+================================================================================
+
+The upstream Anki repository vendors or references the following third-party
+components under permissive licenses:
+
+- MathJax:
+  Copyright (C) The MathJax Consortium
+  License: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
+
+- jQuery and jQuery-UI:
+  Copyright (C) OpenJS Foundation and other contributors, https://openjsf.org/
+  License: MIT License (https://jquery.org/license)
+
+- protobuf.js:
+  Copyright (C) 2012-2023 Daniel Wirtz
+  License: BSD 3-Clause License
+
+- plot.js:
+  Copyright (C) 2007-2014 IOLA and Ole Laursen
+  License: MIT License
+
+- statsbg.py:
+  License: Creative Commons Attribution 4.0 International (CC BY 4.0)
+
+- Anki Translations:
+  Contributions from the Anki translation community under BSD and Public Domain.
+
+================================================================================
+UPSTREAM CONTRIBUTORS
+================================================================================
+
+In accordance with anki-upstream/CONTRIBUTORS, upstream contributions are
+copyright 2010-Present their respective authors under the 3-Clause BSD License:
+
+AMBOSS MD Inc., Aristotelis P. (Glutanimate), Erez Volk, zjosua, Yngve Hoiseth,
+Arthur Milchior, Ijgnd, Yoonchae Lee, Evandro Coan, Alan Du, Yuchen Lei,
+Henry Tang, Simone Gaiarin, Rai (Michal Pokorny), Zeno Gantner, Henrik Giesel,
+Michał Bartoszkiewicz, Sander Santema, Thomas Brownback, Andrew Gaul, kenden,
+Emil Hamrin, Nickolay Yudin, neitrinoweb, Andreas Reis, Matt Krump,
+Alexander Presnyakov, Abdo, aplaice, phwoo, Soren Bjornstad, Aleksa Sarai,
+Jakub Kaczmarzyk, Akshara Balachandra, lukkea, David Allison, Tsung-Han Yu,
+Piotr Kubowicz, RumovZ, Cecini, Krish Shah, ianki, rye761, Guillem Palau Salvà,
+Meredith Derecho, Daniel Wallgren, Kerrick Staley, Maksim Abramchuk,
+Benjamin Kulnik, Shaun Ren, Ryan Greenblatt, Matthias Metelka, qubist-pixel-ux,
+cherryblossom, Hikaru Yoshiga, Thore Tyborski, Alexander Giorev, Ren Tatsumoto,
+lolilolicon, Gesa Stupperich, git9527, Vova Selin, qxo, Spooghetti420,
+Danish Prakash, Araceli Yanez, Sam Bradshaw, gnnoh, Sachin Govind, Bruce Harris,
+Patric Cunha, Brayan Oliveira, Luka Warren, wisherhxl, dobefore, Bart Louwers,
+Sam Penny, Yutsuten, Zoom, TRIAEIOU, Stefan Kangas, Fabricio Duarte, Mani,
+Kaben Nanlohy, Tobias Predel, Daniel Tang, Jack Pearson, yellowjello,
+Ingemar Berg, Ben Kerman, Euan Kemp, Kieran Black, XeR, mgrottenthaler,
+Austin Siew, Joel Koen, Christopher Woggon, Kavel Rao, Ben Yip, mmjang,
+shunlog, 3ter, Derek Dang, Luc Mcgrady, Kehinde Adeleke, Marko Juhanne,
+Gabriel Heinatz, Monty Evans, Nil Admirari, Michael Winkworth, Mateusz Wojewoda,
+Jarrett Ye, Sam Waechter, Michael Eliachevitch, Carlo Quick, Dominique Martinet,
+chandraiyengar, Gustaf Carefall, virinci, snowtimeglass, brishtibheja,
+Amanda Sternberg, Francisco Esteva, Daniela Silva Rocha, Emma Plante,
+Miguel Gazquez, Michael Lappas, Brett Schwartz, Lovro Boban, Tim Arnold,
+Daniel Pechersky, Helmut Carter, barisayyildiz, Christos Longros,
+Jeremy Fleischman, Marcus Lo, Tim Gatzke, David Sauerwein, Konstantin Tutsch,
+Niko Savola, Qaisar Sulaiman, Ashish Yadav, Timothy Lee, Han Lua,
+Andreas U. Schmidhauser, Peter Szilvasi, JaksonSouza, Carlos Mendez,
+James Liu, Caleb Meadows, Michael McDonald, Artem Lytkin, Aarian Malhotra,
+Louis Vicat, Philip Neuffer, Domenic Denicola, Andrew Wang, Henrik Thorén,
+Sai Vishal, Nurullah Türkoğlu, Ardana Nugraha, Higor Monteiro, Chris Argeros,
+and all other contributors to the Anki project.
+
+================================================================================
+TRADEMARK DISCLAIMER
+================================================================================
+
+"Anki", "AnkiWeb", "AnkiMobile", and "AnkiDroid" are trademarks or registered
+trademarks of their respective owners (including Anki Software, LLC and
+Ankitects Pty Ltd).
+
+Cardly is an independent open-source software project. Cardly is NOT affiliated
+with, endorsed by, sponsored by, or associated in any way with Damien Elmes,
+Ankitects Pty Ltd, Anki Software, LLC, or the official Anki development team.
+
+Cardly does not utilize any trademarked Anki logos, brand names, or proprietary
+graphics in its user interface or distribution assets.

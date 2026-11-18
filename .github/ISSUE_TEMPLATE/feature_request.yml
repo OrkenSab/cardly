@@ -1,0 +1,55 @@
+name: 💡 Feature Request
+description: Propose a new feature, enhancement, or parity capability for Cardly
+title: "[Feature]: "
+labels: ["enhancement", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ### Thank you for helping improve Cardly!
+        Please review [docs/PARITY.md](docs/PARITY.md) to check existing desktop parity status before proposing desktop features.
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem or Limitation
+      description: Is your feature request related to a specific problem or workflow friction?
+      placeholder: "I find it challenging when studying because [...]"
+    validations:
+      required: true
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed Solution or Behavior
+      description: Describe what you would like to see happen and how users would interact with it.
+      placeholder: "Add an option to [...] with keyboard shortcut [...]"
+    validations:
+      required: true
+  - type: textarea
+    id: desktop-parity
+    attributes:
+      label: Desktop Anki Parity Reference
+      description: Does this capability exist in official Anki Desktop (v23/v24)? If so, describe where and how it is implemented in desktop Anki.
+      placeholder: "In Desktop Anki, this is found in Tools > Preferences > ..."
+    validations:
+      required: false
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives Considered
+      description: What other solutions or workarounds have you tried or considered?
+    validations:
+      required: false
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional Context & Mockups
+      description: Attach sketches, screenshots, or additional references that could help explain your idea.
+    validations:
+      required: false
+  - type: checkboxes
+    id: contribution
+    attributes:
+      label: Contribution
+      options:
+        - label: I would be interested in submitting a pull request for this feature.
+          required: false
