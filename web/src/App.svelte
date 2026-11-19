@@ -10,6 +10,7 @@
   import { store } from "./lib/store.svelte";
 
   import AudioRecorderModal from "./components/AudioRecorderModal.svelte";
+  import AiCardGeneratorModal from "./components/AiCardGeneratorModal.svelte";
   import Browser from "./components/Browser.svelte";
   import CardPreviewerModal from "./components/CardPreviewerModal.svelte";
   import CardTemplatesModal from "./components/CardTemplatesModal.svelte";
@@ -54,6 +55,10 @@
     // Escape closes topmost modal (except when DialogOverlay handles it)
     if (ev.key === "Escape") {
       if (store.dialog) return;
+      if (store.aiGeneratorOpen) {
+        store.aiGeneratorOpen = false;
+        return;
+      }
       if (store.audioRecorder.open) {
         store.audioRecorder.resolve?.(null);
         return;
@@ -182,6 +187,11 @@
       if (key === "n" && ev.shiftKey) {
         ev.preventDefault();
         store.manageNotetypesOpen = true;
+        return;
+      }
+      if (key === "g" && ev.shiftKey) {
+        ev.preventDefault();
+        store.aiGeneratorOpen = true;
         return;
       }
     }
@@ -456,6 +466,10 @@
 
   {#if store.audioRecorder.open}
     <AudioRecorderModal />
+  {/if}
+
+  {#if store.aiGeneratorOpen}
+    <AiCardGeneratorModal />
   {/if}
 
   <MaintenanceModals />

@@ -137,6 +137,7 @@ class CardlyStore {
 
   // Active modals & overlays
   addCardsOpen = $state<boolean>(false);
+  aiGeneratorOpen = $state<boolean>(false);
   editCurrent = $state<EditCurrentModalState>({ open: false, noteId: 0 });
   browser = $state<BrowserModalState>({ open: false, initialSearch: "" });
   statsOpen = $state<boolean>(false);
@@ -232,6 +233,7 @@ class CardlyStore {
   get hasOpenModal(): boolean {
     return (
       this.addCardsOpen ||
+      this.aiGeneratorOpen ||
       this.editCurrent.open ||
       this.browser.open ||
       this.statsOpen ||

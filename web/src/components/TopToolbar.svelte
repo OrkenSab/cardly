@@ -27,6 +27,15 @@
       Add
     </button>
     <button
+      class="hitem ai-toolbar-btn"
+      title="AI Card Generator (Ctrl+Shift+G)"
+      onclick={() => {
+        store.aiGeneratorOpen = true;
+      }}
+    >
+      ✨ AI
+    </button>
+    <button
       class="hitem"
       title="Shortcut: B"
       onclick={() => {

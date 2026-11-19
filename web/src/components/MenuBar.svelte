@@ -110,6 +110,10 @@
       </button>
       {#if openMenu === "tools"}
         <div class="menu-dropdown" role="menu">
+          <button class="context-menu-item" role="menuitem" onclick={() => run(() => (store.aiGeneratorOpen = true))}>
+            <span>AI Card Generator...</span><span class="shortcut">Ctrl+Shift+G</span>
+          </button>
+          <div class="context-menu-sep"></div>
           <button class="context-menu-item" role="menuitem" onclick={() => run(() => (store.studyDeckOpen = true))}>
             <span>Study Deck...</span><span class="shortcut">S</span>
           </button>

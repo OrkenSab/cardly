@@ -886,3 +886,274 @@ async fn demo_mode_seeding_reset_status_and_abuse_protection() {
     assert_eq!(alice_me["demo_mode"], true);
     assert_eq!(alice_me["is_demo_user"], false);
 }
+
+#[tokio::test]
+async fn ai_card_generation_and_batch_add() {
+    let h = TestHarness::new();
+
+    // 1. Unauthenticated requests to AI endpoints are rejected
+    let (status, _, _) = h
+        .send(
+            Request::post("/api/ai/generate")
+                .header(header::CONTENT_TYPE, "application/json")
+                .body(Body::from(r#"{"text":"test"}"#))
+                .unwrap(),
+        )
+        .await;
+    assert_eq!(status, StatusCode::UNAUTHORIZED);
+
+    let (status, _, _) = h
+        .send(
+            Request::post("/api/ai/batch-add")
+                .header(header::CONTENT_TYPE, "application/json")
+                .body(Body::from(r#"{"deck_id":1,"notetype_id":1,"cards":[]}"#))
+                .unwrap(),
+        )
+        .await;
+    assert_eq!(status, StatusCode::UNAUTHORIZED);
+
+    // 2. Login as alice
+    let (cookie, token) = h.login("alice", "secret123").await;
+
+    // 3. Invalid API token is rejected (403 Forbidden)
+    let (status, _, _) = h
+        .send(
+            Request::post("/api/ai/generate")
+                .header(header::COOKIE, &cookie)
+                .header(API_TOKEN_HEADER, "invalid-token")
+                .header(header::CONTENT_TYPE, "application/json")
+                .body(Body::from(r#"{"text":"test"}"#))
+                .unwrap(),
+        )
+        .await;
+    assert_eq!(status, StatusCode::FORBIDDEN);
+
+    // 4. Mock AI generation: Basic cards
+    let (status, _, bytes) = h
+        .send(
+            Request::post("/api/ai/generate")
+                .header(header::COOKIE, &cookie)
+                .header(API_TOKEN_HEADER, &token)
+                .header(header::CONTENT_TYPE, "application/json")
+                .body(Body::from(
+                    r#"{
+                        "text": "Spaced repetition and FSRS algorithm overview.",
+                        "mode": "basic",
+                        "target_count": 2,
+                        "language": "en",
+                        "api_key": "test-mock-key"
+                    }"#,
+                ))
+                .unwrap(),
+        )
+        .await;
+    assert_eq!(status, StatusCode::OK);
+    let gen_basic: serde_json::Value = serde_json::from_slice(&bytes).unwrap();
+    let cards = gen_basic["cards"].as_array().expect("cards array");
+    assert_eq!(cards.len(), 2);
+    assert!(!cards[0]["front"].as_str().unwrap().is_empty());
+    assert!(!cards[0]["back"].as_str().unwrap().is_empty());
+    assert!(!cards[0]["tags"].as_array().unwrap().is_empty());
+
+    // 5. Mock AI generation: Cloze cards
+    let (status, _, bytes) = h
+        .send(
+            Request::post("/api/ai/generate")
+                .header(header::COOKIE, &cookie)
+                .header(API_TOKEN_HEADER, &token)
+                .header(header::CONTENT_TYPE, "application/json")
+                .body(Body::from(
+                    r#"{
+                        "text": "Spaced repetition uses increasing intervals.",
+                        "mode": "cloze",
+                        "target_count": 2,
+                        "language": "en",
+                        "api_key": "test-mock-key"
+                    }"#,
+                ))
+                .unwrap(),
+        )
+        .await;
+    assert_eq!(status, StatusCode::OK);
+    let gen_cloze: serde_json::Value = serde_json::from_slice(&bytes).unwrap();
+    let cloze_cards = gen_cloze["cards"].as_array().expect("cloze cards");
+    assert_eq!(cloze_cards.len(), 2);
+    assert!(cloze_cards[0]["cloze"].as_str().unwrap().contains("{{c1::"));
+
+    // 6. Multilingual mock generation: Russian
+    let (status, _, bytes) = h
+        .send(
+            Request::post("/api/ai/generate")
+                .header(header::COOKIE, &cookie)
+                .header(API_TOKEN_HEADER, &token)
+                .header(header::CONTENT_TYPE, "application/json")
+                .body(Body::from(
+                    r#"{
+                        "text": "Интервальное повторение",
+                        "mode": "basic",
+                        "target_count": 2,
+                        "language": "ru",
+                        "api_key": "test-mock-key"
+                    }"#,
+                ))
+                .unwrap(),
+        )
+        .await;
+    assert_eq!(status, StatusCode::OK);
+    let gen_ru: serde_json::Value = serde_json::from_slice(&bytes).unwrap();
+    let ru_cards = gen_ru["cards"].as_array().unwrap();
+    assert_eq!(ru_cards.len(), 2);
+    assert!(ru_cards[0]["front"].as_str().unwrap().contains("повторение"));
+
+    // 7. Get deck ID and notetype IDs via rslib
+    let (status, bytes) = h
+        .rpc_raw(
+            &cookie,
+            &token,
+            "getDeckNames",
+            anki_proto::decks::GetDeckNamesRequest {
+                skip_empty_default: false,
+                include_filtered: true,
+            }
+            .encode_to_vec(),
+        )
+        .await;
+    assert_eq!(status, StatusCode::OK);
+    let deck_names = anki_proto::decks::DeckNames::decode(bytes.as_slice()).unwrap();
+    let deck_id = deck_names.entries[0].id;
+
+    let (status, bytes) = h
+        .rpc_raw(&cookie, &token, "getNotetypeNames", vec![])
+        .await;
+    assert_eq!(status, StatusCode::OK);
+    let nt_names = anki_proto::notetypes::NotetypeNames::decode(bytes.as_slice()).unwrap();
+    let basic_id = nt_names
+        .entries
+        .iter()
+        .find(|e| e.name == "Basic")
+        .expect("Basic notetype")
+        .id;
+    let cloze_id = nt_names
+        .entries
+        .iter()
+        .find(|e| e.name == "Cloze")
+        .expect("Cloze notetype")
+        .id;
+
+    // 8. Batch add Basic cards
+    let (status, _, bytes) = h
+        .send(
+            Request::post("/api/ai/batch-add")
+                .header(header::COOKIE, &cookie)
+                .header(API_TOKEN_HEADER, &token)
+                .header(header::CONTENT_TYPE, "application/json")
+                .body(Body::from(
+                    serde_json::json!({
+                        "deck_id": deck_id,
+                        "notetype_id": basic_id,
+                        "cards": [
+                            {
+                                "front": "What is Cardly?",
+                                "back": "An open-source Anki-compatible web client and sync server.",
+                                "tags": ["ai-test", "cardly"]
+                            },
+                            {
+                                "front": "Which scheduler does Cardly support?",
+                                "back": "FSRS and SM-2.",
+                                "tags": ["ai-test", "scheduler"]
+                            }
+                        ]
+                    })
+                    .to_string(),
+                ))
+                .unwrap(),
+        )
+        .await;
+    assert_eq!(status, StatusCode::OK);
+    let batch_resp: serde_json::Value = serde_json::from_slice(&bytes).unwrap();
+    assert_eq!(batch_resp["added_count"], 2);
+    let note_ids = batch_resp["note_ids"].as_array().unwrap();
+    assert_eq!(note_ids.len(), 2);
+
+    // Verify notes exist via searchNotes
+    let (status, bytes) = h
+        .rpc_raw(
+            &cookie,
+            &token,
+            "searchNotes",
+            anki_proto::search::SearchRequest {
+                search: "tag:ai-test".to_string(),
+                order: None,
+            }
+            .encode_to_vec(),
+        )
+        .await;
+    assert_eq!(status, StatusCode::OK);
+    let search_res = anki_proto::search::SearchResponse::decode(bytes.as_slice()).unwrap();
+    assert_eq!(search_res.ids.len(), 2);
+
+    // 9. Batch add Cloze card with undo verification
+    let (status, _, bytes) = h
+        .send(
+            Request::post("/api/ai/batch-add")
+                .header(header::COOKIE, &cookie)
+                .header(API_TOKEN_HEADER, &token)
+                .header(header::CONTENT_TYPE, "application/json")
+                .body(Body::from(
+                    serde_json::json!({
+                        "deck_id": deck_id,
+                        "notetype_id": cloze_id,
+                        "cards": [
+                            {
+                                "cloze": "Cardly is powered by official {{c1::rslib}} core.",
+                                "tags": ["ai-undo-test"]
+                            }
+                        ]
+                    })
+                    .to_string(),
+                ))
+                .unwrap(),
+        )
+        .await;
+    assert_eq!(status, StatusCode::OK);
+    let cloze_batch_resp: serde_json::Value = serde_json::from_slice(&bytes).unwrap();
+    assert_eq!(cloze_batch_resp["added_count"], 1);
+
+    // Verify cloze note exists
+    let (status, bytes) = h
+        .rpc_raw(
+            &cookie,
+            &token,
+            "searchNotes",
+            anki_proto::search::SearchRequest {
+                search: "tag:ai-undo-test".to_string(),
+                order: None,
+            }
+            .encode_to_vec(),
+        )
+        .await;
+    assert_eq!(status, StatusCode::OK);
+    let cloze_search = anki_proto::search::SearchResponse::decode(bytes.as_slice()).unwrap();
+    assert_eq!(cloze_search.ids.len(), 1);
+
+    // Undo the cloze batch add operation via rpc "undo"
+    let (status, _) = h.rpc_raw(&cookie, &token, "undo", vec![]).await;
+    assert_eq!(status, StatusCode::OK);
+
+    // Verify note is undone
+    let (status, bytes) = h
+        .rpc_raw(
+            &cookie,
+            &token,
+            "searchNotes",
+            anki_proto::search::SearchRequest {
+                search: "tag:ai-undo-test".to_string(),
+                order: None,
+            }
+            .encode_to_vec(),
+        )
+        .await;
+    assert!(status == StatusCode::OK || status == StatusCode::NO_CONTENT);
+    let after_undo_search = anki_proto::search::SearchResponse::decode(bytes.as_slice()).unwrap();
+    assert_eq!(after_undo_search.ids.len(), 0, "cloze note should be undone");
+}

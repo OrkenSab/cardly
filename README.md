@@ -76,6 +76,22 @@ Cardly adheres to strict functional honesty. For full technical details and test
 
 ---
 
+## ✨ AI Card Generator (Text & Photo OCR)
+
+Cardly includes a built-in AI flashcard generator that converts lecture notes, articles, and textbook photos into atomic, high-retention spaced repetition cards:
+
+- **Multimodal Support**: Paste raw text or upload photos of book pages and diagrams for OCR extraction.
+- **Card Formats**: Generates atomic **Basic (Q&A)** or **Cloze Deletion (`{{c1::...}}`)** cards.
+- **Provider Choice**:
+  - **Google Gemini** (`gemini-1.5-flash`, `gemini-1.5-pro` via Google AI Studio).
+  - **OpenAI & OpenRouter** (`gpt-4o-mini`, `deepseek-chat`).
+  - **Local Ollama** (`llama3.2`, `mistral`, `llava`) for 100% offline, private study.
+- **Review & Batch Add**: Interactive preview lets you edit prompts, answers, and tags before adding them directly into your selected deck.
+
+Shortcut: **`Ctrl+Shift+G`** or click **✨ AI** in the top toolbar. Full setup details in [docs/AI_GENERATOR.md](./docs/AI_GENERATOR.md).
+
+---
+
 ## ⚖️ How Cardly Differs from AnkiWeb and Desktop Anki
 
 | Capability / Feature | Official Desktop Anki | Official AnkiWeb | Cardly (This Project) |
