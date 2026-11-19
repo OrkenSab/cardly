@@ -15,7 +15,7 @@ My girlfriend is in medical school, studying 600+ cards every single day on Anki
 - The official AnkiWeb interface is intentionally lightweight and read-only for editing; it doesn't support the full 3-pane browser, tag management, or the FSRS optimizer.
 - Every third-party web flashcard app we tested reimplements spaced repetition math in JavaScript, which invariably drifts from true Anki intervals, lacks nested Cloze support, or locks cards into proprietary clouds.
 
-So I spent the last few months building **Cardly** (https://cardly.app): a self-hosted, pixel-perfect web clone of Desktop Anki that directly reuses Anki's official Rust core.
+So I spent the last few months building **Cardly** (https://cardly.app): a self-hosted, faithful web client for Anki collections that directly reuses Anki's official Rust core.
 
 ### Architecture & Technical Decisions
 
@@ -35,7 +35,7 @@ So I spent the last few months building **Cardly** (https://cardly.app): a self-
    Shared Anki decks often contain custom JavaScript (pitch accents, interactive cloze, diagrams). Cardly renders cards inside isolated `srcdoc` iframes governed by a strict Content Security Policy (`UNTRUSTED_MEDIA_CSP`). Crucially, all mutating backend RPCs require an `X-Cardly-Api-Token` header that only the top-level application shell possesses; card scripts cannot read session cookies or mutate collections.
 
 6. **AI Card Generation & Multimodal OCR**:
-   We added an AI generator that turns lecture notes, Markdown files, or textbook photos into atomic, high-retention Q&A or Cloze cards. It supports Google Gemini (multimodal OCR), OpenAI/OpenRouter, and 100% local Ollama instances (`llama3.2`).
+   We added an AI generator that turns lecture notes, Markdown files, or textbook photos into atomic, high-retention Q&A or Cloze cards. It supports Google Gemini (multimodal OCR), OpenAI/OpenRouter, and offline local Ollama instances (`llama3.2`).
 
 ### Licensing & Upstream Credits
 

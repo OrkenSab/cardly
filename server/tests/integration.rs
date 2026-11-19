@@ -117,6 +117,9 @@ impl TestHarness {
             true,
             Some("demo".to_string()),
             Some(3600),
+            None,
+            50,
+            10,
         )
         .expect("build config");
 
@@ -1156,4 +1159,72 @@ async fn ai_card_generation_and_batch_add() {
     assert!(status == StatusCode::OK || status == StatusCode::NO_CONTENT);
     let after_undo_search = anki_proto::search::SearchResponse::decode(bytes.as_slice()).unwrap();
     assert_eq!(after_undo_search.ids.len(), 0, "cloze note should be undone");
+
+    // 10. Security & Abuse Testing: Large payload rejection (413)
+    let giant_text = "A".repeat(150_000); // 150 KB > 100 KB limit
+    let (status, _, _) = h
+        .send(
+            Request::post("/api/ai/generate")
+                .header(header::COOKIE, &cookie)
+                .header(API_TOKEN_HEADER, &token)
+                .header(header::CONTENT_TYPE, "application/json")
+                .body(Body::from(
+                    serde_json::json!({
+                        "text": giant_text,
+                        "mode": "basic",
+                        "api_key": "mock"
+                    })
+                    .to_string(),
+                ))
+                .unwrap(),
+        )
+        .await;
+    assert_eq!(status, StatusCode::PAYLOAD_TOO_LARGE);
+
+    // 11. Security & Abuse Testing: Missing API key with no server key (400)
+    let (status, _, _) = h
+        .send(
+            Request::post("/api/ai/generate")
+                .header(header::COOKIE, &cookie)
+                .header(API_TOKEN_HEADER, &token)
+                .header(header::CONTENT_TYPE, "application/json")
+                .body(Body::from(
+                    serde_json::json!({
+                        "text": "Photosynthesis process",
+                        "mode": "basic"
+                    })
+                    .to_string(),
+                ))
+                .unwrap(),
+        )
+        .await;
+    assert_eq!(status, StatusCode::BAD_REQUEST);
+
+    // 12. Security & Abuse Testing: Rate Limiter exhaustion (429)
+    // Send 12 rapid requests to exceed the 10-token bucket
+    let mut hit_429 = false;
+    for _ in 0..12 {
+        let (st, _, _) = h
+            .send(
+                Request::post("/api/ai/generate")
+                    .header(header::COOKIE, &cookie)
+                    .header(API_TOKEN_HEADER, &token)
+                    .header(header::CONTENT_TYPE, "application/json")
+                    .body(Body::from(
+                        serde_json::json!({
+                            "text": "Quick test note",
+                            "mode": "basic",
+                            "api_key": "mock"
+                        })
+                        .to_string(),
+                    ))
+                    .unwrap(),
+            )
+            .await;
+        if st == StatusCode::TOO_MANY_REQUESTS {
+            hit_429 = true;
+            break;
+        }
+    }
+    assert!(hit_429, "Expected rate limiter to trigger 429 Too Many Requests");
 }

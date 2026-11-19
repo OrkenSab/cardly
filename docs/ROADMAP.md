@@ -1,18 +1,18 @@
 # Cardly Product Roadmap
 
-This document outlines the development direction, upcoming milestones, and architectural vision for **Cardly** — the self-hosted, AGPL-3.0 web clone of Desktop Anki powered by upstream Rust `rslib` and Svelte 5.
+This document outlines the concrete development direction, active near-term milestones, and exploratory ideas for **Cardly** — the self-hosted web app for Anki collections powered directly by upstream Rust `rslib` and Svelte 5.
 
 ---
 
 ## 🧭 Guiding Principles
 
-1. **Strict Upstream Parity & Compatibility:**
-   Never reinvent the card scheduler, database schema, or template engine. Always leverage upstream `rslib` to maintain 100% data compatibility with `.apkg`, `.colpkg`, and official Anki sync clients (AnkiDroid, AnkiMobile, Desktop).
-2. **Privacy & True Self-Hosting:**
+1. **Strict Upstream Parity & Compatibility:**  
+   Never reinvent the card scheduler, database schema, or template engine. Always leverage upstream `rslib` to maintain data compatibility with `.apkg`, `.colpkg`, and official Anki sync clients (AnkiDroid, AnkiMobile, Desktop).
+2. **Privacy & True Self-Hosting:**  
    Cardly belongs on your server. Zero telemetry, zero analytics tracking, zero third-party dependencies required for core functionality.
-3. **Desktop Fidelity with Modern Web Ergonomics:**
+3. **Desktop Fidelity with Modern Web Ergonomics:**  
    Keyboard-first navigation, instant response times (< 15 ms RPCs), sub-millisecond local caching, and seamless responsive design that scales from desktop multi-monitor workflows down to smartphones.
-4. **Pragmatic Extensibility:**
+4. **Pragmatic Extensibility:**  
    Provide high-impact modern additions (multimodal AI card generation, PWA, built-in sync server) without compromising core reliability.
 
 ---
@@ -21,15 +21,13 @@ This document outlines the development direction, upcoming milestones, and archi
 
 ```mermaid
 flowchart LR
-    v010["v0.1.0 (Launch)<br/>Core Parity + AI"] --> v020["v0.2.0 (Q1)<br/>Media & Audio Polish"]
-    v020 --> v030["v0.3.0 (Q2)<br/>Collaboration & Backups"]
-    v030 --> v040["v0.4.0 (Q3)<br/>Web Add-ons & Themes"]
-    v040 --> v100["v1.0.0 (Q4)<br/>Offline WASM & Stability"]
+    v010["v0.1.0 (Launch)<br/>Core Parity + AI"] --> v020["v0.2.0 (Near-term)<br/>Audio Polish & Shortcuts"]
+    v020 -.-> ideas["Future Ideas (Community)<br/>Add-ons, Sync Relay, WASM"]
 ```
 
 ---
 
-## 📦 Milestones Detail
+## 📦 Active Milestones
 
 ### 🟢 v0.1.0 — Public Launch Baseline (Shipped 🎉)
 *Focus: Full desktop parity, self-hosted sync server, mobile PWA, multimodal AI generation, single-command deployment.*
@@ -45,8 +43,8 @@ flowchart LR
 
 ---
 
-### 🟡 v0.2.0 — Audio & Media Polish, Community Decks (Target: Q1)
-*Focus: Deep multimedia support, in-browser recording, image masking, and starter content.*
+### 🟡 v0.2.0 — Multimedia Polish & Shortcuts (Active Focus)
+*Focus: Deep multimedia support, in-browser recording, playback controls, and starter content.*
 
 - [ ] **In-Browser Audio Recorder:**
   - One-click microphone recording directly inside the card editor using Web Audio API.
@@ -54,64 +52,51 @@ flowchart LR
 - [ ] **Reviewer Audio Controls:**
   - Dedicated playback speed controls (`0.8x`, `1.0x`, `1.2x`, `1.5x`, `2.0x`) with hotkeys (`[` and `]`).
   - Auto-replay toggle and audio repeat hotkey (`R`).
-- [ ] **Visual Image Occlusion Web Editor:**
-  - Browser-native image occlusion note type editor: draw masks (rectangles, ellipses, polygons) directly on uploaded textbook diagrams.
-  - Toggle individual mask vs. hide-all-reveal-one during review.
 - [ ] **Configurable Hotkey Manager:**
   - Custom keybinding remapping interface in Preferences for all review, browse, and editor actions.
   - Pre-configured presets: Standard Anki, Vim-style (`j`/`k`/`h`/`l`), Single-Handed (`Q`/`W`/`E`/`R`).
 - [ ] **Curated Community Starter Decks:**
-  - Integrated starter deck repository for language learners (Top 3,000 English/Spanish/German/Kazakh words).
+  - Integrated starter deck repository for language learners (Top 3,000 high-frequency words).
   - Standardized Kazakhstan UNT (ЕНТ) starter decks for History and Math.
-- [ ] **Audio Text-to-Speech (TTS) Integration:**
-  - Server-side and browser-native TTS generation (Web Speech API + optional Piper TTS) for vocabulary fields.
+- [ ] **Audio Text-to-Speech (TTS) Polish:**
+  - Browser-native TTS generation (Web Speech API) for vocabulary fields with voice picker in Preferences.
 
 ---
 
-### 🔵 v0.3.0 — Collaboration & Enterprise Self-Hosting (Target: Q2)
-*Focus: Multi-user administration, shared deck subscriptions, and automated cloud backup snapshots.*
+## 💡 Future Ideas & Explorations (Under Community Evaluation)
 
-- [ ] **Web Admin Dashboard:**
-  - Instance administrator portal: manage users, view disk usage per collection, enforce storage quotas.
-  - Server telemetry (active sync sessions, RPC response percentiles, SQLite database health checks).
-- [ ] **Shared Decks & Read-Only Deck Subscriptions:**
-  - Publish public or unlisted read-only deck links.
-  - Subscribers pull card updates without losing personal scheduling intervals or review history.
-- [ ] **Automated Cloud Backup Snapshots:**
-  - Scheduled background backups to AWS S3, Cloudflare R2, Backblaze B2, or local mounted volumes.
-  - One-click snapshot rollback with verification checksums.
-- [ ] **Optional AnkiWeb Sync Relay:**
-  - Bidirectional background bridge allowing users to sync their Cardly collection directly with an official `ankiweb.net` account.
+The following items are concepts currently under exploration. They are not committed releases and will be prioritized based on community feedback and contributions in [GitHub Discussions](https://github.com/cardly-app/cardly/discussions).
 
----
+### Idea: Visual Image Occlusion Web Editor
+- Browser-native visual image occlusion note type editor: draw masks (rectangles, ellipses, polygons) directly on uploaded textbook diagrams.
+- Toggle individual mask vs. hide-all-reveal-one during review.
 
-### 🟣 v0.4.0 — Web Add-on & Theme Ecosystem (Target: Q3)
-*Focus: Extensibility without compromising security, community themes, and advanced analytics.*
+### Idea: Multi-User Web Admin Console
+- Instance administrator portal: manage users, view disk usage per collection, enforce storage quotas.
+- Server telemetry (active sync sessions, RPC response percentiles, SQLite database health checks).
 
-- [ ] **Sandboxed Web Add-on Architecture:**
-  - Isolated Web Worker / WebAssembly execution runtime for community extensions.
-  - Secure hook points: Reviewer bottom bar widgets, answer buttons modifications, custom card timer sounds, automated tagging rules.
-- [ ] **Community Card Themes & Styling Gallery:**
-  - One-click import and preview of card styles (e.g., Notion minimalist, Obsidian Dark, Cyberpunk, Academic Classic).
-  - Live CSS variable inspector and real-time card preview.
-- [ ] **Advanced Spaced Repetition Analytics v2:**
-  - Visual FSRS parameter optimizer and simulation playground.
-  - Interactive calendar heatmap (streaks, forecast workload, review heat by hour of day).
-  - Retention by tag and deck difficulty breakdown.
+### Idea: Shared Decks & Read-Only Deck Subscriptions
+- Publish public or unlisted read-only deck links.
+- Subscribers pull card updates without losing personal scheduling intervals or review history.
 
----
+### Idea: Automated Cloud Backup Snapshots
+- Scheduled background backups to AWS S3, Cloudflare R2, Backblaze B2, or local mounted volumes.
+- One-click snapshot rollback with verification checksums.
 
-### 🌟 v1.0.0 — Pure Offline WebAssembly & Native Desktop Shells (Target: Q4)
-*Focus: 100% offline standalone web execution, native clients, and long-term stability.*
+### Idea: Sandboxed Web Add-on Architecture
+- Isolated Web Worker / WebAssembly execution runtime for community extensions.
+- Secure hook points: Reviewer bottom bar widgets, answer buttons modifications, custom card timer sounds, automated tagging rules.
 
-- [ ] **Client-Side `rslib` via WebAssembly (OPFS):**
-  - Compile `rslib` directly to WASM and execute SQLite inside browser Origin Private File System (OPFS).
-  - Enable 100% standalone, serverless offline Cardly that runs entirely in any browser tab without a backend server.
-- [ ] **Native Desktop & Mobile Wrappers:**
-  - Ultra-lightweight Tauri wrapper for macOS, Linux, and Windows (< 15 MB installer).
-  - Android APK (Capacitor / TWA) with native system notifications and background sync.
-- [ ] **Long-term Backward Compatibility Guarantee:**
-  - Automated migration tests against every new upstream Anki database schema release.
+### Idea: Community Card Themes Gallery
+- One-click import and preview of card styles (e.g., Notion minimalist, Obsidian Dark, Cyberpunk, Academic Classic).
+- Live CSS variable inspector and real-time card preview.
+
+### Idea: Client-Side WebAssembly Core (Serverless Offline)
+- Compile `rslib` directly to WASM and execute SQLite inside browser Origin Private File System (OPFS).
+- Enable standalone, serverless offline Cardly that runs entirely in any browser tab without a backend server.
+
+### Idea: Native Desktop Shells (Tauri)
+- Ultra-lightweight Tauri wrapper for macOS, Linux, and Windows (< 15 MB installer).
 
 ---
 
@@ -124,9 +109,9 @@ We prioritize features according to three criteria:
 
 ---
 
-## 💡 How to Suggest or Vote on Features
+## 💬 How to Suggest or Vote on Features
 
-We want Cardly to be shaped by the community:
+We want Cardly to be shaped by real study workflows:
 - **Vote on Ideas:** Visit the [Cardly GitHub Discussions](https://github.com/cardly-app/cardly/discussions) and upvote features under **Ideas**.
 - **Submit a Feature Request:** Open an issue using the [Feature Request Template](https://github.com/cardly-app/cardly/issues/new?template=feature_request.yml).
 - **Contribute Code:** Check out [CONTRIBUTING.md](../CONTRIBUTING.md) and browse issues labeled [`good first issue`](https://github.com/cardly-app/cardly/labels/good%20first%20issue).

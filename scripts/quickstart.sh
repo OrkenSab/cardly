@@ -95,6 +95,13 @@ else
 fi
 echo -e "${GREEN}✓ Docker and Compose detected: ${COMPOSE_CMD}${NC}"
 
+# Check upstream git submodule initialization
+if [[ ! -f "anki-upstream/ninja" ]]; then
+  echo -e "${YELLOW}Notice: Upstream Anki submodule not detected. Initializing git submodules...${NC}"
+  git submodule update --init --recursive
+  echo -e "${GREEN}✓ Initialized anki-upstream submodule.${NC}"
+fi
+
 echo -e "\n${BLUE}[2/5] Checking configuration (.env)...${NC}"
 if [[ ! -f ".env" ]]; then
   if [[ -f ".env.example" ]]; then

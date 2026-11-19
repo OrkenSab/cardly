@@ -31,13 +31,19 @@ pub struct AppState {
     pub config: ServerConfig,
     pub users: UserManager,
     pub rpc: RpcRegistry,
+    pub ai_quota: Arc<ai::AiQuotaManager>,
 }
 
 impl AppState {
     pub fn new(config: ServerConfig) -> Arc<Self> {
         let users = UserManager::new(config.data_dir.clone());
         let rpc = RpcRegistry::build();
-        Arc::new(Self { config, users, rpc })
+        let ai_quota = Arc::new(ai::AiQuotaManager::new(
+            config.ai_server_key.clone(),
+            config.ai_global_daily_limit,
+            config.ai_ip_daily_limit,
+        ));
+        Arc::new(Self { config, users, rpc, ai_quota })
     }
 }
 
@@ -67,7 +73,7 @@ pub fn build_router(state: Arc<AppState>) -> Router {
         // AI Card Generator & Batch Add APIs
         .route(
             "/api/ai/generate",
-            post(ai::ai_generate_handler).layer(DefaultBodyLimit::max(max_upload)),
+            post(ai::ai_generate_handler).layer(DefaultBodyLimit::max(20 * 1024 * 1024)),
         )
         .route("/api/ai/batch-add", post(ai::ai_batch_add_handler))
         // Cardly auxiliary APIs (uploads, exports, batch browser rows, timezone, backups)

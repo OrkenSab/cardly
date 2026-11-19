@@ -47,6 +47,9 @@ pub struct ServerConfig {
     pub demo_mode: bool,
     pub demo_user: Option<String>,
     pub demo_reset_interval_secs: Option<u64>,
+    pub ai_server_key: Option<String>,
+    pub ai_global_daily_limit: u32,
+    pub ai_ip_daily_limit: u32,
 }
 
 /// Minimal `.env` loader that does not overwrite variables already set in the environment.
@@ -174,6 +177,22 @@ impl ServerConfig {
             .and_then(|v| v.parse().ok())
             .unwrap_or(3600);
 
+        let ai_server_key = env::var("CARDLY_AI_SERVER_KEY")
+            .or_else(|_| env::var("CARDLY_GEMINI_API_KEY"))
+            .or_else(|_| env::var("CARDLY_OPENAI_API_KEY"))
+            .ok()
+            .filter(|k| !k.trim().is_empty());
+
+        let ai_global_daily_limit: u32 = env::var("CARDLY_AI_GLOBAL_DAILY_LIMIT")
+            .ok()
+            .and_then(|v| v.parse().ok())
+            .unwrap_or(50);
+
+        let ai_ip_daily_limit: u32 = env::var("CARDLY_AI_IP_DAILY_LIMIT")
+            .ok()
+            .and_then(|v| v.parse().ok())
+            .unwrap_or(10);
+
         let mut raw_users = collect_users_from_env()?;
         let mut demo_user_name = None;
 
@@ -185,6 +204,30 @@ impl ServerConfig {
             demo_user_name = Some(name.to_string());
             if !raw_users.iter().any(|u| u.starts_with(&format!("{name}:"))) {
                 raw_users.push(demo_user_raw);
+            }
+        }
+
+        // Audit for weak default passwords when not in demo mode
+        if !demo_mode {
+            const WEAK_PASSWORDS: &[&str] = &[
+                "change-me-please",
+                "cardly123",
+                "password",
+                "123456",
+                "12345678",
+                "admin",
+                "secret",
+            ];
+            for raw in &raw_users {
+                if let Some((uname, secret)) = raw.split_once(':') {
+                    if WEAK_PASSWORDS.contains(&secret.trim()) {
+                        tracing::warn!(
+                            "⚠️ SECURITY WARNING: User '{}' is configured with default/weak password '{}'. Please update CARDLY_USER1 in .env with a strong secret before public deployment!",
+                            uname.trim(),
+                            secret.trim()
+                        );
+                    }
+                }
             }
         }
 
@@ -204,6 +247,9 @@ impl ServerConfig {
             demo_mode,
             demo_user_name,
             Some(demo_reset_interval_secs),
+            ai_server_key,
+            ai_global_daily_limit,
+            ai_ip_daily_limit,
         )
     }
 
@@ -234,6 +280,9 @@ impl ServerConfig {
             false,
             None,
             None,
+            None,
+            50,
+            10,
         )
     }
 
@@ -252,6 +301,9 @@ impl ServerConfig {
         demo_mode: bool,
         demo_user: Option<String>,
         demo_reset_interval_secs: Option<u64>,
+        ai_server_key: Option<String>,
+        ai_global_daily_limit: u32,
+        ai_ip_daily_limit: u32,
     ) -> Result<Self> {
         if users.is_empty() {
             bail!("No users configured; set CARDLY_USER1=username:password (or SYNC_USER1).");
@@ -281,6 +333,9 @@ impl ServerConfig {
             demo_mode,
             demo_user,
             demo_reset_interval_secs,
+            ai_server_key,
+            ai_global_daily_limit,
+            ai_ip_daily_limit,
         })
     }
 }

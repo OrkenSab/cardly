@@ -25,6 +25,7 @@ use axum::http::StatusCode;
 use axum::response::IntoResponse;
 use axum::response::Response;
 use axum::Json;
+use axum_client_ip::ClientIp;
 use prost::Message;
 use serde::Deserialize;
 use serde::Serialize;
@@ -77,6 +78,7 @@ pub struct UploadResponse {
 /// isolated `tmp/` directory and returns an opaque `upload_id`.
 pub async fn upload_file_handler(
     State(state): State<Arc<AppState>>,
+    ClientIp(client_ip): ClientIp,
     headers: HeaderMap,
     mut multipart: Multipart,
 ) -> Response {
@@ -96,7 +98,7 @@ pub async fn upload_file_handler(
             .unwrap_or(false);
 
     if let Err((status, msg)) =
-        crate::demo::validate_demo_action(&claims.u, is_demo, "/api/uploads", None)
+        crate::demo::validate_demo_action(&claims.u, is_demo, "/api/uploads", Some(client_ip))
     {
         return text_err(status, msg);
     }

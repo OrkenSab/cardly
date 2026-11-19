@@ -25,6 +25,7 @@ use axum::http::StatusCode;
 use axum::response::IntoResponse;
 use axum::response::Response;
 use axum::Json;
+use axum_client_ip::ClientIp;
 use image::codecs::jpeg::JpegEncoder;
 use image::codecs::png::PngEncoder;
 use image::ImageEncoder;
@@ -198,6 +199,7 @@ pub async fn call_rslib_method(
 /// Main `POST /_anki/{method}` handler matching `qt/aqt/mediasrv.py`'s protobuf-over-HTTP protocol.
 pub async fn handle_anki_rpc(
     State(state): State<Arc<AppState>>,
+    ClientIp(client_ip): ClientIp,
     Path(method): Path<String>,
     headers: HeaderMap,
     body: Bytes,
@@ -242,7 +244,7 @@ pub async fn handle_anki_rpc(
             .unwrap_or(false);
 
     if let Err((status, msg)) =
-        crate::demo::validate_demo_action(&claims.u, is_demo, &format!("/_anki/{method}"), None)
+        crate::demo::validate_demo_action(&claims.u, is_demo, &format!("/_anki/{method}"), Some(client_ip))
     {
         return text_error(status, msg);
     }

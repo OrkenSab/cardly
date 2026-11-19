@@ -36,7 +36,7 @@ This document outlines the self-promotion policies and tailored launch posts for
 
 ## 📝 Tailored Post 1: `r/Anki`
 
-**Title**: I built Cardly: a pixel-perfect, self-hosted web version of Anki powered directly by the official Rust core (`rslib`), with FSRS and a built-in sync server
+**Title**: I built Cardly: a faithful, self-hosted web version of Anki powered directly by the official Rust core (`rslib`), with FSRS and a built-in sync server
 
 **Post Body**:
 
@@ -53,16 +53,16 @@ To solve this, I spent the last few months building **Cardly** (https://cardly.a
 - **Full FSRS v4 & v5**: Includes the in-browser weights optimizer and retention simulator.
 - **Built-in Anki Sync Server**: Cardly implements Anki's official `/sync/*` and `/msync/*` protocols. In **AnkiDroid** or **AnkiMobile**, you can simply point your custom sync server to Cardly and sync your cards and media directly!
 - **Desktop Parity**: 3-pane virtualized card browser, MathJax 3, Cloze deletions, audio/video playback, card templates editor, and all desktop keyboard shortcuts (`Space`/`Enter`, `1`–`4`, `d`, `a`, `b`, `t`, `y`, `Ctrl+Z`, flags `1`–`7`).
-- **AI Flashcard Generator**: Optional built-in generator that turns lecture notes or textbook photos (via Google Gemini multimodal OCR, OpenAI, or 100% offline local Ollama) into atomic flashcards.
+- **AI Flashcard Generator**: Optional built-in generator that turns lecture notes or textbook photos (via Google Gemini multimodal OCR, OpenAI, or offline local Ollama) into atomic flashcards.
 
 ### Free & Open Source (AGPL-3.0)
-Cardly is 100% open-source under the **GNU AGPLv3** license, matching upstream Anki. A huge thank you to Damien Elmes and the Anki contributors for building such an incredible open ecosystem.
+Cardly is open-source under the **GNU AGPLv3** license, matching upstream Anki. A huge thank you to Damien Elmes and the Anki contributors for building such an incredible open ecosystem.
 
-- **GitHub Repository**: https://github.com/ankitects/anki
+- **GitHub Repository**: https://github.com/cardly-app/cardly
 - **Live Demo**: https://cardly.app
 - **Docker Compose Quickstart**:
   ```bash
-  git clone https://github.com/ankitects/anki.git cardly
+  git clone --recurse-submodules https://github.com/cardly-app/cardly.git
   cd cardly && cp .env.example .env
   docker compose up -d
   ```
@@ -94,16 +94,16 @@ I built **Cardly** (https://cardly.app), a self-hosted web application that brin
 
 ### Quickstart:
 ```bash
-git clone https://github.com/ankitects/anki.git cardly
+git clone --recurse-submodules https://github.com/cardly-app/cardly.git
 cd cardly
 cp .env.example .env
 docker compose up -d
 ```
-Visit `http://localhost:8080`, log in with `alice:secret123`, and your instance is ready.
+Visit `http://localhost:8080`, log in with `alice:supersecretpassword`, and your instance is ready.
 
-- **Source Code**: https://github.com/ankitects/anki
+- **Source Code**: https://github.com/cardly-app/cardly
 - **Live Demo**: https://cardly.app
-- **Deployment Guide (VPS / Fly.io / Railway / Caddy)**: https://github.com/ankitects/anki/blob/main/docs/DEPLOY.md
+- **Deployment Guide (VPS / Fly.io / Railway / Caddy)**: https://github.com/cardly-app/cardly/blob/main/docs/DEPLOY.md
 
 Feedback and PRs are warmly welcome!
 
@@ -138,8 +138,8 @@ With **Cardly** (https://cardly.app), we took a zero-fork architectural approach
 5. **Copyleft Harmony (AGPL-3.0)**:
    Cardly is licensed under the GNU Affero General Public License v3 or later. All source code, build scripts, and documentation are completely open and credit the upstream Anki contributors.
 
-- **GitHub Repository**: https://github.com/ankitects/anki
-- **Architecture Plan**: https://github.com/ankitects/anki/blob/main/docs/PLAN.md
+- **GitHub Repository**: https://github.com/cardly-app/cardly
+- **Architecture Plan**: https://github.com/cardly-app/cardly/blob/main/docs/PLAN.md
 - **Live Demo**: https://cardly.app
 
 Let me know what you think of the architecture!

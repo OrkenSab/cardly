@@ -1,6 +1,6 @@
 # Cardly
 
-> **Cardly** is a pixel-perfect, self-hosted web clone of Anki Desktop powered directly by Anki's official Rust core (`rslib`), featuring complete FSRS v4/v5 scheduling, desktop-grade card browsing, mobile PWA touch support, and a built-in Anki sync server for AnkiDroid and AnkiMobile.
+> **Cardly** is a faithful, self-hosted web app for Anki collections powered directly by Anki's official Rust core (`rslib`), featuring complete FSRS v4/v5 scheduling, desktop-grade card browsing, mobile PWA touch support, and a built-in Anki sync server for AnkiDroid and AnkiMobile.
 
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-blue.svg)](./LICENSE)
 [![Anki Upstream](https://img.shields.io/badge/Anki_Upstream-ankitects%2Fanki-orange.svg)](https://github.com/ankitects/anki)
@@ -85,7 +85,7 @@ Cardly includes a built-in AI flashcard generator that converts lecture notes, a
 - **Provider Choice**:
   - **Google Gemini** (`gemini-1.5-flash`, `gemini-1.5-pro` via Google AI Studio).
   - **OpenAI & OpenRouter** (`gpt-4o-mini`, `deepseek-chat`).
-  - **Local Ollama** (`llama3.2`, `mistral`, `llava`) for 100% offline, private study.
+  - **Local Ollama** (`llama3.2`, `mistral`, `llava`) for offline, private study without cloud dependencies.
 - **Review & Batch Add**: Interactive preview lets you edit prompts, answers, and tags before adding them directly into your selected deck.
 
 Shortcut: **`Ctrl+Shift+G`** or click **✨ AI** in the top toolbar. Full setup details in [docs/AI_GENERATOR.md](./docs/AI_GENERATOR.md).
@@ -107,7 +107,7 @@ Shortcut: **`Ctrl+Shift+G`** or click **✨ AI** in the top toolbar. Full setup 
 | **Sync Protocol Role** | Sync client (syncs to AnkiWeb or custom server) | Central proprietary cloud server | Built-in Anki Sync Server for mobile & desktop |
 | **Multi-User Support** | Local profile switching | Single account per email | Multi-user accounts with per-user data isolation |
 | **Extensibility (Add-ons)** | PyQt Python add-on manager | No add-on support | Web-safe customizations & Svelte components |
-| **Data Privacy & Self-Hosting** | 100% local on user machine | Data stored on AnkiWeb servers | 100% self-hosted on your own hardware / Docker |
+| **Data Privacy & Self-Hosting** | Local on user machine | Data stored on AnkiWeb servers | Fully self-hosted on your own hardware / Docker |
 | **Installation Requirement** | Requires OS installer, Python, Qt libraries | No installation (browser-only) | Single command via Docker Compose |
 
 ---
@@ -118,8 +118,9 @@ Cardly is packaged as a lightweight, production-ready container requiring only D
 
 ### 1. Clone & Configure
 ```bash
-git clone https://github.com/ankitects/anki.git cardly   # Or clone this repository
+git clone --recurse-submodules https://github.com/cardly-app/cardly.git
 cd cardly
+# If already cloned without submodules: git submodule update --init --recursive
 cp .env.example .env
 ```
 
@@ -233,7 +234,7 @@ npm --prefix e2e run test
 No. Cardly is an independent, open-source project. It is not affiliated with, endorsed by, or maintained by Ankitects Pty Ltd or Damien Elmes. It incorporates upstream open-source code from Anki in accordance with the GNU AGPLv3 license.
 
 ### Does Cardly calculate card intervals identically to Anki Desktop?
-Yes. Unlike other web implementations that approximate spaced repetition algorithms in JavaScript, Cardly links directly against Anki's official `rslib` Rust library. Every scheduling state calculation, interval calculation, FSRS formula, and database transaction runs through upstream Anki code.
+Cardly links directly against Anki's official `rslib` Rust core rather than re-implementing or approximating spaced repetition algorithms in JavaScript. Every scheduling state calculation, interval calculation, FSRS formula, and database transaction runs through upstream Anki code.
 
 ### Can I import my existing `.apkg` or `.colpkg` collections?
 Yes. You can import any `.apkg` deck package or `.colpkg` collection file via drag-and-drop or the **File &rarr; Import** menu. All cards, notes, custom note types, tags, scheduling histories, and media are fully preserved.

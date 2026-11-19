@@ -12,7 +12,7 @@ Hello Damien and fellow Anki community members,
 
 First and foremost, I want to express my deepest gratitude to Damien Elmes, the Ankitects team, and all the contributors who have made Anki the gold standard of spaced repetition for nearly two decades. The discipline, architectural elegance, and open-source principles of the Anki project are truly inspiring.
 
-I am writing to share **Cardly** (https://cardly.app), an independent, open-source project created to solve a specific challenge: providing a full-featured, self-hostable web interface that maintains 100% fidelity to official Anki scheduling and collections without forking or reimplementing Anki's algorithms.
+I am writing to share **Cardly** (https://cardly.app), an independent, open-source project created to solve a specific challenge: providing a full-featured, self-hostable web interface that maintains direct fidelity to official Anki scheduling and collections without forking or reimplementing Anki's algorithms.
 
 ### Architecture & Design Decisions
 
@@ -37,7 +37,9 @@ When designing Cardly, our core priority was zero divergence from upstream Anki:
 
 ### Links & Resources
 
-- **GitHub Repository**: https://github.com/ankitects/anki
+- **GitHub Repository**: https://github.com/cardly-app/cardly
+- **Live Demo**: https://cardly.app
+- **Upstream Project**: https://github.com/ankitects/anki
 - **Live Demo Instance**: https://cardly.app
 - **Feature Parity Checklist**: https://github.com/ankitects/anki/blob/main/docs/PARITY.md
 

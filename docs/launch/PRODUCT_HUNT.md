@@ -48,8 +48,8 @@ We built **Cardly** (https://cardly.app) to give you the exact power, precision,
 3. **Built-in Anki Sync Server**: Cardly implements Anki's official `/sync/*` protocol. You can point **AnkiDroid** (Android) or **AnkiMobile** (iOS) at your server and sync directly!
 4. **Desktop Hotkeys & Parity**: 3-pane virtualized browser, MathJax 3, nested cloze, audio/video playback, and full keyboard navigation.
 5. **Installable PWA**: Responsive mobile touch layout with 44px buttons, offline shell caching, and standalone display.
-6. **AI Flashcard Generator**: Turns study notes, articles, or textbook photos (via Gemini multimodal OCR, OpenAI, or 100% offline local Ollama) into atomic flashcards.
-7. **100% Open Source (GNU AGPL-3.0)**: Zero telemetry, self-hosted via Docker Compose, and your data stays completely yours.
+6. **AI Flashcard Generator**: Turns study notes, articles, or textbook photos (via Gemini multimodal OCR, OpenAI, or offline local Ollama) into atomic flashcards.
+7. **Free & Open Source (GNU AGPL-3.0)**: Zero telemetry, self-hosted via Docker Compose, and your data stays completely yours.
 
 Try the live demo at **https://cardly.app** or spin up your own instance with `docker compose up -d`.
 

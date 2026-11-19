@@ -96,7 +96,7 @@
         <div class="hero-container">
           <!-- Badges -->
           <div class="badge-row">
-            <span class="pill-badge pill-blue" data-i18n="badge_anki">100% Anki Compatible</span>
+            <span class="pill-badge pill-blue" data-i18n="badge_anki">Anki Core Compatible</span>
             <span class="pill-badge pill-amber" data-i18n="badge_fsrs">FSRS v4/v5 Core</span>
             <span class="pill-badge pill-emerald" data-i18n="badge_selfhosted">Self-Hosted Docker</span>
             <span class="pill-badge pill-purple" data-i18n="badge_agpl">GNU AGPL-3.0</span>
@@ -108,7 +108,7 @@
           </h1>
 
           <p class="hero-subtitle" data-i18n="hero_subtitle">
-            A pixel-perfect self-hosted web clone of Anki Desktop powered directly by Anki's official Rust core (<code class="inline-code">rslib</code>).
+            A faithful, self-hosted web app for Anki collections powered directly by Anki's official Rust core (<code class="inline-code">rslib</code>).
             Zero algorithmic rewrites, modern FSRS retention optimization, installable PWA, and direct sync with AnkiDroid &amp; AnkiMobile.
           </p>
 
@@ -334,7 +334,7 @@
                 </tr>
                 <tr>
                   <td class="row-name" data-i18n="r_privacy">Data Privacy &amp; Control</td>
-                  <td class="col-cardly" data-i18n="r_privacy_cardly">100% self-hosted on your hardware</td>
+                  <td class="col-cardly" data-i18n="r_privacy_cardly">Fully self-hosted on your hardware</td>
                   <td data-i18n="r_privacy_ankiweb">Stored on AnkiWeb servers</td>
                   <td data-i18n="r_privacy_desktop">Stored locally on computer</td>
                 </tr>
@@ -375,13 +375,13 @@
             <!-- FAQ Item 2 -->
             <div class="accordion-item">
               <button class="accordion-trigger" aria-expanded="false">
-                <span data-i18n="faq_2_q">Does Cardly compute intervals identically to Anki Desktop?</span>
+                <span data-i18n="faq_2_q">How does Cardly calculate intervals compared to Anki Desktop?</span>
                 <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" class="chevron">
                   <polyline points="6 9 12 15 18 9"></polyline>
                 </svg>
               </button>
               <div class="accordion-panel">
-                <p data-i18n="faq_2_a">Yes. Unlike other web flashcard apps that reimplement spaced repetition math in JavaScript, Cardly directly invokes Anki's official Rust core (<code class="inline-code">rslib</code>). Every interval, FSRS power formula, and scheduling state transition runs through upstream Anki code.</p>
+                <p data-i18n="faq_2_a">Cardly directly invokes Anki's official Rust core (<code class="inline-code">rslib</code>) rather than approximating spaced repetition math in JavaScript. Every interval, FSRS power formula, and scheduling state transition runs through upstream Anki code.</p>
               </div>
             </div>
 
@@ -394,7 +394,7 @@
                 </svg>
               </button>
               <div class="accordion-panel">
-                <p data-i18n="faq_3_a">Cardly is 100% free software. You can host it on any cheap cloud VPS ($4–$5/month on Hetzner, DigitalOcean, Linode), deploy it on a home Raspberry Pi, or run it on modern serverless containers (Fly.io, Railway) within their free/hobby tiers.</p>
+                <p data-i18n="faq_3_a">Cardly is completely free and open-source software. You can host it on any cheap cloud VPS ($4–$5/month on Hetzner, DigitalOcean, Linode), deploy it on a home Raspberry Pi, or run it on modern serverless containers (Fly.io, Railway) within their free/hobby tiers.</p>
               </div>
             </div>
 

@@ -1,8 +1,13 @@
 // Copyright: Cardly contributors
 // License: GNU AGPL, version 3 or later; https://www.gnu.org/licenses/agpl.html
 
+use std::collections::HashMap;
 use std::sync::Arc;
+use std::sync::Mutex;
 use std::time::Duration;
+use std::time::Instant;
+use std::time::SystemTime;
+use std::time::UNIX_EPOCH;
 
 use anki_proto::notes::AddNoteRequest;
 use anki_proto::notes::AddNoteResponse;
@@ -17,6 +22,7 @@ use axum::http::StatusCode;
 use axum::response::IntoResponse;
 use axum::response::Response;
 use axum::Json;
+use axum_client_ip::ClientIp;
 use prost::Message;
 use serde::Deserialize;
 use serde::Serialize;
@@ -33,6 +39,111 @@ fn text_err(status: StatusCode, msg: impl Into<String>) -> Response {
         .header(header::CONTENT_TYPE, "text/plain; charset=utf-8")
         .body(Body::from(msg.into()))
         .unwrap()
+}
+
+// ============================================================================
+// AI Quota & Abuse Management (Per-IP rate limits & global server key limits)
+// ============================================================================
+
+#[derive(Debug)]
+pub struct AiQuotaManager {
+    ip_rate_buckets: Mutex<HashMap<String, (f64, Instant)>>,
+    ip_daily_usage: Mutex<HashMap<String, (u64, u32)>>,
+    global_daily_usage: Mutex<(u64, u32)>,
+    global_daily_limit: u32,
+    ip_daily_limit: u32,
+    server_api_key: Option<String>,
+}
+
+impl AiQuotaManager {
+    pub fn new(server_api_key: Option<String>, global_daily_limit: u32, ip_daily_limit: u32) -> Self {
+        Self {
+            ip_rate_buckets: Mutex::new(HashMap::new()),
+            ip_daily_usage: Mutex::new(HashMap::new()),
+            global_daily_usage: Mutex::new((0, 0)),
+            global_daily_limit,
+            ip_daily_limit,
+            server_api_key,
+        }
+    }
+
+    /// Rate limits AI requests per IP: max 10 requests / minute (burst capacity 10, refill 0.166/sec)
+    pub fn check_rate_limit(&self, ip: &str) -> bool {
+        let now = Instant::now();
+        let mut guard = self.ip_rate_buckets.lock().unwrap();
+        if guard.len() > 2000 {
+            guard.retain(|_, (_, last)| now.duration_since(*last).as_secs() < 300);
+        }
+        let entry = guard.entry(ip.to_string()).or_insert((10.0, now));
+        let elapsed = now.duration_since(entry.1).as_secs_f64();
+        entry.0 = (entry.0 + elapsed * (10.0 / 60.0)).min(10.0);
+        entry.1 = now;
+        if entry.0 >= 1.0 {
+            entry.0 -= 1.0;
+            true
+        } else {
+            false
+        }
+    }
+
+    /// Verifies and consumes a server API key quota for the given IP address.
+    /// Returns the resolved API key, or an error response.
+    pub fn acquire_server_key(&self, ip: &str) -> Result<String, (StatusCode, String)> {
+        let Some(ref key) = self.server_api_key else {
+            return Err((
+                StatusCode::BAD_REQUEST,
+                "API key is required. Please provide your own Google Gemini or OpenAI API key in the AI Generator modal, or use local Ollama.".to_string(),
+            ));
+        };
+
+        let current_day = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .unwrap_or_default()
+            .as_secs()
+            / 86400;
+
+        // Check global daily usage
+        {
+            let mut global = self.global_daily_usage.lock().unwrap();
+            if global.0 != current_day {
+                *global = (current_day, 0);
+            }
+            if global.1 >= self.global_daily_limit {
+                return Err((
+                    StatusCode::TOO_MANY_REQUESTS,
+                    format!(
+                        "Cardly server AI daily limit reached (max {} requests/day). Please enter your own Gemini or OpenAI API key to continue.",
+                        self.global_daily_limit
+                    ),
+                ));
+            }
+            global.1 += 1;
+        }
+
+        // Check per-IP daily usage
+        {
+            let mut ip_map = self.ip_daily_usage.lock().unwrap();
+            if ip_map.len() > 5000 {
+                ip_map.retain(|_, (day, _)| *day == current_day);
+            }
+            let entry = ip_map.entry(ip.to_string()).or_insert((current_day, 0));
+            if entry.0 != current_day {
+                *entry = (current_day, 0);
+            }
+            if entry.1 >= self.ip_daily_limit {
+                return Err((
+                    StatusCode::TOO_MANY_REQUESTS,
+                    format!(
+                        "Your IP has reached its daily limit for server-provided AI generation (max {} requests/day). Please enter your own Gemini or OpenAI API key to continue.",
+                        self.ip_daily_limit
+                    ),
+                ));
+            }
+            entry.1 += 1;
+        }
+
+        Ok(key.clone())
+    }
 }
 
 // ============================================================================
@@ -525,6 +636,7 @@ async fn call_openai(
 /// Generates atomic, high-retention flashcards from text or multimodal image input.
 pub async fn ai_generate_handler(
     State(state): State<Arc<AppState>>,
+    ClientIp(client_ip): ClientIp,
     headers: HeaderMap,
     Json(req): Json<AiGenerateRequest>,
 ) -> Response {
@@ -544,9 +656,36 @@ pub async fn ai_generate_handler(
             .unwrap_or(false);
 
     if let Err((status, msg)) =
-        crate::demo::validate_demo_action(&claims.u, is_demo, "/api/ai/generate", None)
+        crate::demo::validate_demo_action(&claims.u, is_demo, "/api/ai/generate", Some(client_ip))
     {
         return text_err(status, msg);
+    }
+
+    // Per-IP rate limiting (10 requests/minute to protect server resources)
+    let ip_str = client_ip.to_string();
+    if !state.ai_quota.check_rate_limit(&ip_str) {
+        return text_err(
+            StatusCode::TOO_MANY_REQUESTS,
+            "AI generation rate limit exceeded (maximum 10 requests per minute). Please wait a moment before trying again.",
+        );
+    }
+
+    // Input payload size constraints
+    if let Some(ref text) = req.text {
+        if text.len() > 100_000 {
+            return text_err(
+                StatusCode::PAYLOAD_TOO_LARGE,
+                "Input text exceeds maximum allowed size (100 KB)",
+            );
+        }
+    }
+    if let Some(ref b64) = req.image_base64 {
+        if b64.len() > 15 * 1024 * 1024 {
+            return text_err(
+                StatusCode::PAYLOAD_TOO_LARGE,
+                "Input image exceeds maximum allowed size (10 MB)",
+            );
+        }
     }
 
     if req.text.as_ref().map(|t| t.trim().is_empty()).unwrap_or(true)
@@ -562,7 +701,7 @@ pub async fn ai_generate_handler(
         );
     }
 
-    let target_count = req.target_count.unwrap_or(3).clamp(1, 25);
+    let target_count = req.target_count.unwrap_or(3).clamp(1, 20);
 
     let is_mock = req
         .api_key
@@ -576,11 +715,18 @@ pub async fn ai_generate_handler(
         return (StatusCode::OK, Json(AiGenerateResponse { cards })).into_response();
     }
 
-    let Some(api_key) = req.api_key.as_deref().filter(|k| !k.is_empty()) else {
-        return text_err(
-            StatusCode::BAD_REQUEST,
-            "API key is required for AI generation (or provide 'test-mock-key' for test mode)",
-        );
+    // Resolve API key: either client-provided key or server-configured fallback with strict quotas
+    let api_key = match req
+        .api_key
+        .as_deref()
+        .map(str::trim)
+        .filter(|k| !k.is_empty() && *k != "server")
+    {
+        Some(user_key) => user_key.to_string(),
+        None => match state.ai_quota.acquire_server_key(&ip_str) {
+            Ok(server_key) => server_key,
+            Err((status, msg)) => return text_err(status, msg),
+        },
     };
 
     let (system_instruction, user_prompt) = build_prompts(&req, target_count);
@@ -592,9 +738,9 @@ pub async fn ai_generate_handler(
 
     let provider = req.provider.to_lowercase();
     let result = if provider == "openai" {
-        call_openai(&client, &req, api_key, &system_instruction, &user_prompt).await
+        call_openai(&client, &req, &api_key, &system_instruction, &user_prompt).await
     } else {
-        call_gemini(&client, &req, api_key, &system_instruction, &user_prompt).await
+        call_gemini(&client, &req, &api_key, &system_instruction, &user_prompt).await
     };
 
     match result {
