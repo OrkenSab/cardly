@@ -249,6 +249,18 @@ Cardly creates full `.colpkg` snapshots of your collection before major sync ope
 
 ---
 
+## 🗺️ Roadmap & Community
+
+We are building Cardly in the open for students, language learners, and self-hosters worldwide:
+
+- **[Product Roadmap](./docs/ROADMAP.md)**: Explore planned features from v0.1.0 to v1.0.0 (in-browser audio recording, image occlusion editor, shared deck subscriptions, client-side WASM core).
+- **[GitHub Discussions](https://github.com/cardly-app/cardly/discussions)**: Propose features, share custom card CSS themes, and get self-hosting help (see [Discussions Setup Guide](./docs/DISCUSSIONS.md)).
+- **[Issue Triage Guide](./docs/TRIAGE.md)**: How issues are prioritized and triaged in under 2 minutes.
+- **[Contributing Guide](./CONTRIBUTING.md)**: How to set up a development environment, run tests, and submit PRs.
+- **[Security Policy](./SECURITY.md)**: Confidential reporting of vulnerabilities.
+
+---
+
 ## 📜 License & Upstream Attribution
 
 Cardly is licensed under the **GNU Affero General Public License, version 3 or later** ([GNU AGPL-3.0-or-later](./LICENSE)).

@@ -2,8 +2,8 @@
 blank_issues_enabled: false
 contact_links:
   - name: 💬 Discussions & Q&A
-    url: https://github.com/ankitects/anki/discussions
+    url: https://github.com/cardly-app/cardly/discussions
     about: Ask questions, share ideas, and discuss study strategies or general card design.
   - name: 🔒 Security Vulnerability Reporting
-    url: https://github.com/ankitects/anki/security/advisories/new
+    url: https://github.com/cardly-app/cardly/security/advisories/new
     about: Please report security vulnerabilities privately according to SECURITY.md.

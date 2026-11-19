@@ -1,0 +1,24 @@
+title: "[Q&A]: "
+labels: ["question"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ### 💬 Ask a Question or Get Help
+        Need help with self-hosting, reverse proxies, mobile sync, or general card design?
+  - type: textarea
+    id: question
+    attributes:
+      label: Your Question
+      description: What do you need help with?
+      placeholder: "e.g., How do I configure Caddy with custom subpaths for Cardly?"
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment & Setup
+      description: OS, Docker version, deployment target (VPS, Fly.io, Railway, local).
+      placeholder: "Ubuntu 24.04 LTS, Docker Compose v2.27, Caddy reverse proxy"
+    validations:
+      required: false

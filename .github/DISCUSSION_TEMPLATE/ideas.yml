@@ -1,0 +1,31 @@
+title: "[Idea]: "
+labels: ["enhancement", "discussion"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ### 💡 Propose a Feature or Improvement
+        Thanks for taking the time to share your idea! Please describe what problem this solves and how it fits into Cardly's architecture.
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem Statement
+      description: What challenge or missing capability are you experiencing?
+      placeholder: "e.g., When reviewing vocabulary cards on my phone, I need to replay audio with one click..."
+    validations:
+      required: true
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed Solution
+      description: Describe the ideal user experience or interface.
+      placeholder: "e.g., Add an audio replay button in the reviewer bar and a hotkey 'R'..."
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives Considered
+      description: Did you consider any other workarounds or approaches?
+    validations:
+      required: false
