@@ -53,11 +53,6 @@ jobs:
             protobuf-compiler \
             rsync
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-
       - name: Set up Rust toolchain
         uses: dtolnay/rust-toolchain@stable
 
@@ -65,6 +60,12 @@ jobs:
         uses: swatinem/rust-cache@v2
         with:
           workspaces: "server -> target"
+
+      - name: Extract prebuilt upstream web assets
+        run: |
+          mkdir -p anki-upstream/out/qt/_aqt/data
+          tar -xzf server/upstream-web-assets.tar.gz -C anki-upstream/out/qt/_aqt/data
+          test -f anki-upstream/out/qt/_aqt/data/web/sveltekit/index.html && echo "Upstream web assets verified"
 
       - name: Run Rust server tests
         run: |
@@ -75,11 +76,6 @@ jobs:
         run: |
           cd server
           cargo build
-
-      - name: Build upstream web assets
-        run: |
-          cd anki-upstream
-          ./ninja qt:aqt:data:web
 
       - name: Upload server binary
         uses: actions/upload-artifact@v4

@@ -52,6 +52,36 @@ use prost::Message;
 use tempfile::TempDir;
 use tower::ServiceExt;
 
+fn resolve_test_upstream_web(tmp: &TempDir) -> PathBuf {
+    let repo_upstream = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .join("../anki-upstream/out/qt/_aqt/data/web");
+    if repo_upstream.join("sveltekit/index.html").exists() {
+        return repo_upstream;
+    }
+
+    let tarball = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("upstream-web-assets.tar.gz");
+    if tarball.exists() {
+        let target_dir = tmp.path().join("extracted_upstream_web");
+        std::fs::create_dir_all(&target_dir).ok();
+        let status = std::process::Command::new("tar")
+            .args(["-xzf", tarball.to_str().unwrap(), "-C", target_dir.to_str().unwrap()])
+            .status();
+        if status.map(|s| s.success()).unwrap_or(false) && target_dir.join("web/sveltekit/index.html").exists() {
+            return target_dir.join("web");
+        }
+    }
+
+    let mock = tmp.path().join("mock_upstream_web");
+    let sveltekit = mock.join("sveltekit");
+    std::fs::create_dir_all(&sveltekit).expect("create mock sveltekit dir");
+    std::fs::write(
+        sveltekit.join("index.html"),
+        b"<!DOCTYPE html><html><head><title>Mock Upstream</title></head><body>Graphs</body></html>",
+    )
+    .expect("write mock index.html");
+    mock
+}
+
 struct TestHarness {
     _tmp: TempDir,
     app: Router,
@@ -60,8 +90,7 @@ struct TestHarness {
 impl TestHarness {
     fn new() -> Self {
         let tmp = TempDir::new().expect("tempdir");
-        let upstream_web = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
-            .join("../anki-upstream/out/qt/_aqt/data/web");
+        let upstream_web = resolve_test_upstream_web(&tmp);
         let users = parse_users(
             &[
                 "alice:secret123".to_string(),
@@ -92,8 +121,7 @@ impl TestHarness {
 
     fn new_with_demo() -> (Self, std::sync::Arc<AppState>) {
         let tmp = TempDir::new().expect("tempdir");
-        let upstream_web = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
-            .join("../anki-upstream/out/qt/_aqt/data/web");
+        let upstream_web = resolve_test_upstream_web(&tmp);
         let users = parse_users(
             &[
                 "demo:demo123".to_string(),
