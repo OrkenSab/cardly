@@ -25,6 +25,10 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+env:
+  PROTOC: /usr/bin/protoc
+  PROTOC_BINARY: /usr/bin/protoc
+
 jobs:
   rust-tests:
     name: Rust Server Tests
@@ -49,6 +53,11 @@ jobs:
             protobuf-compiler \
             rsync
 
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
       - name: Set up Rust toolchain
         uses: dtolnay/rust-toolchain@stable
 
@@ -70,7 +79,6 @@ jobs:
       - name: Build upstream web assets
         run: |
           cd anki-upstream
-          export PROTOC_BINARY=/usr/bin/protoc
           ./ninja qt:aqt:data:web
 
       - name: Upload server binary
