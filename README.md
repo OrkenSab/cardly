@@ -1,181 +1,161 @@
-# Cardly
-
-> **Cardly** is a faithful, self-hosted web app for Anki collections powered directly by Anki's official Rust core (`rslib`), featuring complete FSRS v4/v5 scheduling, desktop-grade card browsing, mobile PWA touch support, and a built-in Anki sync server for AnkiDroid and AnkiMobile.
-
-[![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-blue.svg)](./LICENSE)
-[![Anki Upstream](https://img.shields.io/badge/Anki_Upstream-ankitects%2Fanki-orange.svg)](https://github.com/ankitects/anki)
-[![Tests](https://img.shields.io/badge/Tests-Rust%20%26%20Playwright%20Passing-brightgreen.svg)]()
-
-**English** | [Русский](docs/i18n/README.ru.md) | [Қазақша](docs/i18n/README.kk.md)
-
-> [!NOTE]
-> **Disclaimer**: Cardly is an independent open-source project and is **not affiliated with, endorsed by, or sponsored by Ankitects Pty Ltd or Damien Elmes**. "Anki" is a trademark of its respective owner. Cardly incorporates upstream open-source code from Anki's official backend core (`rslib`) under the terms of the GNU AGPL-3.0 license.
-
----
-
-## 🎬 Live Interactive Demo
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/brand/cardly-logo-dark.svg">
+    <source media="(prefers-color-scheme: light)" srcset="docs/brand/cardly-logo-light.svg">
+    <img src="docs/brand/cardly-logo-light.svg" alt="Cardly" width="240">
+  </picture>
+</p>
 
 <p align="center">
-  <img src="./landing/assets/cardly-demo.gif" alt="Cardly Showcase Demo" width="800" />
-  <br />
-  <em>Complete workflow showcase: Login &rarr; Rich Text / Cloze Card Creation &rarr; Reviewer &rarr; 3-Pane Browser &rarr; Statistics</em>
-  <br />
-  <a href="./landing/assets/cardly-demo.mp4">▶ Download HD Video (MP4, 320 KB)</a>
+  <strong>Fast, self-hosted web client for Anki collections, powered directly by Anki's official Rust core.</strong>
+</p>
+
+<p align="center">
+  <a href="./LICENSE"><img src="https://img.shields.io/badge/License-AGPL--3.0-blue.svg?style=flat-square" alt="AGPL-3.0 License"></a>
+  <a href="https://github.com/ankitects/anki"><img src="https://img.shields.io/badge/Anki%20Core-upstream%20rslib-orange.svg?style=flat-square" alt="Anki Upstream Core"></a>
+  <a href="#quickstart"><img src="https://img.shields.io/badge/Docker-Ready-2496ED.svg?style=flat-square&logo=docker&logoColor=white" alt="Docker Ready"></a>
+  <a href="./docs/PARITY.md"><img src="https://img.shields.io/badge/FSRS-v4%20%2F%20v5-purple.svg?style=flat-square" alt="FSRS Supported"></a>
+</p>
+
+<p align="center">
+  <b>English</b> • <a href="docs/i18n/README.ru.md">Русский</a> • <a href="docs/i18n/README.kk.md">Қазақша</a>
+</p>
+
+<p align="center">
+  <a href="#quickstart">Quickstart</a> •
+  <a href="#why-cardly">Why Cardly</a> •
+  <a href="#interface-preview">Screenshots</a> •
+  <a href="#ankiweb--desktop-comparison">Comparison</a> •
+  <a href="#mobile-sync">Mobile Sync</a> •
+  <a href="#configuration">Configuration</a> •
+  <a href="./docs/PARITY.md">Parity Matrix</a>
 </p>
 
 ---
 
-## 📸 Interface Gallery
+<p align="center">
+  <img src="landing/assets/cardly-demo.gif" alt="Cardly Workflow Demo" width="100%" style="max-width: 860px; border-radius: 8px;" />
+</p>
 
-Every screen in Cardly has been verified for visual and functional fidelity against official Anki Desktop across light and dark themes:
-
-| Screen | Preview (Light) | Preview (Dark / Mobile) |
-| :--- | :--- | :--- |
-| **Deck List** | [01-deck-list-light.png](./docs/screenshots/01-deck-list-light.png) | [14-mobile-deck-list-light.png](./docs/screenshots/14-mobile-deck-list-light.png) *(Mobile)* |
-| **Reviewer** | [04-reviewer-answer-light.png](./docs/screenshots/04-reviewer-answer-light.png) | [13-reviewer-dark.png](./docs/screenshots/13-reviewer-dark.png) *(Dark Mode)* |
-| **Card Browser** | [06-browser-light.png](./docs/screenshots/06-browser-light.png) | — |
-| **Statistics** | [07-stats-light.png](./docs/screenshots/07-stats-light.png) | — |
+> **Disclaimer**: Cardly is an independent open-source project and is not affiliated with, endorsed by, or sponsored by Ankitects Pty Ltd or Damien Elmes. "Anki" is a trademark of its respective owner. Cardly incorporates upstream open-source code from Anki's official backend library (`rslib`) under the GNU AGPL-3.0 license.
 
 ---
 
-## 🎯 Feature Parity Status
+## Quickstart
 
-Cardly adheres to strict functional honesty. For full technical details and test verifications, see [docs/PARITY.md](./docs/PARITY.md).
+Run Cardly with Docker Compose:
 
-### Implemented & Verified (`done`)
-- **Authentic Anki Core**: Directly links upstream `rslib` (Rust). No algorithm rewrites or approximation.
-- **Modern Scheduling & FSRS**: Complete support for default Anki 23+ scheduler, FSRS v4, and FSRS v5 with in-browser weight optimization and retention simulation.
-- **Card Content & Media**: Nested cloze deletions (`{{c1::...}}`), MathJax 3 (client-side rendering), HTML5 audio and video playback, `{{tts ...}}` Text-to-Speech via Web Speech API, typed answers (`{{type:...}}` and `{{type:cloze:...}}`) with character diff highlights, and Image Occlusion.
-- **Desktop Keyboard Shortcuts**: Identical key bindings: `Space`/`Enter`, `1`–`4`, `d` (Decks), `a` (Add), `b` (Browse), `t` (Stats), `y` (Sync), `u` / `Ctrl+Z` (Undo), flags `1`–`7`, mark `*`, bury `-`/`=`, suspend `@`/`!`, delete `Ctrl+Del`, reset `Ctrl+Alt+N`, card info `i`/`Ctrl+Alt+I`.
-- **Card Browser**: 3-pane virtualized layout with Anki search syntax (`deck:`, `tag:`, `is:due`, `prop:reps>5`, `flag:1`), search history, saved searches, sidebar tree, note editor, and bulk actions (change deck, tag/untag, suspend, delete, find & replace, find duplicates, export).
-- **Deck Options & Templates**: Reuses upstream SvelteKit deck options interface; full Card Templates editor with live Front/Back HTML/CSS split preview.
-- **Import & Export**: Drag-and-drop import for `.apkg`, `.colpkg`, and CSV/TSV text files; full export to `.apkg`, `.colpkg`, and CSV.
-- **Built-in Anki Sync Server**: Full implementation of Anki's sync endpoints (`/sync/*` and `/msync/*`), allowing AnkiDroid (Android) and AnkiMobile (iOS) to sync directly with your self-hosted Cardly instance.
-- **Multi-User Isolation**: Isolated SQLite collections and media directories per account; PBKDF2 password hashing; HMAC-SHA256 HttpOnly session cookies; `X-Cardly-Api-Token` security boundary preventing card JavaScript from mutating user collections.
-- **Mobile Responsive PWA**: Standalone installable PWA with web app manifest, service worker offline shell, safe area insets, and ergonomic 44px touch targets.
-- **Automated Backups**: Automatic rolling backups before sync/mutations, pruned to the 50 most recent snapshots.
-
-### Intentionally Skipped (`skipped`)
-- **PyQt / Python Add-ons**: Python desktop add-ons require a local Python and Qt environment and cannot safely run in a web browser sandbox.
-- **Multi-Profile Switcher**: Replaced by standard multi-user web accounts with individual login credentials.
-- **Desktop Audio Drivers (`mpv`)**: Replaced by standard Web Audio, HTML5 media elements, and the Web Speech API.
-
----
-
-## ✨ AI Card Generator (Text & Photo OCR)
-
-Cardly includes a built-in AI flashcard generator that converts lecture notes, articles, and textbook photos into atomic, high-retention spaced repetition cards:
-
-- **Multimodal Support**: Paste raw text or upload photos of book pages and diagrams for OCR extraction.
-- **Card Formats**: Generates atomic **Basic (Q&A)** or **Cloze Deletion (`{{c1::...}}`)** cards.
-- **Provider Choice**:
-  - **Google Gemini** (`gemini-1.5-flash`, `gemini-1.5-pro` via Google AI Studio).
-  - **OpenAI & OpenRouter** (`gpt-4o-mini`, `deepseek-chat`).
-  - **Local Ollama** (`llama3.2`, `mistral`, `llava`) for offline, private study without cloud dependencies.
-- **Review & Batch Add**: Interactive preview lets you edit prompts, answers, and tags before adding them directly into your selected deck.
-
-Shortcut: **`Ctrl+Shift+G`** or click **✨ AI** in the top toolbar. Full setup details in [docs/AI_GENERATOR.md](./docs/AI_GENERATOR.md).
-
----
-
-## ⚖️ How Cardly Differs from AnkiWeb and Desktop Anki
-
-| Capability / Feature | Official Desktop Anki | Official AnkiWeb | Cardly (This Project) |
-| :--- | :--- | :--- | :--- |
-| **Application Type** | Local desktop software (PyQt6 + Python + Rust) | Cloud web service hosted by Anki | Self-hosted web application & PWA |
-| **Core Scheduling Engine** | Native `rslib` (Rust) | Custom web backend | Official `rslib` (Rust) linked directly |
-| **FSRS v4 / v5 Support** | Full support + weights optimizer + simulator | Review only (no optimizer or simulator) | Full support + live optimizer & simulator |
-| **Card Browser** | Full 3-pane browser with bulk edits & search tree | Read-only basic search list | Full 3-pane virtualized browser with bulk actions |
-| **Card Template Editor** | Full HTML/CSS editor with live preview | Very limited | Full split-view editor with live preview |
-| **Deck Options Configuration** | Full options presets & scheduling controls | Minimal settings | Full upstream Deck Options SvelteKit interface |
-| **Media & Math Support** | MathJax, LaTeX (`latex`/`dvipng`), audio, video | Basic MathJax & audio playback | Client-side MathJax 3, HTML5 audio/video, Web TTS |
-| **Mobile & Touch UX** | Desktop only (separate AnkiDroid / AnkiMobile apps) | Basic non-PWA responsive web page | Installable PWA with 44px touch buttons & drawer |
-| **Sync Protocol Role** | Sync client (syncs to AnkiWeb or custom server) | Central proprietary cloud server | Built-in Anki Sync Server for mobile & desktop |
-| **Multi-User Support** | Local profile switching | Single account per email | Multi-user accounts with per-user data isolation |
-| **Extensibility (Add-ons)** | PyQt Python add-on manager | No add-on support | Web-safe customizations & Svelte components |
-| **Data Privacy & Self-Hosting** | Local on user machine | Data stored on AnkiWeb servers | Fully self-hosted on your own hardware / Docker |
-| **Installation Requirement** | Requires OS installer, Python, Qt libraries | No installation (browser-only) | Single command via Docker Compose |
-
----
-
-## 🚀 One-Command Quickstart
-
-Cardly is packaged as a lightweight, production-ready container requiring only Docker and Docker Compose.
-
-### 1. Clone & Configure
 ```bash
-git clone --recurse-submodules https://github.com/cardly-app/cardly.git
+# 1. Clone repository with upstream submodule
+git clone --recurse-submodules https://github.com/OrkenSab/cardly.git
 cd cardly
-# If already cloned without submodules: git submodule update --init --recursive
+
+# 2. Configure credentials
 cp .env.example .env
-```
 
-Edit `.env` to define your user accounts:
-```ini
-CARDLY_USER1=alice:supersecretpassword
-CARDLY_PORT=8080
-```
-
-### 2. Launch Cardly
-```bash
+# 3. Start container
 docker compose up -d
 ```
 
-### 3. Start Studying
-Open your browser and navigate to:
-**`http://localhost:8080`**
+Open **`http://localhost:8080`** in your browser. Log in using the credentials defined in `.env` (default: `alice` / `supersecretpassword`).
 
-Log in using the credentials defined in `.env`.
-
-To stop the service:
+To stop:
 ```bash
 docker compose down
 ```
 
 ---
 
-## ⚙️ Configuration Reference (`.env`)
+## Why Cardly?
 
-Cardly reads environment variables from `.env` in the project root:
+Desktop Anki is reliable, but requires installing Python and Qt dependencies on every computer. AnkiWeb is accessible anywhere, but provides only a minimal study interface without a card browser, template editor, or FSRS weight optimizer.
 
-| Variable | Default Value | Description |
-| :--- | :--- | :--- |
-| `CARDLY_PORT` | `8080` | Host port on which the web application and sync server listen. |
-| `CARDLY_HOST` | `0.0.0.0` | Bind address for the HTTP server inside the container. |
-| `CARDLY_DATA_DIR` | `./data` (host) / `/data` (container) | Persistent directory storing user collections, media files, and backups. |
-| `CARDLY_USER1` | *Required* | First user credentials in `username:password` format. |
-| `CARDLY_USER2`, `CARDLY_USER3`, ... | *Optional* | Additional user accounts. Each account receives an isolated collection and sync endpoint. |
-| `PASSWORDS_HASHED` | `0` | Set to `1` if passwords specified in `CARDLY_USER*` are pre-hashed PBKDF2 PHC strings. |
-| `CARDLY_SESSION_SECRET` | *Auto-generated* | 256-bit secret used to sign session cookies. If empty, auto-generated and stored in `$CARDLY_DATA_DIR/.session_secret`. |
-| `CARDLY_COOKIE_SECURE` | `false` | Set to `true` when serving Cardly behind an HTTPS reverse proxy (e.g., Caddy, Traefik, Nginx). |
-| `CARDLY_MAX_UPLOAD_MB` | `512` | Maximum allowable file size in MiB for `.apkg`, `.colpkg`, and media file uploads. |
-| `RUST_LOG` | `cardly_server=info,anki=info` | Tracing log level filter for the backend server. |
+Cardly gives you a complete, self-hosted web workspace running on your own server:
+
+- **Official Anki Rust Core (`rslib`)**: We do not approximate or rewrite spaced repetition algorithms in JavaScript. Interval calculation, fuzzing, retention curves, and FSRS v4/v5 calculations run through upstream Anki Rust code.
+- **Desktop-Grade Card Browser**: Virtualized 3-pane browser built for large collections (100,000+ notes). Supports Anki search queries (`deck:`, `tag:`, `is:due`, `prop:reps>5`), saved searches, and batch operations (suspend, tag, find & replace, export).
+- **Built-in Sync Server**: Connect AnkiDroid (Android) and AnkiMobile (iOS) directly to your self-hosted instance using their native custom sync server settings. No third-party sync plugins required.
+- **In-Browser FSRS Optimizer**: Train personalized 19-parameter FSRS weights and run retention simulations directly from your review logs.
+- **Card Templates & Media**: Client-side MathJax 3, nested cloze deletions (`{{c1::...}}`), HTML5 audio/video, image occlusion, and a split-screen HTML/CSS template editor with live preview.
+- **AI Card Generator**: Create atomic Q&A or cloze cards from lecture notes or textbook photos using local Ollama models or cloud providers (Gemini, OpenAI, OpenRouter).
+- **Self-Hosted Data Ownership**: Multi-user accounts with isolated SQLite collections (`collection.anki2`) and media stores. Automatic rolling snapshots before sync and schema changes.
 
 ---
 
-## 📱 Mobile Sync Setup (AnkiDroid & AnkiMobile)
+## Interface Preview
 
-Cardly includes a built-in Anki Sync Server. You can synchronize your cards, review progress, and media seamlessly between Cardly and official mobile apps:
+| Deck Overview | Dark Mode Reviewer |
+| :---: | :---: |
+| <img src="docs/screenshots/01-deck-list-light.png" width="420" alt="Deck Overview" /> | <img src="docs/screenshots/13-reviewer-dark.png" width="420" alt="Reviewer Dark Theme" /> |
+| **3-Pane Card Browser** | **Retention & Forecast Stats** |
+| <img src="docs/screenshots/06-browser-light.png" width="420" alt="Card Browser" /> | <img src="docs/screenshots/07-stats-light.png" width="420" alt="Statistics" /> |
+
+<p align="center">
+  <img src="docs/screenshots/14-mobile-deck-list-light.png" width="280" alt="Mobile PWA" />
+  <br>
+  <em>Mobile PWA layout: bottom navigation bar, safe-area insets, and 44px touch targets.</em>
+</p>
+
+---
+
+## AnkiWeb & Desktop Comparison
+
+| Feature | Desktop Anki | AnkiWeb | Cardly |
+| :--- | :--- | :--- | :--- |
+| **Environment** | Local desktop (Python / PyQt6) | Proprietary cloud service | Self-hosted web app & PWA |
+| **Core Scheduling** | Upstream `rslib` (Rust) | Custom web backend | Upstream `rslib` (Rust) linked directly |
+| **FSRS v4 / v5** | Scheduler + Optimizer + Simulator | Review only | Scheduler + Optimizer + Simulator |
+| **Card Browser** | Full 3-pane browser | Basic search list | Full 3-pane virtualized browser |
+| **Template Editor** | Split HTML/CSS editor | Limited | Split HTML/CSS editor with live preview |
+| **Math & Media** | MathJax, LaTeX, audio/video | MathJax, basic audio | MathJax 3, HTML5 audio/video, Web TTS |
+| **Sync Server** | Client only | Cloud server | Built-in sync server for mobile & desktop |
+| **Mobile Access** | Separate native apps | Basic responsive web | Installable PWA + direct sync to mobile apps |
+| **Data Storage** | Local user disk | AnkiWeb servers | Self-hosted Docker volume (isolated per user) |
+| **Add-ons** | PyQt Python add-ons | Not supported | Built-in features (FSRS, stats, AI generator) |
+
+---
+
+## Mobile Sync
+
+Cardly implements the official Anki sync protocol (`/sync/*` and `/msync/*`). You can use standard Anki mobile apps with your server:
 
 ### AnkiDroid (Android)
 1. Open **AnkiDroid** &rarr; **Settings** &rarr; **Syncing** &rarr; **Custom sync server**.
-2. Check **Use custom sync server**.
+2. Enable **Use custom sync server**.
 3. Set **Sync url**: `http://<YOUR_SERVER_IP>:8080/sync/`
 4. Set **Media sync url**: `http://<YOUR_SERVER_IP>:8080/msync/`
-5. Return to the main screen, tap **Sync**, and enter your `CARDLY_USER1` username and password.
+5. Return to the main screen, tap **Sync**, and enter your `CARDLY_USER1` credentials.
 
 ### AnkiMobile (iOS)
 1. Open **AnkiMobile** &rarr; **Preferences** &rarr; **Syncing** &rarr; **Custom Server**.
 2. Set **Sync URL**: `http://<YOUR_SERVER_IP>:8080/sync/`
-3. Enter your username and password.
-4. Tap **Sync Now**.
+3. Enter your username and password, then tap **Sync Now**.
 
 > [!TIP]
-> When accessing your server over the internet or public Wi-Fi, it is strongly recommended to run Cardly behind an HTTPS reverse proxy (such as Caddy or Nginx) with Let's Encrypt certificates, and set `CARDLY_COOKIE_SECURE=true`.
+> When accessing your server over public Wi-Fi or the internet, run Cardly behind an HTTPS reverse proxy (such as Caddy or Nginx) with automated TLS certificates, and set `CARDLY_COOKIE_SECURE=true`.
 
 ---
 
-## 🛠 Local Development & Testing
+## Configuration
+
+Cardly reads environment variables from `.env` in the project root:
+
+| Variable | Default | Description |
+| :--- | :--- | :--- |
+| `CARDLY_PORT` | `8080` | Host port for the web app and sync server. |
+| `CARDLY_HOST` | `0.0.0.0` | Bind address inside the container. |
+| `CARDLY_DATA_DIR` | `./data` (host) / `/data` (container) | Persistent directory storing user collections, media files, and backups. |
+| `CARDLY_USER1` | *Required* | First user credentials in `username:password` format. |
+| `CARDLY_USER2`, `...` | *Optional* | Additional user accounts. Each account receives an isolated collection. |
+| `PASSWORDS_HASHED` | `0` | Set to `1` if passwords specified in `CARDLY_USER*` are pre-hashed PBKDF2 strings. |
+| `CARDLY_SESSION_SECRET` | *Auto-generated* | Secret key for signing session cookies. Saved to `$CARDLY_DATA_DIR/.session_secret`. |
+| `CARDLY_COOKIE_SECURE` | `false` | Set to `true` when serving behind an HTTPS reverse proxy. |
+| `CARDLY_MAX_UPLOAD_MB` | `512` | Maximum allowable file size in MiB for `.apkg`, `.colpkg`, and media uploads. |
+| `RUST_LOG` | `cardly_server=info,anki=info` | Tracing log level filter for the backend server. |
+
+---
+
+## Local Development & Testing
 
 If you want to contribute to Cardly or run it without Docker:
 
@@ -186,13 +166,13 @@ If you want to contribute to Cardly or run it without Docker:
 
 ### Build & Run
 ```bash
-# 1. Build the Svelte 5 frontend shell
+# 1. Build frontend shell
 cd web
 npm install
 npm run build
 cd ..
 
-# 2. Start the Rust server
+# 2. Run backend server
 CARDLY_USER1="alice:secret123" \
 CARDLY_PORT=8080 \
 CARDLY_SHELL_DIR="./web/dist" \
@@ -202,58 +182,35 @@ cargo run --manifest-path server/Cargo.toml
 
 ### Running Test Suites
 ```bash
-# 1. Rust backend integration tests (validates Protobuf RPC and Anki sync protocol)
+# Backend integration tests (Protobuf RPC and Anki sync protocol)
 cargo test --manifest-path server/Cargo.toml --test integration
 
-# 2. Frontend Svelte 5 type checks
+# Frontend type checking
 npm --prefix web run check
 
-# 3. Playwright End-to-End tests (desktop and mobile flows)
+# Playwright End-to-End tests (desktop and mobile flows)
 npm --prefix e2e run test
 ```
 
 ---
 
-## ❓ Frequently Asked Questions (FAQ)
+## Documentation Links
 
-### Is Cardly an official Anki product?
-No. Cardly is an independent, open-source project. It is not affiliated with, endorsed by, or maintained by Ankitects Pty Ltd or Damien Elmes. It incorporates upstream open-source code from Anki in accordance with the GNU AGPLv3 license.
-
-### Does Cardly calculate card intervals identically to Anki Desktop?
-Cardly links directly against Anki's official `rslib` Rust core rather than re-implementing or approximating spaced repetition algorithms in JavaScript. Every scheduling state calculation, interval calculation, FSRS formula, and database transaction runs through upstream Anki code.
-
-### Can I import my existing `.apkg` or `.colpkg` collections?
-Yes. You can import any `.apkg` deck package or `.colpkg` collection file via drag-and-drop or the **File &rarr; Import** menu. All cards, notes, custom note types, tags, scheduling histories, and media are fully preserved.
-
-### Does Cardly support Python add-ons?
-No. Desktop Anki add-ons are written in Python and rely directly on desktop PyQt6 GUI APIs. Running arbitrary Python code inside a browser or on a multi-user web server poses major security and architectural incompatibilities. Features commonly added via add-ons (such as FSRS optimization, advanced stats, image occlusion, and dark mode) are already built directly into Cardly.
-
-### How is my data protected?
-Each user account has a completely isolated data directory with its own SQLite database (`collection.anki2`), media store, and backup snapshots. Web session authentication uses PBKDF2 key derivation and HttpOnly secure cookies. Crucially, untrusted user-submitted JavaScript from card templates is executed in sandboxed iframes without access to session credentials or sensitive backend APIs.
-
-### How do automatic backups work?
-Cardly creates full `.colpkg` snapshots of your collection before major sync operations and schema updates. Backups are saved to the persistent volume under `/data/users/<username>/backups/`. Cardly automatically maintains the latest 50 backups, pruning older snapshots to prevent disk exhaustion. You can download or restore backups at any time from **Preferences &rarr; Backups**.
+- [Parity Matrix (`docs/PARITY.md`)](./docs/PARITY.md) — Detailed verification status for every Anki feature.
+- [AI Generator Guide (`docs/AI_GENERATOR.md`)](./docs/AI_GENERATOR.md) — Setup instructions for Ollama, Gemini, and OpenAI.
+- [Production Deployment (`docs/DEPLOY.md`)](./docs/DEPLOY.md) — Caddy reverse proxy, TLS setup, and backup strategies.
+- [Roadmap (`docs/ROADMAP.md`)](./docs/ROADMAP.md) — Near-term priorities and experimental ideas.
+- [Contributing Guide (`CONTRIBUTING.md`)](./CONTRIBUTING.md) — Code style, pull request guidelines, and issue triage.
 
 ---
 
-## 🗺️ Roadmap & Community
-
-We are building Cardly in the open for students, language learners, and self-hosters worldwide:
-
-- **[Product Roadmap](./docs/ROADMAP.md)**: Explore planned features from v0.1.0 to v1.0.0 (in-browser audio recording, image occlusion editor, shared deck subscriptions, client-side WASM core).
-- **[Roadmap](./docs/ROADMAP.md)**: Near-term plans for v0.2.0 and future ideas under evaluation.
-- **[Contributing Guide](./CONTRIBUTING.md)**: Development setup, test guidelines, and issue triage.
-- **[Security Policy](./SECURITY.md)**: Confidential reporting of vulnerabilities.
-
----
-
-## 📜 License & Upstream Attribution
+## License & Attribution
 
 Cardly is licensed under the **GNU Affero General Public License, version 3 or later** ([GNU AGPL-3.0-or-later](./LICENSE)).
 
-Cardly is built upon the foundational work of the Anki open-source project:
+Cardly is built upon the Anki open-source project:
 - **Upstream Repository**: [https://github.com/ankitects/anki](https://github.com/ankitects/anki)
 - **Original Author & Maintainer**: Damien Elmes and the Anki contributors
 - **Upstream License**: GNU AGPL-3.0-or-later (with portions under BSD-3 and MIT licenses)
 
-For comprehensive attribution, third-party software notices, and contributor listings, please refer to the [NOTICE](./NOTICE) file.
+See the [NOTICE](./NOTICE) file for third-party software notices and contributor acknowledgments.

@@ -4,6 +4,14 @@
       <stop offset="0%" stop-color="#6366F1"/>
       <stop offset="100%" stop-color="#8B5CF6"/>
     </linearGradient>
+    <style>
+      .brand-text { fill: #0F172A; }
+      .brand-accent { fill: #6366F1; }
+      @media (prefers-color-scheme: dark) {
+        .brand-text { fill: #F8FAFC; }
+        .brand-accent { fill: #818CF8; }
+      }
+    </style>
   </defs>
 
   <!-- Left Emblem (52x52) -->
@@ -19,8 +27,8 @@
     </g>
   </g>
 
-  <!-- Clean Wordmark (No overlapping badges) -->
+  <!-- Clean Wordmark (Theme-aware) -->
   <text x="76" y="49" font-family="'DejaVu Sans', -apple-system, system-ui, sans-serif" font-size="40" font-weight="800" letter-spacing="-0.5px">
-    <tspan fill="#F8FAFC">Card</tspan><tspan fill="#818CF8">ly</tspan>
+    <tspan class="brand-text">Card</tspan><tspan class="brand-accent">ly</tspan>
   </text>
 </svg>
