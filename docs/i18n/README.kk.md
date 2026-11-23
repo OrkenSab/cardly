@@ -2,52 +2,39 @@
 
 > **Cardly** — ресми Anki Rust өзегіне (`rslib`) тікелей негізделген, заманауи FSRS v4/v5 интервалды қайталау алгоритмдерін, толыққанды 3 панельді карточкалар шолғышын, сенсорлық басқаруға бейімделген мобильді PWA нұсқасын және AnkiDroid пен AnkiMobile үшін кірістірілген синхрондау серверін қамтитын, браузерде жұмыс істейтін Anki Desktop веб-баламасы.
 
-[![Лицензия: AGPL v3](https://img.shields.io/badge/Лицензия-AGPL_v3-blue.svg)](./LICENSE)
+[![Лицензия: AGPL v3](https://img.shields.io/badge/Лицензия-AGPL_v3-blue.svg)](../../LICENSE)
 [![Anki Upstream](https://img.shields.io/badge/Anki_Upstream-ankitects%2Fanki-orange.svg)](https://github.com/ankitects/anki)
 [![Тесттер](https://img.shields.io/badge/Тесттер-Rust%20%26%20Playwright%20Сәтті-brightgreen.svg)]()
 
-[English](README.md) | [Русский](README.ru.md) | [Қазақша](README.kk.md)
+[English](../../README.md) | [Русский](README.ru.md) | **Қазақша**
+
+> [!NOTE]
+> **Құқықтық ескерту**: Cardly — дербес ашық бастапқы жоба. Ол **Ankitects Pty Ltd компаниясымен немесе Дэмиен Элмспен ресми байланысты емес, олар тарапынан қаржыландырылмайды және қолдау таппаған**. «Anki» сауда белгісі оның заңды иесіне тиесілі. Cardly ресми Anki өзегін (`rslib`) GNU AGPL-3.0 лицензиясының талаптарына сәйкес пайдаланады.
 
 ---
 
 ## 🎬 Интерактивті бейнедемонстрация (Demo)
 
 <p align="center">
-  <img src="./docs/demo/cardly-demo.gif" alt="Cardly Showcase Demo" width="800" />
+  <img src="../../landing/assets/cardly-demo.gif" alt="Cardly Showcase Demo" width="800" />
   <br />
   <em>Жұмыс үрдісіне шолу: Жүйеге кіру &rarr; Форматталған және Cloze карточкаларын қосу &rarr; Қайталау &rarr; 3-панельді шолғыш &rarr; Статистика</em>
   <br />
-  <a href="./docs/demo/cardly-demo.mp4">▶ HD сапада жүктеп алу (MP4, 320 КБ)</a>
+  <a href="../../landing/assets/cardly-demo.mp4">▶ HD сапада жүктеп алу (MP4, 320 КБ)</a>
 </p>
 
 ---
 
 ## 📸 Интерфейс галереясы (Screenshots)
 
-Cardly жүйесінің барлық терезелері ресми Anki Desktop нұсқасымен ашық және күңгірт реңктерде, сондай-ақ мобильді құрылғыларда толық визуалды және функционалды сәйкестік бойынша тексерілген:
+Cardly жүйесінің барлық терезелері ресми Anki Desktop нұсқасымен ашық және күңгірт реңктерде сәйкестігі тексерілген:
 
-### Компьютерлік интерфейс (Desktop)
-| Терезе атауы | Ашық реңк (Light) | Күңгірт реңк (Dark) |
+| Терезе атауы | Алдын ала қарау (Ашық реңк) | Алдын ала қарау (Күңгірт / Мобильді) |
 | :--- | :--- | :--- |
-| **Колодалар тізімі (Негізгі терезе)** | [01-deck-list-light.png](./docs/screenshots/01-deck-list-light.png) | [11-deck-list-dark.png](./docs/screenshots/11-deck-list-dark.png) |
-| **Колодаға шолу (Deck Overview)** | [02-deck-overview-light.png](./docs/screenshots/02-deck-overview-light.png) | — |
-| **Қайталау: Сұрақ (Question)** | [03-reviewer-question-light.png](./docs/screenshots/03-reviewer-question-light.png) | — |
-| **Қайталау: Жауап және бағалау батырмалары** | [04-reviewer-answer-light.png](./docs/screenshots/04-reviewer-answer-light.png) | [13-reviewer-dark.png](./docs/screenshots/13-reviewer-dark.png) |
-| **Карточкаларды қосу (Add Cards)** | [05-add-cards-light.png](./docs/screenshots/05-add-cards-light.png) | — |
-| **Карточкалар шолғышы (3-панельді браузер)** | [06-browser-light.png](./docs/screenshots/06-browser-light.png) | [12-browser-dark.png](./docs/screenshots/12-browser-dark.png) |
-| **Статистика және диаграммалар (Graphs)** | [07-stats-light.png](./docs/screenshots/07-stats-light.png) | — |
-| **Колода баптаулары және FSRS параметрлері**| [08-deck-options-fsrs-light.png](./docs/screenshots/08-deck-options-fsrs-light.png) | — |
-| **Карточка үлгілерінің редакторы (Templates)**| [09-card-templates-light.png](./docs/screenshots/09-card-templates-light.png) | — |
-| **Баптаулар терезесі (Preferences)** | [10-preferences-light.png](./docs/screenshots/10-preferences-light.png) | — |
-
-### Мобильді нұсқа және PWA (Смартфон 390×844)
-| Мобильді терезе | Скриншот сілтемесі |
-| :--- | :--- |
-| **Мобильді колодалар тізімі** | [14-mobile-deck-list-light.png](./docs/screenshots/14-mobile-deck-list-light.png) |
-| **Мобильді колодаға шолу** | [15-mobile-deck-overview-light.png](./docs/screenshots/15-mobile-deck-overview-light.png) |
-| **Мобильді қайталау: Сұрақ** | [16-mobile-reviewer-question-light.png](./docs/screenshots/16-mobile-reviewer-question-light.png) |
-| **Мобильді қайталау: Жауап (ыңғайлы 44px батырмалар)** | [17-mobile-reviewer-answer-light.png](./docs/screenshots/17-mobile-reviewer-answer-light.png) |
-| **Мобильді қайталау: Күңгірт реңк** | [18-mobile-reviewer-dark.png](./docs/screenshots/18-mobile-reviewer-dark.png) |
+| **Колодалар тізімі** | [01-deck-list-light.png](../screenshots/01-deck-list-light.png) | [14-mobile-deck-list-light.png](../screenshots/14-mobile-deck-list-light.png) *(Смартфон)* |
+| **Қайталау (Reviewer)** | [04-reviewer-answer-light.png](../screenshots/04-reviewer-answer-light.png) | [13-reviewer-dark.png](../screenshots/13-reviewer-dark.png) *(Күңгірт реңк)* |
+| **Карточкалар шолғышы** | [06-browser-light.png](../screenshots/06-browser-light.png) | — |
+| **Статистика** | [07-stats-light.png](../screenshots/07-stats-light.png) | — |
 | **Мобильді карточкалар шолғышы (бүйір панель)** | [19-mobile-browser-light.png](./docs/screenshots/19-mobile-browser-light.png) |
 
 ---

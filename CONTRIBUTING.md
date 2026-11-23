@@ -48,7 +48,7 @@ Cardly consists of three primary components:
 
 1. Clone the repository with submodules:
    ```bash
-   git clone --recurse-submodules https://github.com/ankitects/anki.git cardly
+   git clone --recurse-submodules https://github.com/cardly-app/cardly.git
    cd cardly
    ```
 
@@ -135,3 +135,11 @@ By submitting a pull request or patch to Cardly, you agree that your contributio
 4. Commit your changes with clear, descriptive commit messages.
 5. Push your branch to GitHub and open a Pull Request against `main`.
 6. Maintainers will review your PR and provide constructive feedback.
+
+---
+
+## Issues & Triage
+
+- **Bug Reports**: Please include your environment details (OS, Docker version, browser), exact reproduction steps, and relevant server logs.
+- **Feature Requests**: Check [docs/ROADMAP.md](./docs/ROADMAP.md) first to see if your idea is already planned.
+- **Labels**: We tag issues with `good first issue` for newcomers, `upstream-blocked` when waiting on Anki core changes, and standard component tags (`area:reviewer`, `area:browser`, `area:sync`, `area:ai`).

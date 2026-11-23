@@ -3,7 +3,7 @@
 services:
   cardly:
     build:
-      context: .
+      context: ..
       dockerfile: Dockerfile
     image: cardly:latest
     container_name: cardly-app

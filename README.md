@@ -6,49 +6,35 @@
 [![Anki Upstream](https://img.shields.io/badge/Anki_Upstream-ankitects%2Fanki-orange.svg)](https://github.com/ankitects/anki)
 [![Tests](https://img.shields.io/badge/Tests-Rust%20%26%20Playwright%20Passing-brightgreen.svg)]()
 
-[English](README.md) | [Русский](README.ru.md) | [Қазақша](README.kk.md)
+**English** | [Русский](docs/i18n/README.ru.md) | [Қазақша](docs/i18n/README.kk.md)
+
+> [!NOTE]
+> **Disclaimer**: Cardly is an independent open-source project and is **not affiliated with, endorsed by, or sponsored by Ankitects Pty Ltd or Damien Elmes**. "Anki" is a trademark of its respective owner. Cardly incorporates upstream open-source code from Anki's official backend core (`rslib`) under the terms of the GNU AGPL-3.0 license.
 
 ---
 
 ## 🎬 Live Interactive Demo
 
 <p align="center">
-  <img src="./docs/demo/cardly-demo.gif" alt="Cardly Showcase Demo" width="800" />
+  <img src="./landing/assets/cardly-demo.gif" alt="Cardly Showcase Demo" width="800" />
   <br />
   <em>Complete workflow showcase: Login &rarr; Rich Text / Cloze Card Creation &rarr; Reviewer &rarr; 3-Pane Browser &rarr; Statistics</em>
   <br />
-  <a href="./docs/demo/cardly-demo.mp4">▶ Download HD Video (MP4, 320 KB)</a>
+  <a href="./landing/assets/cardly-demo.mp4">▶ Download HD Video (MP4, 320 KB)</a>
 </p>
 
 ---
 
 ## 📸 Interface Gallery
 
-Every screen in Cardly has been verified for visual and functional fidelity against official Anki Desktop across light and dark themes, as well as on mobile viewports:
+Every screen in Cardly has been verified for visual and functional fidelity against official Anki Desktop across light and dark themes:
 
-### Desktop Interface
-| Screen | Light Mode | Dark Mode |
+| Screen | Preview (Light) | Preview (Dark / Mobile) |
 | :--- | :--- | :--- |
-| **Deck List (Main Screen)** | [01-deck-list-light.png](./docs/screenshots/01-deck-list-light.png) | [11-deck-list-dark.png](./docs/screenshots/11-deck-list-dark.png) |
-| **Deck Overview** | [02-deck-overview-light.png](./docs/screenshots/02-deck-overview-light.png) | — |
-| **Reviewer: Question** | [03-reviewer-question-light.png](./docs/screenshots/03-reviewer-question-light.png) | — |
-| **Reviewer: Answer & Rating Buttons** | [04-reviewer-answer-light.png](./docs/screenshots/04-reviewer-answer-light.png) | [13-reviewer-dark.png](./docs/screenshots/13-reviewer-dark.png) |
-| **Add Cards Dialog** | [05-add-cards-light.png](./docs/screenshots/05-add-cards-light.png) | — |
-| **Card Browser (3-Pane Resizable)** | [06-browser-light.png](./docs/screenshots/06-browser-light.png) | [12-browser-dark.png](./docs/screenshots/12-browser-dark.png) |
-| **Statistics & Visual Graphs** | [07-stats-light.png](./docs/screenshots/07-stats-light.png) | — |
-| **Deck Options & FSRS Parameters** | [08-deck-options-fsrs-light.png](./docs/screenshots/08-deck-options-fsrs-light.png) | — |
-| **Card Templates Split Editor** | [09-card-templates-light.png](./docs/screenshots/09-card-templates-light.png) | — |
-| **Preferences Modal** | [10-preferences-light.png](./docs/screenshots/10-preferences-light.png) | — |
-
-### Mobile & Progressive Web App (PWA 390×844)
-| Mobile Screen | Screenshot Link |
-| :--- | :--- |
-| **Mobile Deck Tree** | [14-mobile-deck-list-light.png](./docs/screenshots/14-mobile-deck-list-light.png) |
-| **Mobile Deck Overview** | [15-mobile-deck-overview-light.png](./docs/screenshots/15-mobile-deck-overview-light.png) |
-| **Mobile Reviewer: Question State** | [16-mobile-reviewer-question-light.png](./docs/screenshots/16-mobile-reviewer-question-light.png) |
-| **Mobile Reviewer: Answer State (44px touch buttons)** | [17-mobile-reviewer-answer-light.png](./docs/screenshots/17-mobile-reviewer-answer-light.png) |
-| **Mobile Reviewer: Dark Theme** | [18-mobile-reviewer-dark.png](./docs/screenshots/18-mobile-reviewer-dark.png) |
-| **Mobile Card Browser (Sidebar Drawer)** | [19-mobile-browser-light.png](./docs/screenshots/19-mobile-browser-light.png) |
+| **Deck List** | [01-deck-list-light.png](./docs/screenshots/01-deck-list-light.png) | [14-mobile-deck-list-light.png](./docs/screenshots/14-mobile-deck-list-light.png) *(Mobile)* |
+| **Reviewer** | [04-reviewer-answer-light.png](./docs/screenshots/04-reviewer-answer-light.png) | [13-reviewer-dark.png](./docs/screenshots/13-reviewer-dark.png) *(Dark Mode)* |
+| **Card Browser** | [06-browser-light.png](./docs/screenshots/06-browser-light.png) | — |
+| **Statistics** | [07-stats-light.png](./docs/screenshots/07-stats-light.png) | — |
 
 ---
 
@@ -255,9 +241,8 @@ Cardly creates full `.colpkg` snapshots of your collection before major sync ope
 We are building Cardly in the open for students, language learners, and self-hosters worldwide:
 
 - **[Product Roadmap](./docs/ROADMAP.md)**: Explore planned features from v0.1.0 to v1.0.0 (in-browser audio recording, image occlusion editor, shared deck subscriptions, client-side WASM core).
-- **[GitHub Discussions](https://github.com/cardly-app/cardly/discussions)**: Propose features, share custom card CSS themes, and get self-hosting help (see [Discussions Setup Guide](./docs/DISCUSSIONS.md)).
-- **[Issue Triage Guide](./docs/TRIAGE.md)**: How issues are prioritized and triaged in under 2 minutes.
-- **[Contributing Guide](./CONTRIBUTING.md)**: How to set up a development environment, run tests, and submit PRs.
+- **[Roadmap](./docs/ROADMAP.md)**: Near-term plans for v0.2.0 and future ideas under evaluation.
+- **[Contributing Guide](./CONTRIBUTING.md)**: Development setup, test guidelines, and issue triage.
 - **[Security Policy](./SECURITY.md)**: Confidential reporting of vulnerabilities.
 
 ---

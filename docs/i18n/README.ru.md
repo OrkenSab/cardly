@@ -2,53 +2,39 @@
 
 > **Cardly** — функциональный веб-клиент для работы с колодами Anki, работающий прямо в браузере на базе официального ядра Anki на Rust (`rslib`), с поддержкой современных алгоритмов интервального повторения FSRS v4/v5, полноценным 3-панельным браузером карточек, мобильным режимом PWA с оптимизацией под сенсорный ввод и встроенным сервером синхронизации для AnkiDroid и AnkiMobile.
 
-[![Лицензия: AGPL v3](https://img.shields.io/badge/Лицензия-AGPL_v3-blue.svg)](./LICENSE)
+[![Лицензия: AGPL v3](https://img.shields.io/badge/Лицензия-AGPL_v3-blue.svg)](../../LICENSE)
 [![Anki Upstream](https://img.shields.io/badge/Anki_Upstream-ankitects%2Fanki-orange.svg)](https://github.com/ankitects/anki)
 [![Тесты](https://img.shields.io/badge/Тесты-Rust%20%26%20Playwright%20Passing-brightgreen.svg)]()
 
-[English](README.md) | [Русский](README.ru.md) | [Қазақша](README.kk.md)
+[English](../../README.md) | **Русский** | [Қазақша](README.kk.md)
+
+> [!NOTE]
+> **Правовая оговорка**: Cardly — независимый проект с открытым исходным кодом. Он **не аффилирован, не спонсируется и не поддерживается компанией Ankitects Pty Ltd или Дэмиеном Элмсом**. «Anki» является зарегистрированным товарным знаком законного правообладателя. Cardly использует официальное ядро Anki (`rslib`) на условиях лицензии GNU AGPL-3.0.
 
 ---
 
 ## 🎬 Интерактивная видеодемонстрация (Demo)
 
 <p align="center">
-  <img src="./docs/demo/cardly-demo.gif" alt="Cardly Showcase Demo" width="800" />
+  <img src="../../landing/assets/cardly-demo.gif" alt="Cardly Showcase Demo" width="800" />
   <br />
   <em>Демонстрация сценариев работы: Вход &rarr; Создание карточки с форматированием и Cloze &rarr; Ревьюер &rarr; 3-панельный браузер &rarr; Статистика</em>
   <br />
-  <a href="./docs/demo/cardly-demo.mp4">▶ Скачать HD-видео (MP4, 320 КБ)</a>
+  <a href="../../landing/assets/cardly-demo.mp4">▶ Скачать HD-видео (MP4, 320 КБ)</a>
 </p>
 
 ---
 
 ## 📸 Галерея интерфейса (Screenshots)
 
-Каждый экран Cardly прошел строгое визуальное и функциональное тестирование на соответствие официальному Anki Desktop как в светлой, так и в темной теме, а также на мобильных экранах смартфонов:
+Каждый экран Cardly проверен на визуальное и функциональное соответствие официальному Anki Desktop в светлой и темной темах:
 
-### Десктопный интерфейс
-| Экран | Светлая тема | Темная тема |
+| Экран | Превью (Светлая тема) | Превью (Тёмная тема / Мобильная) |
 | :--- | :--- | :--- |
-| **Список колод (Главный экран)** | [01-deck-list-light.png](./docs/screenshots/01-deck-list-light.png) | [11-deck-list-dark.png](./docs/screenshots/11-deck-list-dark.png) |
-| **Обзор колоды (Deck Overview)** | [02-deck-overview-light.png](./docs/screenshots/02-deck-overview-light.png) | — |
-| **Ревьюер: Вопрос (Question)** | [03-reviewer-question-light.png](./docs/screenshots/03-reviewer-question-light.png) | — |
-| **Ревьюер: Ответ и кнопки оценки** | [04-reviewer-answer-light.png](./docs/screenshots/04-reviewer-answer-light.png) | [13-reviewer-dark.png](./docs/screenshots/13-reviewer-dark.png) |
-| **Добавление карточек (Add Cards)** | [05-add-cards-light.png](./docs/screenshots/05-add-cards-light.png) | — |
-| **Браузер карточек (3-панельный)** | [06-browser-light.png](./docs/screenshots/06-browser-light.png) | [12-browser-dark.png](./docs/screenshots/12-browser-dark.png) |
-| **Статистика и графики (Graphs)** | [07-stats-light.png](./docs/screenshots/07-stats-light.png) | — |
-| **Опции колоды и параметры FSRS** | [08-deck-options-fsrs-light.png](./docs/screenshots/08-deck-options-fsrs-light.png) | — |
-| **Редактор шаблонов карточек** | [09-card-templates-light.png](./docs/screenshots/09-card-templates-light.png) | — |
-| **Окно настроек (Preferences)** | [10-preferences-light.png](./docs/screenshots/10-preferences-light.png) | — |
-
-### Мобильный режим и PWA (Смартфоны 390×844)
-| Мобильный экран | Ссылка на скриншот |
-| :--- | :--- |
-| **Мобильное дерево колод** | [14-mobile-deck-list-light.png](./docs/screenshots/14-mobile-deck-list-light.png) |
-| **Мобильный обзор колоды** | [15-mobile-deck-overview-light.png](./docs/screenshots/15-mobile-deck-overview-light.png) |
-| **Мобильный ревьюер: Вопрос** | [16-mobile-reviewer-question-light.png](./docs/screenshots/16-mobile-reviewer-question-light.png) |
-| **Мобильный ревьюер: Ответ (крупные тач-кнопки 44px)** | [17-mobile-reviewer-answer-light.png](./docs/screenshots/17-mobile-reviewer-answer-light.png) |
-| **Мобильный ревьюер: Темная тема** | [18-mobile-reviewer-dark.png](./docs/screenshots/18-mobile-reviewer-dark.png) |
-| **Мобильный браузер карточек (выдвижная панель)** | [19-mobile-browser-light.png](./docs/screenshots/19-mobile-browser-light.png) |
+| **Список колод** | [01-deck-list-light.png](../screenshots/01-deck-list-light.png) | [14-mobile-deck-list-light.png](../screenshots/14-mobile-deck-list-light.png) *(Смартфон)* |
+| **Ревьюер** | [04-reviewer-answer-light.png](../screenshots/04-reviewer-answer-light.png) | [13-reviewer-dark.png](../screenshots/13-reviewer-dark.png) *(Тёмная тема)* |
+| **Браузер карточек** | [06-browser-light.png](../screenshots/06-browser-light.png) | — |
+| **Статистика** | [07-stats-light.png](../screenshots/07-stats-light.png) | — |
 
 ---
 

@@ -1,12 +1,19 @@
 # Environment & local secrets
 .env
+.env.*
+!.env.example
 .env.local
 
 # User data & runtime artifacts
 data/
+collection.media/
 *.anki2
 *.anki2-wal
 *.anki2-shm
+*.apkg
+*.colpkg
+*.log
+*.pem
 
 # Rust build outputs
 target/
@@ -16,6 +23,7 @@ server/target/
 node_modules/
 web/node_modules/
 web/.npm-cache/
+.npm-cache/
 web/dist/
 web/.svelte-kit/
 

@@ -46,7 +46,7 @@ sh get-docker.sh
 
 ### Step 3: Clone Repository
 ```bash
-git clone https://github.com/ankitects/anki.git /opt/cardly   # or your Cardly repo clone
+git clone --recurse-submodules https://github.com/cardly-app/cardly.git /opt/cardly
 cd /opt/cardly
 ```
 
@@ -76,9 +76,9 @@ RUST_LOG=cardly_server=info,anki=info
 ```
 
 ### Step 5: Start Services with Automated HTTPS
-Launch Cardly and Caddy using `docker-compose.prod.yml`:
+Launch Cardly and Caddy using `deploy/docker-compose.prod.yml`:
 ```bash
-docker compose -f docker-compose.prod.yml up -d
+docker compose -f deploy/docker-compose.prod.yml up -d
 ```
 Caddy will automatically:
 - Request and install a TLS certificate from Let's Encrypt or ZeroSSL.
@@ -109,8 +109,8 @@ After=docker.service
 Type=oneshot
 RemainAfterExit=yes
 WorkingDirectory=/opt/cardly
-ExecStart=/usr/bin/docker compose -f docker-compose.prod.yml up -d
-ExecStop=/usr/bin/docker compose -f docker-compose.prod.yml down
+ExecStart=/usr/bin/docker compose -f deploy/docker-compose.prod.yml up -d
+ExecStop=/usr/bin/docker compose -f deploy/docker-compose.prod.yml down
 TimeoutStartSec=0
 
 [Install]
@@ -154,9 +154,9 @@ fly secrets set \
 ```
 
 ### Step 5: Deploy
-Deploy using the included [`fly.toml`](../fly.toml):
+Deploy using the configuration in [`deploy/fly.toml`](../deploy/fly.toml):
 ```bash
-fly deploy
+fly deploy --config deploy/fly.toml
 ```
 
 ### Step 6: Custom Domain & Free SSL

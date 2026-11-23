@@ -3,7 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "test": "playwright test"
+    "test": "playwright test",
+    "record:demo": "playwright test tools/record-demo.spec.ts",
+    "record:gallery": "playwright test tools/mobile-gallery.spec.ts"
   },
   "devDependencies": {
     "@playwright/test": "^1.51.1"

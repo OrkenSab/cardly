@@ -31,7 +31,6 @@ All production vector and raster brand assets are located in `web/public/` and `
 | `web/public/icon-maskable-192.png` | PNG (192×192) | PWA adaptive maskable icon |
 | `web/public/icon-maskable-512.png` | PNG (512×512) | PWA high-res adaptive maskable icon |
 | `docs/brand/social-preview.svg` | Vector (1280×640) | Source vector for social media cards and OpenGraph images |
-| `docs/brand/social-preview.png` | PNG (1280×640, 185 KB) | GitHub repository OpenGraph / Twitter Card preview banner |
 | `web/public/social-preview.png` | PNG (1280×640) | Served directly via web server for social meta tags |
 
 ---
@@ -118,7 +117,7 @@ font-family: ui-monospace, "SFMono-Regular", Consolas, "Liberation Mono", Menlo,
 - Use `web/public/cardly-icon.svg` as the primary square emblem.
 - Ensure clear margin space around the emblem equal to at least 25% of the emblem's height.
 - Use `web/public/icon-maskable.svg` for any Android or adaptive app icon requirements.
-- Use the dark background version (`docs/brand/social-preview.png`) for social media, marketing cards, and repository headers.
+- Use the dark background version (`web/public/social-preview.png`) for social media, marketing cards, and repository headers.
 
 ### Don't:
 - Do not stretch, warp, or alter the aspect ratio of the flashcard geometry.
