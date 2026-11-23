@@ -13,7 +13,7 @@
     "noEmit": true,
     "skipLibCheck": true,
     "paths": {
-      "@generated/*": ["../anki-upstream/out/ts/lib/generated/*"]
+      "@generated/*": ["./generated/*", "../anki-upstream/out/ts/lib/generated/*"]
     }
   },
   "include": ["src/**/*.ts", "src/**/*.svelte"]

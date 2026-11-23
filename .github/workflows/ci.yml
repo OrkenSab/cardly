@@ -57,16 +57,35 @@ jobs:
         with:
           workspaces: "server -> target"
 
-      - name: Build upstream proto descriptors & web assets
-        run: |
-          cd anki-upstream
-          export PROTOC_BINARY=/usr/bin/protoc
-          ./ninja ts:sveltekit qt:aqt:data:web
-
       - name: Run Rust server tests
         run: |
           cd server
           cargo test --verbose
+
+      - name: Build server binary for E2E
+        run: |
+          cd server
+          cargo build
+
+      - name: Build upstream web assets
+        run: |
+          cd anki-upstream
+          export PROTOC_BINARY=/usr/bin/protoc
+          ./ninja qt:aqt:data:web
+
+      - name: Upload server binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: cardly-server-bin
+          path: server/target/debug/cardly-server
+          retention-days: 1
+
+      - name: Upload upstream web assets
+        uses: actions/upload-artifact@v4
+        with:
+          name: upstream-web-dist
+          path: anki-upstream/out/qt/_aqt/data/web
+          retention-days: 1
 
   svelte-check-build:
     name: Svelte 5 Type Check & Build
@@ -74,16 +93,6 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-        with:
-          submodules: recursive
-
-      - name: Install system dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y --no-install-recommends \
-            ca-certificates \
-            ninja-build \
-            protobuf-compiler
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
@@ -91,12 +100,6 @@ jobs:
           node-version: 22
           cache: "npm"
           cache-dependency-path: "web/package-lock.json"
-
-      - name: Generate upstream TypeScript protobuf bindings
-        run: |
-          cd anki-upstream
-          export PROTOC_BINARY=/usr/bin/protoc
-          ./ninja ts:sveltekit
 
       - name: Install web dependencies
         run: |
@@ -127,46 +130,27 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
+      - name: Download server binary
+        uses: actions/download-artifact@v4
         with:
-          submodules: recursive
+          name: cardly-server-bin
+          path: server/target/debug
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+      - name: Make server binary executable
+        run: chmod +x server/target/debug/cardly-server
 
-      - name: Build Cardly Docker image
-        uses: docker/build-push-action@v6
+      - name: Download upstream web assets
+        uses: actions/download-artifact@v4
         with:
-          context: .
-          load: true
-          tags: cardly:ci
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          name: upstream-web-dist
+          path: anki-upstream/out/qt/_aqt/data/web
 
-      - name: Start Cardly container
-        run: |
-          docker run -d --name cardly-ci \
-            -p 8091:8080 \
-            -e CARDLY_USER1="alice:secret123" \
-            -e SYNC_USER1="alice:secret123" \
-            -e CARDLY_HOST="0.0.0.0" \
-            -e CARDLY_PORT="8080" \
-            -e RUST_LOG="cardly_server=info,anki=info" \
-            cardly:ci
-
-      - name: Wait for Cardly server healthcheck
-        run: |
-          echo "Waiting for Cardly server on http://127.0.0.1:8091/healthz..."
-          for i in $(seq 1 45); do
-            if curl -s -f http://127.0.0.1:8091/healthz > /dev/null 2>&1; then
-              echo "Cardly server is healthy! (attempt $i)"
-              exit 0
-            fi
-            echo "Waiting for server to become ready ($i/45)..."
-            sleep 2
-          done
-          echo "Cardly server healthcheck timed out! Container logs:"
-          docker logs cardly-ci
-          exit 1
+      - name: Download web shell dist artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: web-dist
+          path: web/dist
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
@@ -181,6 +165,32 @@ jobs:
           npm ci
           npx playwright install --with-deps chromium
 
+      - name: Start Cardly server
+        run: |
+          mkdir -p /tmp/cardly_e2e_data
+          CARDLY_PORT=8091 \
+          CARDLY_USER1="alice:secret123" \
+          PASSWORDS_HASHED=0 \
+          CARDLY_DATA_DIR="/tmp/cardly_e2e_data" \
+          CARDLY_SHELL_DIR="web/dist" \
+          CARDLY_UPSTREAM_WEB_DIR="anki-upstream/out/qt/_aqt/data/web" \
+          server/target/debug/cardly-server &
+          echo $! > /tmp/cardly_server.pid
+
+      - name: Wait for Cardly server healthcheck
+        run: |
+          echo "Waiting for Cardly server on http://127.0.0.1:8091/healthz..."
+          for i in $(seq 1 45); do
+            if curl -s -f http://127.0.0.1:8091/healthz > /dev/null 2>&1; then
+              echo "Cardly server is healthy! (attempt $i)"
+              exit 0
+            fi
+            echo "Waiting for server to become ready ($i/45)..."
+            sleep 1
+          done
+          echo "Cardly server healthcheck timed out!"
+          exit 1
+
       - name: Run Playwright E2E tests
         env:
           CARDLY_BASE_URL: "http://127.0.0.1:8091"
@@ -190,7 +200,14 @@ jobs:
           cd e2e
           npx playwright test
 
-      - name: Upload Playwright report and screenshots
+      - name: Stop Cardly server
+        if: always()
+        run: |
+          if [ -f /tmp/cardly_server.pid ]; then
+            kill $(cat /tmp/cardly_server.pid) 2>/dev/null || true
+          fi
+
+      - name: Upload Playwright report
         if: always()
         uses: actions/upload-artifact@v4
         with:
@@ -199,7 +216,3 @@ jobs:
             e2e/playwright-report/
             e2e/test-results/
           retention-days: 14
-
-      - name: Dump container logs on failure
-        if: failure()
-        run: docker logs cardly-ci

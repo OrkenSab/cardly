@@ -8,7 +8,14 @@ use std::path::PathBuf;
 fn main() {
     let descriptors = env::var("DESCRIPTORS_BIN")
         .map(PathBuf::from)
-        .unwrap_or_else(|_| PathBuf::from("../anki-upstream/out/rslib/proto/descriptors.bin"));
+        .unwrap_or_else(|_| {
+            let upstream = PathBuf::from("../anki-upstream/out/rslib/proto/descriptors.bin");
+            if upstream.exists() {
+                upstream
+            } else {
+                PathBuf::from("descriptors.bin")
+            }
+        });
 
     println!("cargo:rerun-if-env-changed=DESCRIPTORS_BIN");
     println!("cargo:rerun-if-changed={}", descriptors.display());

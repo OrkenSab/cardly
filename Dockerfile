@@ -30,7 +30,7 @@ COPY anki-upstream ./anki-upstream
 # Build upstream proto descriptors, FTL strings, and SvelteKit + reviewer web bundle
 WORKDIR /build/anki-upstream
 ENV PROTOC_BINARY=/usr/bin/protoc
-RUN ./ninja ts:sveltekit qt:aqt:data:web
+RUN ./ninja sveltekit qt:aqt:data:web rslib
 
 # Copy Cardly Rust server crate and build release binary
 WORKDIR /build

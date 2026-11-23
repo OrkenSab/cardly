@@ -1,8 +1,12 @@
 import { svelte } from "@sveltejs/vite-plugin-svelte";
+import { existsSync } from "fs";
 import { resolve } from "path";
 import { defineConfig } from "vite";
 
-const upstreamGenerated = resolve(__dirname, "../anki-upstream/out/ts/lib/generated");
+const localGenerated = resolve(__dirname, "generated");
+const upstreamGenerated = existsSync(localGenerated)
+  ? localGenerated
+  : resolve(__dirname, "../anki-upstream/out/ts/lib/generated");
 
 export default defineConfig({
   plugins: [svelte()],
