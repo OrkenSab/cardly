@@ -24,7 +24,8 @@
   let ready = $state(false);
   let lastLoadedKey = "";
 
-  const src = $derived(`/editor/?mode=${mode}`);
+  const baseSrc = $derived(`/editor/?mode=${mode}`);
+  const src = $derived(store.isDark ? `${baseSrc}#night` : baseSrc);
 
   function syncTheme() {
     if (!iframeEl) return;
@@ -34,9 +35,14 @@
       const dark = store.isDark;
       doc.documentElement.classList.toggle("night-mode", dark);
       doc.documentElement.classList.toggle("nightMode", dark);
+      doc.documentElement.dataset.bsTheme = dark ? "dark" : "light";
+      doc.documentElement.setAttribute("data-bs-theme", dark ? "dark" : "light");
+      doc.documentElement.style.colorScheme = dark ? "dark" : "light";
       if (doc.body) {
         doc.body.classList.toggle("night-mode", dark);
         doc.body.classList.toggle("nightMode", dark);
+        doc.body.style.backgroundColor = dark ? "var(--canvas, #2c2c2c)" : "var(--canvas, #f5f5f5)";
+        doc.body.style.color = dark ? "var(--fg, #fcfcfc)" : "var(--fg, #020202)";
       }
     } catch {
       // ignore

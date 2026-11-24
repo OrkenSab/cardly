@@ -42,8 +42,9 @@ export function buildCardPreviewDoc(opts: {
   const mathjax = opts.includeMathJax
     ? `<script>window.MathJax={tex:{inlineMath:[['\\\\(','\\\\)']],displayMath:[['\\\\[','\\\\]']]},svg:{fontCache:'none'}};</script><script defer src="/_anki/js/vendor/mathjax/tex-chtml-full.js"></script>`
     : "";
+  const bsTheme = opts.isDark ? "dark" : "light";
   return `<!doctype html>
-<html class="${darkClass}">
+<html class="${darkClass}" data-bs-theme="${bsTheme}" style="color-scheme: ${bsTheme}">
 <head>
 <meta charset="utf-8">
 <base href="${window.location.origin}/">

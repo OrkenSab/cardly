@@ -325,6 +325,9 @@ class CardlyStore {
     const root = document.documentElement;
     root.classList.toggle("night-mode", dark);
     root.classList.toggle("nightMode", dark);
+    root.dataset.bsTheme = dark ? "dark" : "light";
+    root.setAttribute("data-bs-theme", dark ? "dark" : "light");
+    root.style.colorScheme = dark ? "dark" : "light";
     document.body.classList.toggle("night-mode", dark);
     document.body.classList.toggle("nightMode", dark);
     document.body.classList.toggle("minimalist", this.minimalistMode);
@@ -336,9 +339,14 @@ class CardlyStore {
         if (!doc) continue;
         doc.documentElement.classList.toggle("night-mode", dark);
         doc.documentElement.classList.toggle("nightMode", dark);
+        doc.documentElement.dataset.bsTheme = dark ? "dark" : "light";
+        doc.documentElement.setAttribute("data-bs-theme", dark ? "dark" : "light");
+        doc.documentElement.style.colorScheme = dark ? "dark" : "light";
         if (doc.body) {
           doc.body.classList.toggle("night-mode", dark);
           doc.body.classList.toggle("nightMode", dark);
+          doc.body.style.backgroundColor = dark ? "var(--canvas, #2c2c2c)" : "var(--canvas, #f5f5f5)";
+          doc.body.style.color = dark ? "var(--fg, #fcfcfc)" : "var(--fg, #020202)";
         }
       } catch {
         // cross-origin or not ready
