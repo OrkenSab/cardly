@@ -3,6 +3,18 @@
  * Theme toggle, Copy button, Multilingual i18n (EN, RU, KK), FAQ Accordion
  */
 
+// ============================================================================
+// Global Configuration (Single Source of Truth for URLs)
+// ============================================================================
+const CONFIG = {
+  // Public live demo URL (HTTPS required for PWA installation on mobile)
+  DEMO_URL: "https://my-cardly.duckdns.org",
+  // Official open-source repository
+  REPO_URL: "https://github.com/OrkenSab/cardly",
+  // Frequency of demo data purge & sample re-seeding
+  RESET_INTERVAL_HOURS: 2,
+};
+
 const translations = {
   en: {
     nav_features: "Features",
@@ -16,7 +28,13 @@ const translations = {
     hero_title: "The Open-Source Spaced Repetition App <br /><span class=\"gradient-text\">for Web &amp; Mobile</span>",
     hero_subtitle: "A faithful, self-hosted web app for Anki collections powered directly by Anki's official Rust core (rslib). Zero algorithmic rewrites, modern FSRS retention optimization, installable PWA, and direct sync with AnkiDroid & AnkiMobile.",
     cta_demo: "Try Live Demo",
+    cta_github: "View on GitHub",
     cta_quickstart: "Quickstart via Docker",
+    demo_reset_note: "Public Demo: data resets every 2 hours • No registration required",
+    demo_offline_title: "Live Demo Server Cycling",
+    demo_offline_desc: "The demo server is currently executing its scheduled reset or temporarily offline. You can preview all features in the workflow video below or run Cardly locally via Docker in 10 seconds.",
+    cta_watch_video: "Watch Video Preview",
+    cta_quickstart_link: "Docker Quickstart",
     snippet_label: "One-Command Quickstart",
     copy_btn: "Copy",
     copied_toast: "Copied 'docker compose up -d' to clipboard!",
@@ -102,7 +120,13 @@ const translations = {
     hero_title: "Веб-приложение интервального повторения <br /><span class=\"gradient-text\">для компьютеров и смартфонов</span>",
     hero_subtitle: "Функциональный веб-клиент для колод Anki на базе официального ядра Anki на Rust (rslib). Без эмуляции алгоритмов, с поддержкой FSRS, автономным PWA и прямой синхронизацией с AnkiDroid и AnkiMobile.",
     cta_demo: "Открыть демо-версию",
+    cta_github: "Код на GitHub",
     cta_quickstart: "Запуск через Docker",
+    demo_reset_note: "Публичное демо: сброс данных каждые 2 часа • Без регистрации",
+    demo_offline_title: "Демо-сервер перезапускается",
+    demo_offline_desc: "Демо-сервер сейчас выполняет плановый сброс данных или временно недоступен. Вы можете посмотреть видео интерфейса ниже или запустить Cardly локально через Docker за 10 секунд.",
+    cta_watch_video: "Смотреть видео",
+    cta_quickstart_link: "Docker инструкция",
     snippet_label: "Запуск одной командой",
     copy_btn: "Копировать",
     copied_toast: "Команда 'docker compose up -d' скопирована в буфер обмена!",
@@ -188,7 +212,13 @@ const translations = {
     hero_title: "Компьютер мен смартфондарға арналған <br /><span class=\"gradient-text\">интервалды қайталау жүйесі</span>",
     hero_subtitle: "Ресми Anki Rust өзегіне (rslib) негізделген толыққанды Anki веб-баламасы. Алгоритмдерді дәл қайталау, заманауи FSRS оңтайландырғышы, дербес PWA және AnkiDroid пен AnkiMobile-мен тікелей синхрондау.",
     cta_demo: "Демо нұсқасын көру",
+    cta_github: "GitHub репозиторийі",
     cta_quickstart: "Docker арқылы қосу",
+    demo_reset_note: "Ашық демо: деректер әр 2 сағат сайын жаңарады • Тіркелусіз",
+    demo_offline_title: "Демо-сервер қайта іске қосылуда",
+    demo_offline_desc: "Демо-сервер жоспарлы жаңарту кезеңінде. Төмендегі шолу видеосын көре аласыз немесе Cardly-ді 10 секундта Docker арқылы қоса аласыз.",
+    cta_watch_video: "Видеоны көру",
+    cta_quickstart_link: "Docker нұсқаулығы",
     snippet_label: "Бір командамен іске қосу",
     copy_btn: "Көшіру",
     copied_toast: "'docker compose up -d' командасы алмасу буферіне көшірілді!",
@@ -373,4 +403,35 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
   });
+
+  // 5. Dynamic URL Injection from CONFIG
+  document.querySelectorAll(".btn-live-demo").forEach((el) => {
+    el.setAttribute("href", CONFIG.DEMO_URL);
+  });
+  document.querySelectorAll(".btn-view-github, .nav-gh").forEach((el) => {
+    el.setAttribute("href", CONFIG.REPO_URL);
+  });
+
+  // 6. Demo Availability Healthcheck with Fallback
+  async function checkDemoAvailability() {
+    const noticeEl = document.getElementById("demoOfflineNotice");
+    if (!noticeEl || CONFIG.DEMO_URL.includes("<YOUR_SUBDOMAIN>")) return;
+    try {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), 2500);
+      const res = await fetch(`${CONFIG.DEMO_URL}/healthz`, {
+        method: "GET",
+        mode: "cors",
+        signal: controller.signal,
+      });
+      clearTimeout(timer);
+      if (!res.ok) {
+        noticeEl.style.display = "flex";
+      }
+    } catch {
+      noticeEl.style.display = "flex";
+    }
+  }
+
+  void checkDemoAvailability();
 });

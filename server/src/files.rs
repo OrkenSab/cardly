@@ -108,6 +108,12 @@ pub async fn upload_file_handler(
         Err(e) => return text_err(StatusCode::INTERNAL_SERVER_ERROR, e.to_string()),
     };
 
+    if is_demo {
+        if let Err((status, msg)) = crate::demo::check_demo_storage_cap(&runtime.folder) {
+            return text_err(status, msg);
+        }
+    }
+
     while let Ok(Some(field)) = multipart.next_field().await {
         let orig_name = field
             .file_name()
@@ -313,7 +319,7 @@ pub async fn export_handler(
             .unwrap_or(false);
 
     if let Err((status, msg)) =
-        crate::demo::validate_demo_action(&claims.u, is_demo, "/api/import/colpkg", None)
+        crate::demo::validate_demo_action(&claims.u, is_demo, "/api/export", None)
     {
         return text_err(status, msg);
     }
@@ -532,7 +538,7 @@ pub async fn create_backup_handler(
             .unwrap_or(false);
 
     if let Err((status, msg)) =
-        crate::demo::validate_demo_action(&claims.u, is_demo, "/api/import/colpkg", None)
+        crate::demo::validate_demo_action(&claims.u, is_demo, "/api/backups/create", None)
     {
         return text_err(status, msg);
     }

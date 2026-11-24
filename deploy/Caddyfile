@@ -1,6 +1,6 @@
 # Caddyfile for Cardly production reverse proxy with automatic TLS (Let's Encrypt / ZeroSSL)
 {
-    email {$CADDY_EMAIL}
+    # Global Caddy options
 }
 
 {$DOMAIN:localhost} {

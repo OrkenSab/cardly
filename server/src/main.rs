@@ -41,18 +41,9 @@ async fn main() -> anyhow::Result<()> {
             .demo_user
             .as_deref()
             .unwrap_or(cardly_server::demo::DEFAULT_DEMO_USER);
-        info!(user = %demo_user, "Demo mode active; checking sample collection...");
-        match state.users.get_or_init(demo_user) {
-            Ok(runtime) => {
-                if let Err(err) =
-                    cardly_server::demo::seed_demo_collection_if_empty(&state, &runtime).await
-                {
-                    tracing::warn!(error = ?err, "Failed to seed demo collection at startup");
-                }
-            }
-            Err(err) => {
-                tracing::warn!(error = ?err, "Failed to initialize demo user runtime");
-            }
+        info!(user = %demo_user, "Demo mode active; resetting and seeding sample decks on startup...");
+        if let Err(err) = cardly_server::demo::reset_demo_collection(&state).await {
+            tracing::warn!(error = ?err, "Failed to reset demo collection at startup");
         }
         let interval = state
             .config

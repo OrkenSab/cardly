@@ -241,6 +241,18 @@
   <LoginView />
 {:else}
   <div class="app-shell">
+    {#if store.demoMode}
+      <div class="demo-banner-top" role="region" aria-label="Demo notice">
+        <span class="demo-banner-text">
+          ⚡ <strong>Demo Mode</strong>: data resets every {Math.max(1, Math.round(store.demoResetIntervalMinutes / 60))} hour{Math.round(store.demoResetIntervalMinutes / 60) > 1 ? "s" : ""}. Free guest trial.
+        </span>
+        <div class="demo-banner-links">
+          <a href="https://github.com/OrkenSab/cardly" target="_blank" rel="noopener noreferrer">Source Code</a>
+          <span class="banner-sep">•</span>
+          <span class="banner-disclaimer">Not affiliated with Anki / Ankitects</span>
+        </div>
+      </div>
+    {/if}
     {#if !(store.view === "review" && store.hideTopBar)}
       <MenuBar />
       <TopToolbar />
@@ -536,6 +548,47 @@
   .change-nt-window {
     width: min(720px, 94vw);
     height: min(620px, 86vh);
+  }
+  .demo-banner-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 6px 14px;
+    background: #1e293b;
+    color: #f1f5f9;
+    font-size: 12px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+    z-index: 100;
+    flex-shrink: 0;
+  }
+  .demo-banner-top a {
+    color: #38bdf8;
+    text-decoration: underline;
+    font-weight: 500;
+  }
+  .demo-banner-top a:hover {
+    color: #7dd3fc;
+  }
+  .demo-banner-links {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+    color: #94a3b8;
+  }
+  @media (max-width: 640px) {
+    .demo-banner-top {
+      flex-direction: column;
+      gap: 3px;
+      text-align: center;
+      padding: 6px 10px;
+    }
+    .banner-disclaimer {
+      display: none;
+    }
+    .banner-sep {
+      display: none;
+    }
   }
   @media (max-width: 640px) {
     .add-window,

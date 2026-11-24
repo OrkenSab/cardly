@@ -1,9 +1,7 @@
-# Cardly Production Deployment Guide
+# Cardly Production & Demo Deployment Guide
 
-This guide provides battle-tested, step-by-step instructions for deploying Cardly to production across three environments:
-1. **Self-Hosted VPS** ($4–$5/mo on Hetzner, DigitalOcean, Linode, or Vultr) with automated HTTPS via Caddy.
-2. **Fly.io** (Serverless container with persistent NVMe volume).
-3. **Railway** (PaaS one-click git-push deployment).
+This guide provides step-by-step instructions for deploying Cardly with automated HTTPS.
+The primary production setup is tailored for an **Oracle Cloud Always Free VM** (1 GB RAM, 1 vCPU) running behind automated Let's Encrypt / ZeroSSL TLS via Caddy.
 
 ---
 
@@ -11,248 +9,186 @@ This guide provides battle-tested, step-by-step instructions for deploying Cardl
 
 Cardly's Rust backend (`rslib`) and static Svelte 5 frontend are designed for high efficiency:
 - **CPU**: 1 vCPU (shared is sufficient).
-- **RAM**: 512 MB minimum, 1 GB recommended for collections with >100,000 cards.
-- **Disk**: 5 GB–10 GB SSD / NVMe (depending on media collection size).
-- **Network**: Ports `80/tcp` (HTTP) and `443/tcp` (HTTPS / HTTP/3 QUIC).
+- **RAM**: 512 MB minimum, 1 GB recommended.
+- **Swap**: 1–2 GB swap space (critical on 1 GB RAM VMs to prevent OOM spikes).
+- **Disk**: 5 GB–10 GB SSD / NVMe.
+- **Network**: Ports `80/tcp` (HTTP / ACME challenge) and `443/tcp` (HTTPS / HTTP/3 QUIC).
+
+> [!WARNING]
+> **Do NOT compile Rust or run `cargo build` on a 1 GB RAM VM.**
+> Compiling upstream Anki's `rslib` and Cardly requires 3–4 GB of memory during linking and will immediately crash low-memory VMs with an Out Of Memory (OOM) kernel panic. Always pull pre-built Docker containers from **GitHub Container Registry (`ghcr.io/orkensab/cardly:latest`)**.
 
 ---
 
-## 1. Deploying on a Cheap VPS ($4–$5/mo) with Docker & Caddy
+## 1. Oracle Cloud VM Deployment (1 GB RAM / 1 vCPU)
 
-A $4–$5/mo VPS (such as a Hetzner Cloud CX22 or DigitalOcean Basic Droplet) is the recommended setup for individuals, families, and study groups.
+### Step 1: Ingress Ports in Oracle Cloud Console
+Oracle Cloud Compute instances sit behind a Virtual Cloud Network (VCN) firewall. You **must** open ports 80 and 443 in the console:
 
-### Step 1: Server Preparation & Firewall
-Connect to your fresh Ubuntu 22.04 or 24.04 LTS instance:
+1. In the [Oracle Cloud Console](https://cloud.oracle.com/), navigate to **Networking** → **Virtual Cloud Networks**.
+2. Select your VCN, then click **Security Lists** → **Default Security List for `<your-vcn>`**.
+3. Under **Ingress Rules**, click **Add Ingress Rules**:
+   - **Source CIDR**: `0.0.0.0/0`
+   - **IP Protocol**: `TCP`
+   - **Destination Port Range**: `80,443`
+   - **Description**: `Allow HTTP/HTTPS for Cardly and Caddy`
+4. Click **Add Ingress Rules**.
+
+---
+
+### Step 2: Configure Free Dynamic DNS (DuckDNS)
+Cardly requires HTTPS for progressive web app (PWA) installation and offline service workers on iOS Safari and Android Chrome.
+
+If you don't have a custom domain:
+1. Go to [duckdns.org](https://www.duckdns.org/) and log in (via GitHub, Google, etc.).
+2. In the **domains** section, create a free subdomain (e.g., `cardly-demo`).
+3. In the **current ip** field, enter the **Public IPv4 address** of your Oracle Cloud VM.
+4. Click **update ip**.
+5. Your instance will now resolve at `<YOUR_SUBDOMAIN>.duckdns.org`.
+
+---
+
+### Step 3: Connect via SSH & Harden Access
+Connect to your VM using your SSH private key:
 ```bash
-ssh root@<YOUR-SERVER-IP>
-apt-get update && apt-get upgrade -y
-apt-get install -y ca-certificates curl git ufw
-
-# Configure firewall
-ufw default deny incoming
-ufw default allow outgoing
-ufw allow 22/tcp    # SSH
-ufw allow 80/tcp    # HTTP (Let's Encrypt challenge & redirect)
-ufw allow 443/tcp   # HTTPS
-ufw allow 443/udp   # HTTP/3 QUIC
-ufw enable
+ssh -i ~/.ssh/id_rsa ubuntu@<VM_PUBLIC_IP>
 ```
 
-### Step 2: Install Docker & Docker Compose
+#### Basic SSH Hardening:
+Disable password-based SSH authentication to prevent brute force attacks:
 ```bash
-curl -fsSL https://get.docker.com -o get-docker.sh
-sh get-docker.sh
+sudo sed -i 's/^#*PasswordAuthentication .*/PasswordAuthentication no/' /etc/ssh/sshd_config
+sudo systemctl restart ssh || sudo systemctl restart sshd
 ```
 
-### Step 3: Clone Repository
+---
+
+### Step 4: Run the Automated Setup Script
+Run the automated provisioning script directly on the VM:
+
 ```bash
-git clone --recurse-submodules https://github.com/cardly-app/cardly.git /opt/cardly
-cd /opt/cardly
+# 1. Download setup script
+curl -fsSL https://raw.githubusercontent.com/OrkenSab/cardly/main/scripts/setup-oracle-vm.sh -o setup-oracle-vm.sh
+
+# 2. Execute with your domain
+sudo bash setup-oracle-vm.sh <YOUR_SUBDOMAIN>.duckdns.org
 ```
 
-### Step 4: Configure Production Environment (`.env`)
-Create `/opt/cardly/.env`:
-```ini
-# Domain configuration for Caddy automatic TLS
-DOMAIN=anki.example.com
-CADDY_EMAIL=admin@example.com
+The script automatically:
+1. Configures a **2 GB swap file** (`/swapfile`) with optimized swappiness (`vm.swappiness=10`).
+2. Opens ports `80` and `443` in both the Linux kernel **`iptables`** rules and **`ufw`**.
+3. Installs Docker Engine and the Docker Compose plugin.
+4. Creates `/opt/cardly` with production `docker-compose.prod.yml` and `Caddyfile`.
+5. Enforces resource safety limits (`mem_limit: 450M`, `cpus: 0.80`, JSON log rotation).
+6. Configures **Demo Mode** (`CARDLY_DEMO_MODE=true`, resets every 2 hours, AI disabled for safety).
+7. Pulls the pre-built image from GHCR and starts Caddy + Cardly with automatic TLS.
+8. Registers a systemd service (`cardly.service`) so Cardly starts automatically on VM reboot.
 
-# Cardly container settings
-CARDLY_PORT=8080
-CARDLY_HOST=0.0.0.0
-CARDLY_DATA_DIR=/data
-CARDLY_COOKIE_SECURE=true
+---
 
-# User accounts (username:password)
-CARDLY_USER1=alice:MakeThisAStrongPassword123!
-# Additional accounts:
-# CARDLY_USER2=bob:AnotherStrongPassword456!
-
-# Upload limit in MiB
-CARDLY_MAX_UPLOAD_MB=512
-
-# Tracing log filter
-RUST_LOG=cardly_server=info,anki=info
-```
-
-### Step 5: Start Services with Automated HTTPS
-Launch Cardly and Caddy using `deploy/docker-compose.prod.yml`:
-```bash
-docker compose -f deploy/docker-compose.prod.yml up -d
-```
-Caddy will automatically:
-- Request and install a TLS certificate from Let's Encrypt or ZeroSSL.
-- Redirect all port 80 HTTP requests to port 443 HTTPS.
-- Reverse proxy traffic to the Cardly backend container.
-
-### Step 6: Verify Deployment
-Visit your domain in any modern browser:
+### Step 5: Verification
+Visit your domain in any browser:
 ```text
-https://anki.example.com
-```
-And check server health:
-```bash
-curl -f https://anki.example.com/healthz
-# Output: {"status":"ok"}
+https://<YOUR_SUBDOMAIN>.duckdns.org
 ```
 
-### Step 7: Systemd Autostart Service
-To ensure Cardly starts automatically on server reboot:
+Check the health status:
 ```bash
-cat << 'EOF' > /etc/systemd/system/cardly.service
-[Unit]
-Description=Cardly Anki Web & Sync Server
-Requires=docker.service
-After=docker.service
+curl -f https://<YOUR_SUBDOMAIN>.duckdns.org/healthz
+# Response: {"status":"ok"}
+```
 
-[Service]
-Type=oneshot
-RemainAfterExit=yes
-WorkingDirectory=/opt/cardly
-ExecStart=/usr/bin/docker compose -f deploy/docker-compose.prod.yml up -d
-ExecStop=/usr/bin/docker compose -f deploy/docker-compose.prod.yml down
-TimeoutStartSec=0
+Check container memory usage:
+```bash
+docker stats --no-stream
+```
+*Expected: `cardly-app` consumes ~40–80 MB idle, `cardly-caddy` consumes ~20–35 MB.*
 
-[Install]
-WantedBy=multi-user.target
-EOF
+---
 
-systemctl daemon-reload
-systemctl enable cardly.service
+## 2. Maintenance, Updates & Rollbacks
+
+### Updating Cardly to the Latest Version:
+```bash
+cd /opt/cardly
+docker compose -f deploy/docker-compose.prod.yml pull
+docker compose -f deploy/docker-compose.prod.yml up -d --remove-orphans
+```
+
+### Viewing Logs:
+```bash
+cd /opt/cardly
+docker compose -f deploy/docker-compose.prod.yml logs -f --tail=100
+```
+
+### Rollback Procedure:
+If a newly pulled image causes issues, roll back to a specific previous container image tag:
+```bash
+cd /opt/cardly
+docker compose -f deploy/docker-compose.prod.yml down
+# Edit CARDLY_IMAGE in /opt/cardly/.env or override on command line:
+CARDLY_IMAGE=ghcr.io/orkensab/cardly:<PREVIOUS_GIT_SHA> docker compose -f deploy/docker-compose.prod.yml up -d
 ```
 
 ---
 
-## 2. Deploying to Fly.io
+## 3. Automated CI/CD Deploy Workflow (`deploy-demo.yml`)
 
-Fly.io runs Docker containers directly on Firecracker microVMs near your users with persistent NVMe volumes.
+The repository includes an opt-in GitHub Actions workflow (`.github/workflows/deploy-demo.yml`).
+Whenever changes land on the `main` branch:
+1. GitHub Actions builds the multi-stage Docker container and publishes it to `ghcr.io/orkensab/cardly:latest`.
+2. If SSH repository secrets are configured, it automatically logs into the Oracle Cloud VM and restarts the services.
 
-### Step 1: Install Flyctl & Log In
+### Setting up Repository Secrets (Optional):
+In your GitHub repository, navigate to **Settings** → **Secrets and variables** → **Actions** and add:
+- `SSH_HOST`: The public IPv4 address of your Oracle VM.
+- `SSH_USER`: The SSH user (usually `ubuntu`).
+- `SSH_KEY`: The private SSH key matching the public key on the VM.
+- `SSH_PORT`: (Optional) Custom SSH port (defaults to `22`).
+
+*If secrets are not provided, the workflow safely skips the deployment step.*
+
+---
+
+## 4. Alternative PaaS Deployments
+
+### Fly.io
+Fly.io runs Docker containers directly on Firecracker microVMs with persistent NVMe volumes:
 ```bash
-curl -L https://fly.io/install.sh | sh
-fly auth login
-```
-
-### Step 2: Initialize App
-Inside the Cardly repository root:
-```bash
-# Initialize fly configuration without deploying yet
 fly launch --no-deploy
-```
-
-### Step 3: Create Persistent Volume
-Cardly stores SQLite collections and media files in `/data`. Create a persistent volume:
-```bash
 fly volumes create cardly_data --size 5 --region iad
-```
-
-### Step 4: Set Environment Secrets
-```bash
-fly secrets set \
-  CARDLY_USER1="alice:YourSecurePassword123" \
-  PASSWORDS_HASHED="0"
-```
-
-### Step 5: Deploy
-Deploy using the configuration in [`deploy/fly.toml`](../deploy/fly.toml):
-```bash
+fly secrets set CARDLY_USER1="alice:YourSecurePassword123"
 fly deploy --config deploy/fly.toml
-```
-
-### Step 6: Custom Domain & Free SSL
-```bash
 fly certs add anki.yourdomain.com
-# Follow the DNS CNAME/A instructions provided by flyctl
 ```
+
+### Railway
+Deploy via Railway PaaS:
+1. Create a **New Project** → **Deploy from GitHub repo**.
+2. Add a persistent volume mounted at `/data`.
+3. Set environment variables `CARDLY_HOST=0.0.0.0`, `CARDLY_PORT=8080`, `CARDLY_COOKIE_SECURE=true`.
 
 ---
 
-## 3. Deploying to Railway
+## 5. Demo Mode Architecture
 
-Railway offers frictionless GitHub integration and managed deployments.
-
-### Step 1: Create a Railway Project
-1. Log in to [Railway](https://railway.app/).
-2. Click **New Project** → **Deploy from GitHub repo**.
-3. Select your Cardly repository.
-
-### Step 2: Attach Persistent Volume
-1. Go to the service settings in Railway.
-2. Under **Volumes**, click **Add Volume**.
-3. Set **Mount Path** to `/data`.
-
-### Step 3: Configure Variables
-In the service **Variables** tab, set:
-- `CARDLY_HOST`: `0.0.0.0`
-- `CARDLY_PORT`: `8080`
-- `CARDLY_DATA_DIR`: `/data`
-- `CARDLY_USER1`: `alice:YourPasswordHere`
-- `CARDLY_COOKIE_SECURE`: `true`
-
-Railway automatically provisions an SSL certificate and routes HTTPS traffic to port `8080`.
+When `CARDLY_DEMO_MODE=true` is set:
+- **Instant Guest Login**: Any unauthenticated visitor requesting `/api/auth/me` is immediately issued a signed session cookie as the demo user.
+- **Preloaded Sample Decks**: Generates 3 rich sample decks on startup (General Knowledge, Languages, Science & Math with Cloze & MathJax).
+- **Automated Data Reset**: Re-seeds the collection and wipes uploaded media on server startup and every `CARDLY_DEMO_RESET_INTERVAL_SECS` (default: 2 hours).
+- **Abuse Prevention**:
+  - Request upload body capped at 10 MiB (`DEMO_MAX_UPLOAD_BYTES`).
+  - Total collection disk space capped at 50 MiB (`DEMO_MAX_STORAGE_BYTES`).
+  - `.colpkg` collection replacement and backup restoration are blocked.
+  - User deletion and password changes are rejected.
+  - AI card generation is disabled by default to protect API quotas.
+- **AGPL-3.0 Compliance**: Surfaces a visible banner and footer with direct links to the source repository and non-affiliation disclaimers.
 
 ---
 
-## 4. Enabling Demo Mode (`CARDLY_DEMO_MODE=true`)
+## 6. Mobile Synchronization (AnkiDroid & AnkiMobile)
 
-Cardly features a built-in **Demo Mode** suitable for public showcase instances and classroom trials:
-- Seeds rich sample decks on startup (General Knowledge, Languages, Science with Cloze and MathJax).
-- Automatically resets the demo collection back to pristine condition **every 60 minutes**.
-- Enforces rate limiting (120 req/min) and blocks dangerous administrative actions (backup restoration, collection overwriting).
-- Surfaces a subtle indicator badge in the web UI.
-
-### Activation:
-In your `.env` (or environment secrets):
-```ini
-CARDLY_DEMO_MODE=true
-CARDLY_DEMO_USER=demo:demo123
-```
-Users can sign in with username `demo` and password `demo123` to test all Cardly features without risk of modifying private collections.
-
----
-
-## 5. Mobile Synchronization (AnkiDroid & AnkiMobile)
-
-Cardly contains a native Anki-compatible sync server implementation. Once deployed with HTTPS, configure your mobile devices:
-
-### AnkiDroid (Android)
-1. Open **AnkiDroid** → **Settings** (`⋮`) → **Syncing** → **Custom sync server**.
-2. Set **Sync URL**: `https://anki.example.com/sync/`
-3. Set **Media sync URL**: `https://anki.example.com/msync/`
-4. Set **Username** and **Password** to match `CARDLY_USER1`.
-5. Tap **Sync** on the main deck screen.
-
-### AnkiMobile (iOS)
-1. Open **AnkiMobile** → **Preferences** (gear icon) → **Syncing**.
-2. Tap **Custom Sync Server**.
-3. Enter `https://anki.example.com/sync/` for the sync server.
-4. Log in with your credentials.
-
----
-
-## 6. Backup & Disaster Recovery
-
-Cardly automatically creates backups and keeps the 50 most recent snapshots under `/data/users/<username>/backups/*.colpkg`.
-
-### Automated Offsite Backups Script
-To mirror backups offsite daily (e.g. to AWS S3, Cloudflare R2, or local storage):
-```bash
-cat << 'EOF' > /opt/cardly/backup.sh
-#!/bin/bash
-BACKUP_DIR="/var/lib/docker/volumes/cardly_cardly_data/_data/users"
-DEST_DIR="/backup/cardly"
-mkdir -p "$DEST_DIR"
-rsync -av --include="*/" --include="backups/**" --exclude="*" "$BACKUP_DIR/" "$DEST_DIR/"
-EOF
-chmod +x /opt/cardly/backup.sh
-```
-Add to crontab (`crontab -e`):
-```cron
-0 3 * * * /opt/cardly/backup.sh >/dev/null 2>&1
-```
-
-### Manual Restoration
-To restore a `.colpkg` snapshot:
-1. Open Cardly Web → **Settings / Maintenance** → **Backups**.
-2. Click **Restore** next to any historical snapshot.
-3. Or manually copy the snapshot into a fresh `/data/users/<username>/` directory and restart the container.
+Once deployed behind HTTPS:
+- **Custom Sync Server URL:** `https://<YOUR_DOMAIN>/sync/`
+- **Media Sync URL:** `https://<YOUR_DOMAIN>/msync/`
+- **Credentials:** Username and password configured in `CARDLY_USER1`.

@@ -85,10 +85,29 @@ export async function checkAuth(): Promise<boolean> {
     store.authStatus = "authenticated";
     void syncTimezone();
     void refreshUndoStatus();
+    if (store.demoMode) {
+      void refreshDemoStatus();
+    }
     return true;
   } catch {
     store.authStatus = "unauthenticated";
     return false;
+  }
+}
+
+export async function refreshDemoStatus(): Promise<void> {
+  try {
+    const resp = await fetch("/api/demo/status");
+    if (!resp.ok) return;
+    const data = await resp.json();
+    if (data.reset_interval_minutes !== undefined) {
+      store.demoResetIntervalMinutes = data.reset_interval_minutes;
+    }
+    if (data.resets_in_seconds !== undefined) {
+      store.demoResetsInSeconds = data.resets_in_seconds;
+    }
+  } catch {
+    // Non-fatal
   }
 }
 

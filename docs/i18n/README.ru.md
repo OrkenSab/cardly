@@ -13,6 +13,7 @@
 <p align="center">
   <a href="../../LICENSE"><img src="https://img.shields.io/badge/Лицензия-AGPL--3.0-blue.svg?style=flat-square" alt="Лицензия AGPL-3.0"></a>
   <a href="https://github.com/ankitects/anki"><img src="https://img.shields.io/badge/Ядро%20Anki-upstream%20rslib-orange.svg?style=flat-square" alt="Официальное ядро Anki"></a>
+  <a href="https://<YOUR_SUBDOMAIN>.duckdns.org"><img src="https://img.shields.io/badge/Демо-Открыть-success?style=flat-square&logo=google-chrome&logoColor=white" alt="Демо-версия"></a>
   <a href="#быстрый-старт"><img src="https://img.shields.io/badge/Docker-Ready-2496ED.svg?style=flat-square&logo=docker&logoColor=white" alt="Docker Ready"></a>
   <a href="../PARITY.md"><img src="https://img.shields.io/badge/FSRS-v4%20%2F%20v5-purple.svg?style=flat-square" alt="Поддержка FSRS"></a>
 </p>
@@ -38,6 +39,20 @@
 </p>
 
 > **Правовая оговорка**: Cardly — независимый проект с открытым исходным кодом. Проект **не аффилирован, не поддерживается и не спонсируется компанией Ankitects Pty Ltd или Дэмиеном Элмсом**. Название «Anki» является товарным знаком законного правообладателя. Cardly использует исходный код официальной библиотеки ядра Anki (`rslib`) на условиях лицензии GNU AGPL-3.0.
+
+---
+
+## 🌐 Публичная онлайн демо-версия
+
+Опробуйте Cardly прямо в браузере без установки на свой компьютер:
+
+👉 **[Открыть Live Demo](https://<YOUR_SUBDOMAIN>.duckdns.org)** *(Мгновенный гостевой вход без регистрации)*
+
+> [!NOTE]
+> **Ограничения демо-режима:**
+> - **Периодический сброс данных**: Коллекция автоматически сбрасывается к эталонным демонстрационным колодам каждые 2 часа и при перезапуске сервера. Не используйте демо для постоянного личного обучения.
+> - **AI-генератор**: Генерация карточек через нейросети отключена в демо во избежание перерасхода квот API. Разверните Cardly локально в Docker для подключения Ollama, Gemini или OpenAI.
+> - **Лимиты ресурсов**: Размер загружаемых файлов ограничен 10 МБ, объем хранилища сессии — 50 МБ.
 
 ---
 

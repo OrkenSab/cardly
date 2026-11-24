@@ -1,11 +1,9 @@
 # Cardly Production Docker Compose
 # Includes Caddy reverse proxy for automated HTTPS (Let's Encrypt / ZeroSSL)
+# Optimized for 1 GB RAM / 1 vCPU VMs (resource limits, swap safety, log rotation)
 services:
   cardly:
-    build:
-      context: ..
-      dockerfile: Dockerfile
-    image: cardly:latest
+    image: ${CARDLY_IMAGE:-ghcr.io/orkensab/cardly:latest}
     container_name: cardly-app
     restart: unless-stopped
     env_file:
@@ -20,6 +18,18 @@ services:
       CARDLY_COOKIE_SECURE: "true"
     volumes:
       - cardly_data:/data
+    deploy:
+      resources:
+        limits:
+          cpus: "0.80"
+          memory: 450M
+        reservations:
+          memory: 128M
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
     healthcheck:
       test: ["CMD", "/app/cardly-server", "--healthcheck"]
       interval: 30s
@@ -44,6 +54,18 @@ services:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
       - caddy_data:/data
       - caddy_config:/config
+    deploy:
+      resources:
+        limits:
+          cpus: "0.20"
+          memory: 100M
+        reservations:
+          memory: 32M
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
     depends_on:
       cardly:
         condition: service_healthy

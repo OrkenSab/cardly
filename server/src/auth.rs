@@ -264,15 +264,33 @@ pub async fn logout_handler(State(state): State<Arc<AppState>>) -> Response {
 }
 
 pub async fn me_handler(State(state): State<Arc<AppState>>, headers: HeaderMap) -> Response {
-    let Some(claims) = authenticate_request(&state, &headers) else {
-        return (
-            StatusCode::UNAUTHORIZED,
-            Json(serde_json::json!({
-                "authenticated": false,
-                "demo_mode": state.config.demo_mode
-            })),
-        )
-            .into_response();
+    let maybe_claims = authenticate_request(&state, &headers);
+    let (claims, set_cookie) = match maybe_claims {
+        Some(c) => (c, None),
+        None if state.config.demo_mode => {
+            let demo_username = state
+                .config
+                .demo_user
+                .as_deref()
+                .unwrap_or(crate::demo::DEFAULT_DEMO_USER);
+            let (signed, claims) = sign_session(&state.config.session_secret, demo_username);
+            let cookie = build_session_cookie(
+                &signed,
+                SESSION_TTL_SECS as i64,
+                state.config.cookie_secure,
+            );
+            (claims, Some(cookie))
+        }
+        None => {
+            return (
+                StatusCode::UNAUTHORIZED,
+                Json(serde_json::json!({
+                    "authenticated": false,
+                    "demo_mode": state.config.demo_mode
+                })),
+            )
+                .into_response();
+        }
     };
 
     let is_demo = state.config.demo_mode
@@ -283,12 +301,20 @@ pub async fn me_handler(State(state): State<Arc<AppState>>, headers: HeaderMap) 
             .map(|u| u == claims.u)
             .unwrap_or(false);
 
-    Json(AuthMeResponse {
+    let mut resp = Json(AuthMeResponse {
         authenticated: true,
         username: claims.u,
         api_token: claims.tok,
         demo_mode: state.config.demo_mode,
         is_demo_user: is_demo,
     })
-    .into_response()
+    .into_response();
+
+    if let Some(cookie) = set_cookie {
+        if let Ok(val) = cookie.parse() {
+            resp.headers_mut().insert(header::SET_COOKIE, val);
+        }
+    }
+
+    resp
 }

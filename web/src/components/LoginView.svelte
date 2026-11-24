@@ -31,6 +31,11 @@
       <h1>Cardly</h1>
     </div>
     <p class="subtitle">Sign in to your spaced repetition collection.</p>
+    {#if store.demoMode}
+      <div class="demo-login-notice">
+        ⚡ <strong>Demo mode active</strong>: click the button below to explore Cardly without registration.
+      </div>
+    {/if}
     {#if error}
       <div class="error-box" role="alert">{error}</div>
     {/if}
@@ -70,7 +75,7 @@
             handleSubmit();
           }}
         >
-          ⚡ Try Demo (demo / demo123)
+          ⚡ Enter Demo Mode (Instant Guest Access)
         </button>
       {/if}
     </form>
@@ -123,6 +128,16 @@
     padding: 8px 10px;
     font-size: 13px;
     margin-bottom: 14px;
+  }
+  .demo-login-notice {
+    background: rgba(0, 117, 202, 0.08);
+    border: 1px solid rgba(0, 117, 202, 0.25);
+    color: var(--accent-info, #0075ca);
+    border-radius: var(--border-radius);
+    padding: 8px 10px;
+    font-size: 12.5px;
+    margin-bottom: 14px;
+    line-height: 1.4;
   }
   .field {
     display: flex;

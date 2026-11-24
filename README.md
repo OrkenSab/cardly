@@ -13,6 +13,7 @@
 <p align="center">
   <a href="./LICENSE"><img src="https://img.shields.io/badge/License-AGPL--3.0-blue.svg?style=flat-square" alt="AGPL-3.0 License"></a>
   <a href="https://github.com/ankitects/anki"><img src="https://img.shields.io/badge/Anki%20Core-upstream%20rslib-orange.svg?style=flat-square" alt="Anki Upstream Core"></a>
+  <a href="https://<YOUR_SUBDOMAIN>.duckdns.org"><img src="https://img.shields.io/badge/Live%20Demo-Try%20Now-success?style=flat-square&logo=google-chrome&logoColor=white" alt="Live Demo"></a>
   <a href="#quickstart"><img src="https://img.shields.io/badge/Docker-Ready-2496ED.svg?style=flat-square&logo=docker&logoColor=white" alt="Docker Ready"></a>
   <a href="./docs/PARITY.md"><img src="https://img.shields.io/badge/FSRS-v4%20%2F%20v5-purple.svg?style=flat-square" alt="FSRS Supported"></a>
 </p>
@@ -38,6 +39,20 @@
 </p>
 
 > **Disclaimer**: Cardly is an independent open-source project and is not affiliated with, endorsed by, or sponsored by Ankitects Pty Ltd or Damien Elmes. "Anki" is a trademark of its respective owner. Cardly incorporates upstream open-source code from Anki's official backend library (`rslib`) under the GNU AGPL-3.0 license.
+
+---
+
+## 🌐 Live Public Demo
+
+Experience Cardly directly in your browser without local installation:
+
+👉 **[Try the Live Demo](https://<YOUR_SUBDOMAIN>.duckdns.org)** *(Instant guest access — no sign-up needed)*
+
+> [!NOTE]
+> **Demo Environment Limits:**
+> - **Automated Reset**: The demo collection automatically resets back to clean sample decks every 2 hours and on container restarts. Do not use the demo instance for permanent personal study data.
+> - **AI Generator**: The AI card generator is disabled by default in the public demo to prevent API quota exhaustion. Self-host Cardly with Docker to connect your own local Ollama, Gemini, or OpenAI keys.
+> - **Resource Quotas**: Uploads are capped at 10 MiB per file with a 50 MiB storage quota per session.
 
 ---
 

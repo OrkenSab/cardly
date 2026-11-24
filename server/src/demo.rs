@@ -41,8 +41,9 @@ use crate::AppState;
 
 pub const DEFAULT_DEMO_USER: &str = "demo";
 pub const DEFAULT_DEMO_PASS: &str = "demo123";
-pub const DEFAULT_RESET_INTERVAL_SECS: u64 = 3600; // 60 minutes
+pub const DEFAULT_RESET_INTERVAL_SECS: u64 = 7200; // 2 hours
 pub const DEMO_MAX_UPLOAD_BYTES: usize = 10 * 1024 * 1024; // 10 MiB limit for demo accounts
+pub const DEMO_MAX_STORAGE_BYTES: u64 = 50 * 1024 * 1024; // 50 MiB storage cap per demo user
 
 static LAST_RESET_UNIX: AtomicU64 = AtomicU64::new(0);
 
@@ -120,7 +121,7 @@ use std::sync::OnceLock;
 static GLOBAL_DEMO_LIMITER: OnceLock<DemoRateLimiter> = OnceLock::new();
 
 pub fn demo_limiter() -> &'static DemoRateLimiter {
-    GLOBAL_DEMO_LIMITER.get_or_init(|| DemoRateLimiter::new(30.0, 2.0))
+    GLOBAL_DEMO_LIMITER.get_or_init(|| DemoRateLimiter::new(120.0, 10.0))
 }
 
 /// Checks whether an action performed by the demo user violates abuse rules.
@@ -162,6 +163,52 @@ pub fn validate_demo_action(
         ));
     }
 
+    if path.starts_with("/api/ai/") {
+        return Err((
+            StatusCode::FORBIDDEN,
+            "AI Card Generator is disabled in public Demo Mode to protect API quotas. Self-host Cardly with Docker to use local Ollama, Gemini, or OpenAI.".to_string(),
+        ));
+    }
+
+    if path.contains("password") || path.contains("user/delete") {
+        return Err((
+            StatusCode::FORBIDDEN,
+            "User modification is disabled in Demo Mode.".to_string(),
+        ));
+    }
+
+    Ok(())
+}
+
+/// Recursively computes total size of files inside a directory
+pub fn get_dir_size(path: &std::path::Path) -> u64 {
+    let mut total = 0;
+    if let Ok(entries) = fs::read_dir(path) {
+        for entry in entries.flatten() {
+            let p = entry.path();
+            if p.is_file() {
+                total += entry.metadata().map(|m| m.len()).unwrap_or(0);
+            } else if p.is_dir() {
+                total += get_dir_size(&p);
+            }
+        }
+    }
+    total
+}
+
+/// Verifies that demo user storage consumption stays within bounds (50 MiB cap)
+pub fn check_demo_storage_cap(user_folder: &std::path::Path) -> Result<(), (StatusCode, String)> {
+    let size = get_dir_size(user_folder);
+    if size > DEMO_MAX_STORAGE_BYTES {
+        return Err((
+            StatusCode::INSUFFICIENT_STORAGE,
+            format!(
+                "Demo storage limit reached ({} MiB / {} MiB). Storage will reset on the next scheduled reset.",
+                size / (1024 * 1024),
+                DEMO_MAX_STORAGE_BYTES / (1024 * 1024)
+            ),
+        ));
+    }
     Ok(())
 }
 

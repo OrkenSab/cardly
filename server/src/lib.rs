@@ -48,7 +48,11 @@ impl AppState {
 }
 
 async fn healthz_handler() -> impl IntoResponse {
-    (StatusCode::OK, Json(serde_json::json!({ "status": "ok" })))
+    (
+        StatusCode::OK,
+        [(axum::http::header::ACCESS_CONTROL_ALLOW_ORIGIN, "*")],
+        Json(serde_json::json!({ "status": "ok" })),
+    )
 }
 
 async fn readyz_handler() -> impl IntoResponse {

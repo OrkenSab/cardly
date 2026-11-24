@@ -13,6 +13,7 @@
 <p align="center">
   <a href="../../LICENSE"><img src="https://img.shields.io/badge/Лицензия-AGPL--3.0-blue.svg?style=flat-square" alt="AGPL-3.0 лицензиясы"></a>
   <a href="https://github.com/ankitects/anki"><img src="https://img.shields.io/badge/Anki%20өзегі-upstream%20rslib-orange.svg?style=flat-square" alt="Anki ресми өзегі"></a>
+  <a href="https://<YOUR_SUBDOMAIN>.duckdns.org"><img src="https://img.shields.io/badge/Демо-Қосу-success?style=flat-square&logo=google-chrome&logoColor=white" alt="Демо нұсқа"></a>
   <a href="#жылдам-іске-қосу"><img src="https://img.shields.io/badge/Docker-Ready-2496ED.svg?style=flat-square&logo=docker&logoColor=white" alt="Docker Ready"></a>
   <a href="../PARITY.md"><img src="https://img.shields.io/badge/FSRS-v4%20%2F%20v5-purple.svg?style=flat-square" alt="FSRS қолдауы"></a>
 </p>
@@ -38,6 +39,20 @@
 </p>
 
 > **Құқықтық ескерту**: Cardly — дербес ашық бастапқы жоба. Жоба **Ankitects Pty Ltd компаниясымен немесе Дэмиен Элмспен ресми байланысты емес, олар тарапынан қаржыландырылмайды және қолдау таппаған**. «Anki» сауда белгісі оның заңды иесіне тиесілі. Cardly ресми Anki өзегін (`rslib`) GNU AGPL-3.0 лицензиясының талаптарына сәйкес пайдаланады.
+
+---
+
+## 🌐 Ашық онлайн демо-нұсқа
+
+Cardly мүмкіндіктерін бағдарламаны орнатпай-ақ браузерде көріңіз:
+
+👉 **[Демо нұсқасын қосу](https://<YOUR_SUBDOMAIN>.duckdns.org)** *(Тіркелусіз бірден кіру)*
+
+> [!NOTE]
+> **Демо-режим ерекшеліктері:**
+> - **Мәліметтерді автоматты түрде тазарту**: Демо-жинақ әр 2 сағат сайын және сервер қайта қосылғанда үлгілік колодаларға қайтарылады. Демоны тұрақты жеке оқу үшін пайдаланбаңыз.
+> - **AI-генератор**: API лимиттерін сақтау мақсатында демода AI карточка жасау өшірілген. Жеке Ollama немесе OpenAI кілттерін қосу үшін Cardly-ді Docker арқылы өз компьютеріңізде іске қосыңыз.
+> - **Ресурс шектеулері**: Жүктелетін файл өлшемі 10 МБ-тан, сессияның жалпы көлемі 50 МБ-тан аспауы тиіс.
 
 ---
 

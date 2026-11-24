@@ -47,6 +47,7 @@ pub struct ServerConfig {
     pub demo_mode: bool,
     pub demo_user: Option<String>,
     pub demo_reset_interval_secs: Option<u64>,
+    pub demo_ai_enabled: bool,
     pub ai_server_key: Option<String>,
     pub ai_global_daily_limit: u32,
     pub ai_ip_daily_limit: u32,
@@ -175,7 +176,11 @@ impl ServerConfig {
         let demo_reset_interval_secs: u64 = env::var("CARDLY_DEMO_RESET_INTERVAL_SECS")
             .ok()
             .and_then(|v| v.parse().ok())
-            .unwrap_or(3600);
+            .unwrap_or(7200);
+
+        let demo_ai_enabled = env::var("CARDLY_DEMO_AI_ENABLED")
+            .map(|v| matches!(v.as_str(), "1" | "true" | "TRUE" | "yes"))
+            .unwrap_or(false);
 
         let ai_server_key = env::var("CARDLY_AI_SERVER_KEY")
             .or_else(|_| env::var("CARDLY_GEMINI_API_KEY"))
@@ -247,6 +252,7 @@ impl ServerConfig {
             demo_mode,
             demo_user_name,
             Some(demo_reset_interval_secs),
+            demo_ai_enabled,
             ai_server_key,
             ai_global_daily_limit,
             ai_ip_daily_limit,
@@ -280,6 +286,7 @@ impl ServerConfig {
             false,
             None,
             None,
+            false,
             None,
             50,
             10,
@@ -301,6 +308,7 @@ impl ServerConfig {
         demo_mode: bool,
         demo_user: Option<String>,
         demo_reset_interval_secs: Option<u64>,
+        demo_ai_enabled: bool,
         ai_server_key: Option<String>,
         ai_global_daily_limit: u32,
         ai_ip_daily_limit: u32,
@@ -333,6 +341,7 @@ impl ServerConfig {
             demo_mode,
             demo_user,
             demo_reset_interval_secs,
+            demo_ai_enabled,
             ai_server_key,
             ai_global_daily_limit,
             ai_ip_daily_limit,

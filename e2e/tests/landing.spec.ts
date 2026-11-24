@@ -46,6 +46,14 @@ test("Landing Page Visual Test & Interaction Suite", async ({ page }) => {
   await page.locator("#copyBtn").click();
   await expect(page.locator("#toast")).toHaveClass(/show/);
 
+  // 4b. Hero CTA Buttons & Demo Badges
+  const liveDemoBtn = page.locator(".btn-live-demo");
+  await expect(liveDemoBtn).toBeVisible();
+  const githubBtn = page.locator(".btn-view-github");
+  await expect(githubBtn).toBeVisible();
+  await expect(githubBtn).toHaveAttribute("href", "https://github.com/OrkenSab/cardly");
+  await expect(page.locator(".demo-reset-badge")).toBeVisible();
+
   // 5. Interactive FAQ Accordion
   const firstAccordion = page.locator(".accordion-trigger").first();
   await expect(firstAccordion).toHaveAttribute("aria-expanded", "false");

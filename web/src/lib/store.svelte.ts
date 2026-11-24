@@ -116,6 +116,8 @@ class CardlyStore {
   apiToken = $state<string>("");
   demoMode = $state<boolean>(false);
   isDemoUser = $state<boolean>(false);
+  demoResetIntervalMinutes = $state<number>(120);
+  demoResetsInSeconds = $state<number | null>(null);
 
   // Navigation
   view = $state<MainView>("decks");

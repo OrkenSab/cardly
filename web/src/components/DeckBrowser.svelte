@@ -295,6 +295,13 @@
   <footer class="bottom-bar">
     <button class="anki-btn" onclick={handleCreateDeck}>Create Deck</button>
     <button class="anki-btn" onclick={() => store.openImport("pick")}>Import File</button>
+    {#if store.demoMode}
+      <div class="demo-footer-info">
+        <span>Demo resets every {Math.max(1, Math.round(store.demoResetIntervalMinutes / 60))}h • </span>
+        <a href="https://github.com/OrkenSab/cardly" target="_blank" rel="noopener noreferrer">Source Code</a>
+        <span> • Not affiliated with Anki / Ankitects</span>
+      </div>
+    {/if}
   </footer>
 </main>
 
@@ -517,6 +524,15 @@
     padding: 10px 16px;
     border-top: 1px solid var(--border-subtle);
     background: var(--canvas);
+  }
+  .demo-footer-info {
+    margin-left: 12px;
+    font-size: 11.5px;
+    color: var(--fg-subtle);
+  }
+  .demo-footer-info a {
+    color: var(--accent-info, #0075ca);
+    text-decoration: underline;
   }
   @media (max-width: 640px) {
     .deck-scroll {
