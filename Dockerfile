@@ -30,6 +30,7 @@ COPY anki-upstream ./anki-upstream
 # Build upstream proto descriptors, FTL strings, and SvelteKit + reviewer web bundle
 WORKDIR /build/anki-upstream
 ENV PROTOC_BINARY=/usr/bin/protoc
+RUN rm -rf .git && git init && git config user.email "build@cardly.local" && git config user.name "Cardly" && git add -A && git commit -m "init"
 RUN ./ninja sveltekit qt:aqt:data:web rslib
 
 # Copy Cardly Rust server crate and build release binary
