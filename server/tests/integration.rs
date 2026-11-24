@@ -145,6 +145,7 @@ impl TestHarness {
             true,
             Some("demo".to_string()),
             Some(3600),
+            false,
             None,
             50,
             10,
