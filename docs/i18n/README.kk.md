@@ -13,7 +13,7 @@
 <p align="center">
   <a href="../../LICENSE"><img src="https://img.shields.io/badge/Лицензия-AGPL--3.0-blue.svg?style=flat-square" alt="AGPL-3.0 лицензиясы"></a>
   <a href="https://github.com/ankitects/anki"><img src="https://img.shields.io/badge/Anki%20өзегі-upstream%20rslib-orange.svg?style=flat-square" alt="Anki ресми өзегі"></a>
-  <a href="https://<YOUR_SUBDOMAIN>.duckdns.org"><img src="https://img.shields.io/badge/Демо-Қосу-success?style=flat-square&logo=google-chrome&logoColor=white" alt="Демо нұсқа"></a>
+  <a href="https://my-cardly.duckdns.org"><img src="https://img.shields.io/badge/Демо-Қосу-success?style=flat-square&logo=google-chrome&logoColor=white" alt="Демо нұсқа"></a>
   <a href="#жылдам-іске-қосу"><img src="https://img.shields.io/badge/Docker-Ready-2496ED.svg?style=flat-square&logo=docker&logoColor=white" alt="Docker Ready"></a>
   <a href="../PARITY.md"><img src="https://img.shields.io/badge/FSRS-v4%20%2F%20v5-purple.svg?style=flat-square" alt="FSRS қолдауы"></a>
 </p>
@@ -46,7 +46,8 @@
 
 Cardly мүмкіндіктерін бағдарламаны орнатпай-ақ браузерде көріңіз:
 
-👉 **[Демо нұсқасын қосу](https://<YOUR_SUBDOMAIN>.duckdns.org)** *(Тіркелусіз бірден кіру)*
+👉 **[Демо нұсқасын қосу](https://my-cardly.duckdns.org)** *(Тіркелусіз бірден кіру)*  
+🌐 **[Жоба лендингі](https://orkensab.github.io/cardly/)**
 
 > [!NOTE]
 > **Демо-режим ерекшеліктері:**

@@ -13,7 +13,7 @@
 <p align="center">
   <a href="./LICENSE"><img src="https://img.shields.io/badge/License-AGPL--3.0-blue.svg?style=flat-square" alt="AGPL-3.0 License"></a>
   <a href="https://github.com/ankitects/anki"><img src="https://img.shields.io/badge/Anki%20Core-upstream%20rslib-orange.svg?style=flat-square" alt="Anki Upstream Core"></a>
-  <a href="https://<YOUR_SUBDOMAIN>.duckdns.org"><img src="https://img.shields.io/badge/Live%20Demo-Try%20Now-success?style=flat-square&logo=google-chrome&logoColor=white" alt="Live Demo"></a>
+  <a href="https://my-cardly.duckdns.org"><img src="https://img.shields.io/badge/Live%20Demo-Try%20Now-success?style=flat-square&logo=google-chrome&logoColor=white" alt="Live Demo"></a>
   <a href="#quickstart"><img src="https://img.shields.io/badge/Docker-Ready-2496ED.svg?style=flat-square&logo=docker&logoColor=white" alt="Docker Ready"></a>
   <a href="./docs/PARITY.md"><img src="https://img.shields.io/badge/FSRS-v4%20%2F%20v5-purple.svg?style=flat-square" alt="FSRS Supported"></a>
 </p>
@@ -46,7 +46,8 @@
 
 Experience Cardly directly in your browser without local installation:
 
-👉 **[Try the Live Demo](https://<YOUR_SUBDOMAIN>.duckdns.org)** *(Instant guest access — no sign-up needed)*
+👉 **[Try the Live Demo](https://my-cardly.duckdns.org)** *(Instant guest access — no sign-up needed)*  
+🌐 **[Project Showcase & Landing](https://orkensab.github.io/cardly/)**
 
 > [!NOTE]
 > **Demo Environment Limits:**
