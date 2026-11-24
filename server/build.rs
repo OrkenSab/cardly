@@ -6,14 +6,17 @@ use std::fs;
 use std::path::PathBuf;
 
 fn main() {
+    let manifest_dir = PathBuf::from(env::var("CARGO_MANIFEST_DIR").unwrap_or_else(|_| ".".into()));
     let descriptors = env::var("DESCRIPTORS_BIN")
+        .ok()
         .map(PathBuf::from)
-        .unwrap_or_else(|_| {
-            let upstream = PathBuf::from("../anki-upstream/out/rslib/proto/descriptors.bin");
+        .filter(|p| p.exists())
+        .unwrap_or_else(|| {
+            let upstream = manifest_dir.join("../anki-upstream/out/rslib/proto/descriptors.bin");
             if upstream.exists() {
                 upstream
             } else {
-                PathBuf::from("descriptors.bin")
+                manifest_dir.join("descriptors.bin")
             }
         });
 

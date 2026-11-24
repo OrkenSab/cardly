@@ -4,7 +4,7 @@
 # ============================================================================
 # Stage 1: Build upstream Anki web assets + protobuf descriptors + Cardly server
 # ============================================================================
-FROM rust:1.86-bookworm AS builder
+FROM rust:1-bookworm AS builder
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     bash \
