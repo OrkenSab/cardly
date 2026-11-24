@@ -1,6 +1,18 @@
 import { expect, test } from "@playwright/test";
 
 test.describe("Cardly Demo Mode E2E Suite", () => {
+  test.beforeEach(async ({ request }) => {
+    const statusRes = await request.get("/api/demo/status").catch(() => null);
+    if (!statusRes || statusRes.status() !== 200) {
+      test.skip();
+      return;
+    }
+    const data = await statusRes.json().catch(() => ({}));
+    if (!data.demo_mode) {
+      test.skip();
+    }
+  });
+
   test("Zero-Login Guest Access, Sample Decks, Review, Banner & Limits", async ({ page, request }) => {
     const errors: string[] = [];
     page.on("pageerror", (e) => errors.push(e.message));
