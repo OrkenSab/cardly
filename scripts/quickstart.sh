@@ -26,7 +26,7 @@ print_banner() {
 | |__| (_| | |   | (_| | | |_| |
  \____\__,_|_|    \__,_|_|\__, |
                           |___/ 
-Pixel-perfect Anki Desktop Web Clone & Sync Server
+Open-Source Anki Desktop Web Client & Sync Server
 ===================================================
 EOF
 }

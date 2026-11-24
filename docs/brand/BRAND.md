@@ -1,6 +1,6 @@
 # Cardly Brand Identity & Design Guide
 
-> **Cardly** is an independent, open-source, pixel-perfect web and mobile application powered directly by Anki's official Rust core (`rslib`). This guide documents the brand identity, color system, typography, vector assets, and badge snippets.
+> **Cardly** is an independent, open-source, desktop-grade web and mobile application powered directly by Anki's official Rust core (`rslib`). This guide documents the brand identity, color system, typography, vector assets, and badge snippets.
 
 ---
 
