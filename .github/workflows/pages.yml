@@ -17,12 +17,9 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  deploy:
-    name: Deploy Landing Page
+  build:
+    name: Build & Upload Landing Page
     if: ${{ !github.event.repository.private }}
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -36,6 +33,18 @@ jobs:
         with:
           path: "landing"
 
+  deploy:
+    name: Deploy to GitHub Pages
+    needs: build
+    if: ${{ !github.event.repository.private }}
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
