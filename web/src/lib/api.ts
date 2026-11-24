@@ -134,6 +134,54 @@ export async function login(username: string, password: string): Promise<{ ok: b
   return { ok: true };
 }
 
+export async function register(username: string, password: string): Promise<{ ok: boolean; error?: string }> {
+  const resp = await fetch("/api/auth/register", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    credentials: "same-origin",
+    body: JSON.stringify({ username, password }),
+  });
+  if (!resp.ok) {
+    const d = await resp.json().catch(() => ({}));
+    return { ok: false, error: d.error || "Registration failed" };
+  }
+  const data = await resp.json();
+  store.username = data.username;
+  store.apiToken = data.api_token;
+  store.demoMode = Boolean(data.demo_mode);
+  store.isDemoUser = Boolean(data.is_demo_user);
+  window.__CARDLY_API_TOKEN__ = data.api_token;
+  store.authStatus = "authenticated";
+  void syncTimezone();
+  void refreshUndoStatus();
+  return { ok: true };
+}
+
+export async function continueAsGuest(): Promise<{ ok: boolean; error?: string }> {
+  const resp = await fetch("/api/auth/guest", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    credentials: "same-origin",
+  });
+  if (!resp.ok) {
+    const d = await resp.json().catch(() => ({}));
+    return { ok: false, error: d.error || "Failed to start guest session" };
+  }
+  const data = await resp.json();
+  store.username = data.username;
+  store.apiToken = data.api_token;
+  store.demoMode = Boolean(data.demo_mode);
+  store.isDemoUser = Boolean(data.is_demo_user);
+  window.__CARDLY_API_TOKEN__ = data.api_token;
+  store.authStatus = "authenticated";
+  void syncTimezone();
+  void refreshUndoStatus();
+  if (store.demoMode) {
+    void refreshDemoStatus();
+  }
+  return { ok: true };
+}
+
 export async function logout(): Promise<void> {
   await fetch("/api/auth/logout", { method: "POST", credentials: "same-origin" });
   store.authStatus = "unauthenticated";

@@ -232,6 +232,7 @@ pub async fn import_colpkg_handler(
 
     match res {
         Ok(_) => {
+            let _ = crate::cas::deduplicate_media_in_dir(&runtime.base_data_dir, &runtime.media_dir);
             runtime.media_sync.lock().unwrap().reconcile_directory();
             Json(serde_json::json!({ "ok": true })).into_response()
         }

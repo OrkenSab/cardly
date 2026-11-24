@@ -3,6 +3,7 @@
 
 pub mod ai;
 pub mod auth;
+pub mod cas;
 pub mod config;
 pub mod demo;
 pub mod files;
@@ -10,6 +11,7 @@ pub mod media;
 pub mod rpc;
 pub mod static_assets;
 pub mod sync_server;
+pub mod user_registry;
 pub mod user_runtime;
 
 use std::sync::Arc;
@@ -25,10 +27,12 @@ use tower_http::trace::TraceLayer;
 
 use crate::config::ServerConfig;
 use crate::rpc::RpcRegistry;
+use crate::user_registry::UserRegistry;
 use crate::user_runtime::UserManager;
 
 pub struct AppState {
     pub config: ServerConfig,
+    pub user_registry: Arc<UserRegistry>,
     pub users: UserManager,
     pub rpc: RpcRegistry,
     pub ai_quota: Arc<ai::AiQuotaManager>,
@@ -36,6 +40,10 @@ pub struct AppState {
 
 impl AppState {
     pub fn new(config: ServerConfig) -> Arc<Self> {
+        let user_registry = Arc::new(
+            UserRegistry::new(&config.data_dir, config.users.clone())
+                .expect("initialize user registry"),
+        );
         let users = UserManager::new(config.data_dir.clone());
         let rpc = RpcRegistry::build();
         let ai_quota = Arc::new(ai::AiQuotaManager::new(
@@ -43,7 +51,13 @@ impl AppState {
             config.ai_global_daily_limit,
             config.ai_ip_daily_limit,
         ));
-        Arc::new(Self { config, users, rpc, ai_quota })
+        Arc::new(Self {
+            config,
+            user_registry,
+            users,
+            rpc,
+            ai_quota,
+        })
     }
 }
 
@@ -72,6 +86,11 @@ pub fn build_router(state: Arc<AppState>) -> Router {
         .route("/api/auth/login", post(auth::login_handler))
         .route("/api/auth/logout", post(auth::logout_handler))
         .route("/api/auth/me", get(auth::me_handler))
+        .route("/api/auth/register", post(auth::register_handler))
+        .route("/api/auth/guest", post(auth::guest_handler))
+        .route("/api/register", post(auth::register_handler))
+        .route("/auth/register", post(auth::register_handler))
+        .route("/auth/guest", post(auth::guest_handler))
         // Demo mode status
         .route("/api/demo/status", get(demo::demo_status_handler))
         // AI Card Generator & Batch Add APIs

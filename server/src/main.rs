@@ -52,6 +52,26 @@ async fn main() -> anyhow::Result<()> {
         cardly_server::demo::start_demo_reset_task(state.clone(), interval);
     }
 
+    // Media CAS deduplication background pass
+    let cas_data_dir = state.config.data_dir.clone();
+    tokio::task::spawn_blocking(move || {
+        let users_dir = cas_data_dir.join("users");
+        if let Ok(entries) = std::fs::read_dir(&users_dir) {
+            let mut total_deduped = 0;
+            for entry in entries.flatten() {
+                let media_dir = entry.path().join("media");
+                if media_dir.is_dir() {
+                    if let Ok(n) = cardly_server::cas::deduplicate_media_in_dir(&cas_data_dir, &media_dir) {
+                        total_deduped += n;
+                    }
+                }
+            }
+            if total_deduped > 0 {
+                info!(deduped_files = total_deduped, "Completed startup media CAS deduplication sweep");
+            }
+        }
+    });
+
     let app = build_router(state);
     let listener = TcpListener::bind(addr).await?;
     let bound = listener.local_addr()?;

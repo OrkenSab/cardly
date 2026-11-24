@@ -835,6 +835,7 @@ pub async fn ai_batch_add_handler(
     };
 
     let mut note_ids = Vec::with_capacity(req.cards.len());
+    let mut seen_first_fields = std::collections::HashSet::new();
     for card in req.cards {
         let mut fields = vec![String::new(); field_count.max(2)];
         if let Some(cloze) = card.cloze.or(card.text) {
@@ -864,6 +865,12 @@ pub async fn ai_batch_add_handler(
                     fields[1] = back;
                 }
             }
+        }
+
+        // Avoid adding duplicate cards with identical first field
+        let first_norm = fields.get(0).map(|s| s.trim().to_lowercase()).unwrap_or_default();
+        if !first_norm.is_empty() && !seen_first_fields.insert(first_norm) {
+            continue;
         }
 
         let add_req = AddNoteRequest {

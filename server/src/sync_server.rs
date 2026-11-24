@@ -163,17 +163,19 @@ pub fn media_sync_router() -> Router<Arc<AppState>> {
 
 impl SyncServerHandle {
     fn authenticate_sync_user(&self, hkey: &str) -> HttpResult<Arc<UserRuntime>> {
-        let idx = self
+        let username = self
             .0
-            .config
-            .users_by_hkey
-            .get(hkey)
-            .copied()
+            .user_registry
+            .get_by_hkey(hkey)
+            .map(|u| u.username)
+            .or_else(|| {
+                let idx = self.0.config.users_by_hkey.get(hkey).copied()?;
+                Some(self.0.config.users[idx].username.clone())
+            })
             .or_forbidden("invalid hkey")?;
-        let username = &self.0.config.users[idx].username;
         self.0
             .users
-            .get_or_init(username)
+            .get_or_init(&username)
             .or_internal_err("init user runtime for sync")
     }
 }

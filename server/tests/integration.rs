@@ -1257,3 +1257,219 @@ async fn ai_card_generation_and_batch_add() {
     }
     assert!(hit_429, "Expected rate limiter to trigger 429 Too Many Requests");
 }
+
+#[tokio::test]
+async fn user_registration_guest_session_and_media_cas() {
+    let (h, state) = TestHarness::new_with_demo();
+
+    // 1. Unauthenticated request to /api/auth/me returns 401 Unauthorized (does NOT trap visitor in demo)
+    let (status, _, bytes) = h
+        .send(
+            Request::get("/api/auth/me")
+                .body(Body::empty())
+                .unwrap(),
+        )
+        .await;
+    assert_eq!(status, StatusCode::UNAUTHORIZED);
+    let unauth: serde_json::Value = serde_json::from_slice(&bytes).unwrap();
+    assert_eq!(unauth["authenticated"], false);
+    assert_eq!(unauth["demo_mode"], true);
+
+    // 2. Register new user "charlie"
+    let (status, headers, bytes) = h
+        .send(
+            Request::post("/api/auth/register")
+                .header(header::CONTENT_TYPE, "application/json")
+                .body(Body::from(
+                    serde_json::json!({
+                        "username": "charlie",
+                        "password": "strongpassword123"
+                    })
+                    .to_string(),
+                ))
+                .unwrap(),
+        )
+        .await;
+    assert_eq!(status, StatusCode::OK);
+    let cookie_hdr = headers.get(header::SET_COOKIE).expect("set-cookie on register");
+    let reg_cookie = cookie_hdr.to_str().unwrap().split(';').next().unwrap().to_string();
+    let reg_resp: serde_json::Value = serde_json::from_slice(&bytes).unwrap();
+    assert_eq!(reg_resp["authenticated"], true);
+    assert_eq!(reg_resp["username"], "charlie");
+    assert_eq!(reg_resp["is_demo_user"], false);
+    let charlie_token = reg_resp["api_token"].as_str().unwrap().to_string();
+
+    // 3. Validation: Duplicate username registration is rejected
+    let (status, _, bytes) = h
+        .send(
+            Request::post("/api/auth/register")
+                .header(header::CONTENT_TYPE, "application/json")
+                .body(Body::from(
+                    serde_json::json!({
+                        "username": "charlie",
+                        "password": "anotherpassword123"
+                    })
+                    .to_string(),
+                ))
+                .unwrap(),
+        )
+        .await;
+    assert_eq!(status, StatusCode::BAD_REQUEST);
+    let dup_err: serde_json::Value = serde_json::from_slice(&bytes).unwrap();
+    assert!(dup_err["error"].as_str().unwrap().contains("already taken"));
+
+    // 4. Validation: Short password is rejected
+    let (status, _, bytes) = h
+        .send(
+            Request::post("/api/auth/register")
+                .header(header::CONTENT_TYPE, "application/json")
+                .body(Body::from(
+                    serde_json::json!({
+                        "username": "david",
+                        "password": "123"
+                    })
+                    .to_string(),
+                ))
+                .unwrap(),
+        )
+        .await;
+    assert_eq!(status, StatusCode::BAD_REQUEST);
+    let short_err: serde_json::Value = serde_json::from_slice(&bytes).unwrap();
+    assert!(short_err["error"].as_str().unwrap().contains("at least 6 characters"));
+
+    // 5. Validation: Reserved name is rejected
+    let (status, _, bytes) = h
+        .send(
+            Request::post("/api/auth/register")
+                .header(header::CONTENT_TYPE, "application/json")
+                .body(Body::from(
+                    serde_json::json!({
+                        "username": "demo",
+                        "password": "somepassword123"
+                    })
+                    .to_string(),
+                ))
+                .unwrap(),
+        )
+        .await;
+    assert_eq!(status, StatusCode::BAD_REQUEST);
+    let res_err: serde_json::Value = serde_json::from_slice(&bytes).unwrap();
+    assert!(res_err["error"].as_str().unwrap().contains("reserved"));
+
+    // 6. Charlie can use authenticated RPC to create a deck
+    let (status, _bytes) = h
+        .rpc_raw(
+            &reg_cookie,
+            &charlie_token,
+            "addDeck",
+            anki_proto::decks::Deck {
+                id: 0,
+                name: "Charlie Deck".to_string(),
+                mtime_secs: 0,
+                usn: 0,
+                common: None,
+                kind: Some(anki_proto::decks::deck::Kind::Normal(
+                    anki_proto::decks::deck::Normal::default(),
+                )),
+            }
+            .encode_to_vec(),
+        )
+        .await;
+    assert_eq!(status, StatusCode::OK);
+
+    // 7. Test Logout and Login back as Charlie
+    let (status, headers, _) = h
+        .send(
+            Request::post("/api/auth/logout")
+                .header(header::COOKIE, &reg_cookie)
+                .body(Body::empty())
+                .unwrap(),
+        )
+        .await;
+    assert_eq!(status, StatusCode::OK);
+    let clear_cookie = headers.get(header::SET_COOKIE).unwrap().to_str().unwrap();
+    assert!(clear_cookie.contains("Max-Age=0") || clear_cookie.contains("cardly_session=;"));
+
+    // Login back with Charlie's credentials
+    let (status, _, bytes) = h
+        .send(
+            Request::post("/api/auth/login")
+                .header(header::CONTENT_TYPE, "application/json")
+                .body(Body::from(
+                    serde_json::json!({
+                        "username": "charlie",
+                        "password": "strongpassword123"
+                    })
+                    .to_string(),
+                ))
+                .unwrap(),
+        )
+        .await;
+    assert_eq!(status, StatusCode::OK);
+    let login_resp: serde_json::Value = serde_json::from_slice(&bytes).unwrap();
+    assert_eq!(login_resp["username"], "charlie");
+    assert_eq!(login_resp["authenticated"], true);
+
+    // 8. Ephemeral Guest Session
+    let (status, guest_headers, bytes) = h
+        .send(
+            Request::post("/api/auth/guest")
+                .body(Body::empty())
+                .unwrap(),
+        )
+        .await;
+    assert_eq!(status, StatusCode::OK);
+    let guest_resp: serde_json::Value = serde_json::from_slice(&bytes).unwrap();
+    assert_eq!(guest_resp["authenticated"], true);
+    assert_eq!(guest_resp["is_demo_user"], true);
+    let guest_uname = guest_resp["username"].as_str().unwrap();
+    assert!(guest_uname.starts_with("guest_"));
+    let guest_cookie = guest_headers
+        .get(header::SET_COOKIE)
+        .unwrap()
+        .to_str()
+        .unwrap()
+        .split(';')
+        .next()
+        .unwrap();
+
+    // Verify guest has sample decks seeded
+    let guest_tok = guest_resp["api_token"].as_str().unwrap();
+    let (status, bytes) = h
+        .rpc_raw(
+            guest_cookie,
+            guest_tok,
+            "getDeckNames",
+            anki_proto::decks::GetDeckNamesRequest {
+                skip_empty_default: false,
+                include_filtered: true,
+            }
+            .encode_to_vec(),
+        )
+        .await;
+    assert_eq!(status, StatusCode::OK);
+    let deck_names = anki_proto::decks::DeckNames::decode(bytes.as_slice()).unwrap();
+    assert!(deck_names.entries.iter().any(|d| d.name == "General Knowledge"));
+
+    // 9. Media CAS deduplication test
+    let u1_dir = state.config.data_dir.join("users/charlie/media");
+    let u2_dir = state.config.data_dir.join(format!("users/{guest_uname}/media"));
+    let test_media_data = b"Shared deck audio sound byte [sound:pronounce.mp3]";
+    let f1 = u1_dir.join("pronounce.mp3");
+    let f2 = u2_dir.join("pronounce.mp3");
+
+    cardly_server::cas::store_media_deduplicated(&state.config.data_dir, &f1, test_media_data).unwrap();
+    cardly_server::cas::store_media_deduplicated(&state.config.data_dir, &f2, test_media_data).unwrap();
+
+    assert_eq!(std::fs::read(&f1).unwrap(), test_media_data);
+    assert_eq!(std::fs::read(&f2).unwrap(), test_media_data);
+
+    #[cfg(unix)]
+    {
+        use std::os::unix::fs::MetadataExt;
+        let m1 = std::fs::metadata(&f1).unwrap();
+        let m2 = std::fs::metadata(&f2).unwrap();
+        assert_eq!(m1.ino(), m2.ino(), "Deduplicated files across users must share the same inode");
+    }
+}
+

@@ -45,18 +45,23 @@ use tracing::warn;
 
 /// Holds the server-side media sync database (`media.db`) and shared `media/` folder.
 pub struct MediaSyncStore {
+    pub data_dir: PathBuf,
     pub media_folder: PathBuf,
     pub db: ServerMediaDatabase,
 }
 
 impl MediaSyncStore {
-    pub fn open(user_folder: &Path) -> Result<Self> {
+    pub fn open(data_dir: &Path, user_folder: &Path) -> Result<Self> {
         let media_folder = user_folder.join("media");
         fs::create_dir_all(&media_folder)
             .with_context(|| format!("creating media folder {}", media_folder.display()))?;
         let db = ServerMediaDatabase::new(&user_folder.join("media.db"))
             .map_err(|e| anyhow!("opening media.db: {e:?}"))?;
-        Ok(Self { media_folder, db })
+        Ok(Self {
+            data_dir: data_dir.to_path_buf(),
+            media_folder,
+            db,
+        })
     }
 
     pub fn last_usn(&self) -> HttpResult<Usn> {
@@ -99,7 +104,10 @@ impl MediaSyncStore {
                         UploadedChangeResult::Added { filename, data, .. }
                         | UploadedChangeResult::Replaced { filename, data, .. } => {
                             let dest = folder.join(&filename);
-                            anki_io::write_file(&dest, data)?;
+                            if let Err(e) = crate::cas::store_media_deduplicated(&self.data_dir, &dest, &data) {
+                                warn!(filename, error = %e, "CAS deduplication fallback to direct write");
+                                anki_io::write_file(&dest, data)?;
+                            }
                         }
                         UploadedChangeResult::Removed { filename, .. } => {
                             let dest = folder.join(&filename);
@@ -257,6 +265,7 @@ pub struct CollectionMode {
 
 pub struct UserRuntime {
     pub username: String,
+    pub base_data_dir: PathBuf,
     pub folder: PathBuf,
     pub col_path: PathBuf,
     pub media_dir: PathBuf,
@@ -291,10 +300,11 @@ impl UserRuntime {
 
         let tr = I18n::new(&["en-US".to_string()]);
         let backend = Backend::new(tr, true);
-        let media_sync = MediaSyncStore::open(&folder)?;
+        let media_sync = MediaSyncStore::open(base_data_dir, &folder)?;
 
         Ok(Self {
             username: username.to_string(),
+            base_data_dir: base_data_dir.to_path_buf(),
             folder,
             col_path,
             media_dir,
