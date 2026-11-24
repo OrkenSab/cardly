@@ -98,14 +98,18 @@
     <div class="tabs-nav" role="tablist">
       <button
         type="button"
+        role="tab"
+        aria-selected={mode === "signin"}
         class="tab-btn"
         class:active={mode === "signin"}
         onclick={() => switchMode("signin")}
       >
-        Sign In
+        Log In
       </button>
       <button
         type="button"
+        role="tab"
+        aria-selected={mode === "register"}
         class="tab-btn"
         class:active={mode === "register"}
         onclick={() => switchMode("register")}
