@@ -1,6 +1,7 @@
 <script lang="ts">
   import { importColpkgUpload, uploadFile } from "../lib/api";
   import { store } from "../lib/store.svelte";
+  import Icon from "./Icon.svelte";
   import UpstreamFrame from "./UpstreamFrame.svelte";
 
   let dragging = $state(false);
@@ -106,7 +107,7 @@
           {#if uploading}
             <div class="dz-title">Uploading file...</div>
           {:else}
-            <div class="dz-icon">📥</div>
+            <div class="dz-icon"><Icon name="inbox" size={32} /></div>
             <div class="dz-title">Drop a file here, or click to browse</div>
             <div class="dz-sub">
               Supported formats: <code>.apkg</code> (Deck Package), <code>.colpkg</code> (Collection Package),

@@ -1,6 +1,7 @@
 <script lang="ts">
   import { continueAsGuest, login, register } from "../lib/api";
   import { store } from "../lib/store.svelte";
+  import Icon from "./Icon.svelte";
 
   let mode = $state<"signin" | "register">("signin");
   let username = $state("");
@@ -181,7 +182,8 @@
         disabled={submitting}
         onclick={handleGuestDemo}
       >
-        ⚡ Try Live Demo / Continue as Guest
+        <Icon name="zap" size={16} />
+        <span>Try Live Demo / Continue as Guest</span>
       </button>
       <p class="demo-caption">
         Instant guest access: explore preloaded decks, cards, and study sessions without registration.

@@ -51,6 +51,12 @@ components under permissive licenses:
 - Anki Translations:
   Contributions from the Anki translation community under BSD and Public Domain.
 
+- Lucide Icons (https://lucide.dev):
+  Copyright (c) for portions of Lucide are held by Cole Bemis 2013-2022 as part
+  of Feather (MIT). All other copyright (c) for Lucide are held by Lucide
+  Contributors 2022.
+  License: ISC License (https://lucide.dev/license)
+
 ================================================================================
 UPSTREAM CONTRIBUTORS
 ================================================================================

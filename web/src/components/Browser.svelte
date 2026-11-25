@@ -48,6 +48,7 @@
   import type { TagTreeNode } from "@generated/anki/tags_pb";
   import { fetchBrowserRowsBatch, type BrowserRowJson } from "../lib/api";
   import { store } from "../lib/store.svelte";
+  import Icon from "./Icon.svelte";
   import FindAndReplaceModal from "./FindAndReplaceModal.svelte";
   import FindDuplicatesModal from "./FindDuplicatesModal.svelte";
   import UpstreamEditor from "./UpstreamEditor.svelte";
@@ -954,7 +955,7 @@
                       void runSearch(query);
                     }}
                   >
-                    ★ {name}
+                    <Icon name="star" size={13} /> {name}
                   </button>
                   <button
                     class="sb-del"
@@ -1175,8 +1176,8 @@
               {/each}
             </datalist>
             <button type="submit" class="anki-btn small">Search</button>
-            <button type="button" class="anki-btn small" title="Save current search" onclick={handleSaveSearch}>
-              ★
+            <button type="button" class="anki-btn small" title="Save current search" aria-label="Save current search" onclick={handleSaveSearch}>
+              <Icon name="star" size={14} />
             </button>
             <div class="menu-wrap">
               <button

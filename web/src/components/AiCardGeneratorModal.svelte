@@ -4,6 +4,7 @@
   import type { DeckNameId } from "@generated/anki/decks_pb";
   import type { NotetypeNameId } from "@generated/anki/notetypes_pb";
   import { store } from "../lib/store.svelte";
+  import Icon from "./Icon.svelte";
 
   type TabMode = "text" | "image";
   type CardType = "basic" | "cloze";
@@ -258,7 +259,7 @@
       const targetDeck = decks.find((d) => Number(d.id) === selectedDeckId);
       const deckName = targetDeck ? targetDeck.name : "deck";
 
-      store.toast(`✨ Added ${count} AI flashcards to "${deckName}"!`);
+      store.toast(`Added ${count} AI flashcards to "${deckName}"!`);
       store.opRevision++;
       store.aiGeneratorOpen = false;
     } catch (err) {
@@ -284,17 +285,19 @@
     <!-- Modal Header -->
     <div class="modal-header">
       <div class="title-with-badge">
-        <h2 id="ai-modal-title">✨ AI Card Generator</h2>
+        <h2 id="ai-modal-title"><Icon name="sparkles" size={18} /> AI Card Generator</h2>
         <span class="badge-pill">FSRS Ready</span>
       </div>
-      <button class="modal-close" onclick={closeModal} title="Close (Esc)" aria-label="Close">✕</button>
+      <button class="modal-close" onclick={closeModal} title="Close (Esc)" aria-label="Close">
+        <Icon name="x" size={16} />
+      </button>
     </div>
 
     <!-- Modal Body -->
     <div class="modal-body">
       {#if errorMessage}
         <div class="error-banner" role="alert">
-          <span class="error-icon">⚠️</span>
+          <span class="error-icon"><Icon name="alert-triangle" size={16} /></span>
           <span>{errorMessage}</span>
         </div>
       {/if}
@@ -309,7 +312,7 @@
             role="tab"
             aria-selected={activeTab === "text"}
           >
-            📝 Text &amp; Notes
+            <Icon name="file-text" size={15} /> Text &amp; Notes
           </button>
           <button
             class="tab-btn"
@@ -318,7 +321,7 @@
             role="tab"
             aria-selected={activeTab === "image"}
           >
-            📸 Photo / Image OCR
+            <Icon name="camera" size={15} /> Photo / Image OCR
           </button>
         </div>
 
@@ -346,7 +349,7 @@
                 </div>
               {:else}
                 <div class="dropzone-empty">
-                  <span class="dropzone-icon">📷</span>
+                  <span class="dropzone-icon"><Icon name="camera" size={28} /></span>
                   <p>Drag and drop a photo or document screenshot, or browse files</p>
                   <input
                     id="ai-image-file"
@@ -405,7 +408,7 @@
             onclick={() => (showProviderSettings = !showProviderSettings)}
             aria-expanded={showProviderSettings}
           >
-            <span>⚙️ AI Provider: <strong>{provider === "gemini" ? "Google Gemini" : "OpenAI / Custom"}</strong> ({modelName})</span>
+            <span><Icon name="settings" size={14} /> AI Provider: <strong>{provider === "gemini" ? "Google Gemini" : "OpenAI / Custom"}</strong> ({modelName})</span>
             <span class="toggle-arrow">{showProviderSettings ? "▲" : "▼"}</span>
           </button>
 
@@ -491,7 +494,7 @@
           <div class="review-actions">
             <button type="button" class="btn-small" onclick={() => selectAll(true)}>Select All</button>
             <button type="button" class="btn-small" onclick={() => selectAll(false)}>Deselect All</button>
-            <button type="button" class="btn-small btn-secondary" onclick={() => (step = "configure")}>⚙️ Change Prompt</button>
+            <button type="button" class="btn-small btn-secondary" onclick={() => (step = "configure")}><Icon name="settings" size={13} /> Change Prompt</button>
           </div>
         </div>
 
@@ -503,7 +506,9 @@
                   <input type="checkbox" bind:checked={card.selected} />
                   <span class="card-num">Card #{i + 1}</span>
                 </label>
-                <button type="button" class="btn-delete-card" onclick={() => removeCard(card.id)} title="Delete card">✕</button>
+                <button type="button" class="btn-delete-card" onclick={() => removeCard(card.id)} title="Delete card" aria-label="Delete card">
+                  <Icon name="x" size={14} />
+                </button>
               </div>
 
               {#if cardType === "basic"}
@@ -548,7 +553,7 @@
             <span class="spinner-small"></span>
             <span>Generating Flashcards...</span>
           {:else}
-            <span>✨ Generate Flashcards</span>
+            <span><Icon name="sparkles" size={15} /> Generate Flashcards</span>
           {/if}
         </button>
       {:else}
