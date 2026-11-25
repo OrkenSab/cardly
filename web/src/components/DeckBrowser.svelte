@@ -246,7 +246,7 @@
                   <button
                     type="button"
                     class="collapse-btn"
-                    aria-label={node.collapsed ? "Expand subdecks" : "Collapse subdecks"}
+                    aria-label={node.collapsed ? "Expand group" : "Collapse group"}
                     onclick={(e) => toggleCollapse(node, e)}
                   >
                     {node.collapsed ? "+" : "−"}

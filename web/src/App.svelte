@@ -264,7 +264,7 @@
       >
         <span class="demo-banner-text">
           <Icon name="zap" size={14} />
-          <strong>Demo Mode</strong>: resets every {Math.max(1, Math.round(store.demoResetIntervalMinutes / 60))}h.
+          <strong>Demo Mode</strong>: data resets every {Math.max(1, Math.round(store.demoResetIntervalMinutes / 60))}h.
         </span>
         <div class="demo-banner-links">
           <a href="https://github.com/OrkenSab/cardly" target="_blank" rel="noopener noreferrer">Source Code</a>

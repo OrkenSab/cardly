@@ -189,7 +189,19 @@
 
   <!-- Compact mobile header title (visible <= 640px) -->
   <div class="mobile-header-left">
-    <span class="mobile-title">{mobileTitle}</span>
+    {#if store.view !== "decks"}
+      <button
+        type="button"
+        class="mobile-back-btn"
+        onclick={() => {
+          store.view = "decks";
+        }}
+      >
+        Decks
+      </button>
+    {:else}
+      <span class="mobile-title">{mobileTitle}</span>
+    {/if}
   </div>
 
   <div class="menubar-right">
@@ -547,6 +559,19 @@
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
+    }
+    .mobile-back-btn {
+      border: none;
+      background: transparent;
+      color: var(--fg-link);
+      font-family: inherit;
+      font-size: 15px;
+      font-weight: 600;
+      min-height: 44px;
+      padding: 0 8px 0 0;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
     }
     .theme-toggle,
     .mobile-menu-btn {
