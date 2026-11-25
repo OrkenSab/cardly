@@ -89,6 +89,10 @@ jobs:
           ssh -o StrictHostKeyChecking=no -p "$SSH_PORT" -i ~/.ssh/deploy_key "$SSH_USER@$SSH_HOST" "bash -c '
             set -e
             cd /opt/cardly
+            sed -i \"s|ghcr.io/orkensab/cardly|ghcr.io/cardly-anki/cardly|g\" docker-compose.prod.yml
+            if [ -f .env ]; then
+              sed -i \"s|ghcr.io/orkensab/cardly|ghcr.io/cardly-anki/cardly|g\" .env
+            fi
             docker compose -f docker-compose.prod.yml pull
             docker compose -f docker-compose.prod.yml up -d --remove-orphans
             echo \"✓ Cardly containers pulled and restarted successfully.\"
