@@ -14,6 +14,7 @@
   import { SetDeckCollapsedRequest_Scope } from "@generated/anki/decks_pb";
   import type { DeckTreeNode } from "@generated/anki/decks_pb";
   import { store } from "../lib/store.svelte";
+  import Icon from "./Icon.svelte";
 
   interface FlatDeckRow {
     node: DeckTreeNode;
@@ -192,18 +193,21 @@
     {/if}
 
     <div class="deck-table-wrap">
-      <table class="deck-table" cellspacing="0" cellpadding="3">
-        <thead>
-          <tr>
-            <th class="col-deck">Deck</th>
-            <th class="col-count">New</th>
-            <th class="col-count">Learn</th>
-            <th class="col-count">Due</th>
-            <th class="col-opts"></th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr
+      <div class="deck-table" role="table" aria-label="Decks">
+        <div class="deck-thead" role="rowgroup">
+          <div class="deck-header-row" role="row">
+            <div class="col-deck" role="columnheader">Deck</div>
+            <div class="col-counts-head" role="presentation">
+              <div class="col-count" role="columnheader">New</div>
+              <div class="col-count" role="columnheader">Learn</div>
+              <div class="col-count" role="columnheader">Due</div>
+            </div>
+            <div class="col-opts" role="columnheader" aria-label="Options"></div>
+          </div>
+        </div>
+
+        <div class="deck-tbody" role="rowgroup">
+          <div
             class="top-level-drag-row"
             class:drag-hover={dragOverId === "top"}
             ondragover={(e) => {
@@ -212,21 +216,18 @@
             }}
             ondragleave={() => dragOverId === "top" && (dragOverId = null)}
             ondrop={(e) => handleDrop("top", e)}
-          >
-            <td colspan="5"></td>
-          </tr>
+          ></div>
 
           {#if loading && rows.length === 0}
-            <tr>
-              <td colspan="5" class="loading-cell">Loading decks...</td>
-            </tr>
+            <div class="loading-cell">Loading decks...</div>
           {:else}
             {#each rows as { node, hasChildren } (Number(node.deckId))}
               {@const did = Number(node.deckId)}
-              <tr
+              <div
                 class="deck-row"
                 class:current={did === currentDeckId}
                 class:drag-hover={dragOverId === did}
+                role="row"
                 draggable="true"
                 ondragstart={(e) => handleDragStart(did, e)}
                 ondragend={() => {
@@ -240,51 +241,54 @@
                 ondragleave={() => dragOverId === did && (dragOverId = null)}
                 ondrop={(e) => handleDrop(did, e)}
               >
-                <td class="decktd">
-                  <span class="indent" style="padding-left: {(node.level - 1) * 20}px"></span>
-                  {#if hasChildren}
-                    <button
-                      class="collapse-btn"
-                      aria-label={node.collapsed ? "Expand subdecks" : "Collapse subdecks"}
-                      onclick={(e) => toggleCollapse(node, e)}
-                    >
-                      {node.collapsed ? "+" : "−"}
-                    </button>
-                  {:else}
-                    <span class="collapse-spacer"></span>
-                  {/if}
+                <span class="indent" style="width: {(node.level - 1) * 16}px"></span>
+                {#if hasChildren}
                   <button
-                    class="deck-link"
-                    class:filtered={node.filtered}
-                    onclick={(e) => openDeck(did, e)}
+                    type="button"
+                    class="collapse-btn"
+                    aria-label={node.collapsed ? "Expand subdecks" : "Collapse subdecks"}
+                    onclick={(e) => toggleCollapse(node, e)}
                   >
-                    {shortName(node.name)}
+                    {node.collapsed ? "+" : "−"}
                   </button>
-                </td>
-                <td class="col-count" data-col="new">
-                  <span class={node.newCount > 0 ? "new-count" : "zero-count"}>{node.newCount}</span>
-                </td>
-                <td class="col-count" data-col="learn">
-                  <span class={node.learnCount > 0 ? "learn-count" : "zero-count"}>{node.learnCount}</span>
-                </td>
-                <td class="col-count" data-col="due">
-                  <span class={node.reviewCount > 0 ? "review-count" : "zero-count"}>{node.reviewCount}</span>
-                </td>
-                <td class="col-opts">
+                {:else}
+                  <span class="collapse-spacer"></span>
+                {/if}
+                <button
+                  type="button"
+                  class="deck-link"
+                  class:filtered={node.filtered}
+                  onclick={(e) => openDeck(did, e)}
+                >
+                  <span class="deck-name-text">{shortName(node.name)}</span>
+                  <span class="deck-counts">
+                    <span class="col-count" data-col="new">
+                      <span class={node.newCount > 0 ? "new-count" : "zero-count"}>{node.newCount}</span>
+                    </span>
+                    <span class="col-count" data-col="learn">
+                      <span class={node.learnCount > 0 ? "learn-count" : "zero-count"}>{node.learnCount}</span>
+                    </span>
+                    <span class="col-count" data-col="due">
+                      <span class={node.reviewCount > 0 ? "review-count" : "zero-count"}>{node.reviewCount}</span>
+                    </span>
+                  </span>
+                </button>
+                <div class="col-opts">
                   <button
+                    type="button"
                     class="gear-btn"
                     title="Deck options menu"
                     aria-label={`Options for ${node.name}`}
                     onclick={(e) => openGearMenu(node, e)}
                   >
-                    ⚙
+                    <Icon name="settings" size={16} />
                   </button>
-                </td>
-              </tr>
+                </div>
+              </div>
             {/each}
           {/if}
-        </tbody>
-      </table>
+        </div>
+      </div>
     </div>
 
     {#if studiedText}
@@ -365,14 +369,17 @@
     display: flex;
     flex-direction: column;
     min-height: 0;
+    min-width: 0;
   }
   .deck-scroll {
     flex: 1;
-    overflow: auto;
+    overflow-y: auto;
+    overflow-x: hidden;
     display: flex;
     flex-direction: column;
     align-items: center;
     padding: 24px 16px 16px;
+    min-width: 0;
   }
   .error-banner {
     background: rgba(239, 68, 68, 0.12);
@@ -382,6 +389,7 @@
     border-radius: var(--border-radius);
     margin-bottom: 14px;
     font-size: 13.5px;
+    max-width: 100%;
   }
   .deck-table-wrap {
     border: 1px solid var(--border-subtle);
@@ -389,8 +397,9 @@
     background: var(--canvas-glass);
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
     padding: 14px 16px;
-    min-width: min(560px, 94vw);
-    max-width: 92vw;
+    width: min(600px, 100%);
+    max-width: 100%;
+    min-width: 0;
     transition: box-shadow var(--transition) ease-in-out;
   }
   .deck-table-wrap:hover {
@@ -403,88 +412,116 @@
   }
   .deck-table {
     width: 100%;
-    border-collapse: separate;
-    border-spacing: 0;
+    min-width: 0;
     font-size: 14.5px;
   }
-  th {
+  .deck-header-row {
+    display: flex;
+    align-items: center;
     border-bottom: 1px solid var(--border-subtle);
-    padding: 4px 12px 7px;
+    padding: 4px 4px 7px 12px;
     font-weight: 600;
     font-size: 13.5px;
     color: var(--fg);
+    gap: 8px;
   }
   .col-deck {
+    flex: 1;
+    min-width: 0;
     text-align: left;
   }
+  .col-counts-head,
+  .deck-counts {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+    gap: 4px;
+  }
   .col-count {
-    min-width: 4em;
+    width: 3.6em;
     text-align: right;
     font-variant-numeric: tabular-nums;
+    flex-shrink: 0;
   }
   .col-opts {
-    width: 2.2em;
-    text-align: center;
+    width: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
   }
-  .top-level-drag-row td {
+  .top-level-drag-row {
     height: 8px;
-    padding: 0;
     border-bottom: 2px solid transparent;
   }
-  .deck-row td {
-    padding: 5px 12px;
-    white-space: nowrap;
+  .deck-row {
+    display: flex;
+    align-items: center;
+    padding: 2px 4px 2px 6px;
+    border-radius: var(--border-radius-medium);
+    min-width: 0;
   }
-  .deck-row.current td,
-  .deck-row:hover td {
+  .deck-row.current,
+  .deck-row:hover {
     background: var(--border-subtle);
   }
-  .deck-row.current td:first-child,
-  .deck-row:hover td:first-child {
-    border-top-left-radius: var(--border-radius-medium);
-    border-bottom-left-radius: var(--border-radius-medium);
-  }
-  .deck-row.current td:last-child,
-  .deck-row:hover td:last-child {
-    border-top-right-radius: var(--border-radius-medium);
-    border-bottom-right-radius: var(--border-radius-medium);
-  }
-  .deck-row.drag-hover td,
-  .top-level-drag-row.drag-hover td {
+  .deck-row.drag-hover,
+  .top-level-drag-row.drag-hover {
     border-bottom: 2px solid var(--border-focus);
   }
-  .decktd {
-    min-width: 15em;
-    max-width: calc(100vw - 300px);
-    overflow: hidden;
-    text-overflow: ellipsis;
+  .indent {
+    flex-shrink: 0;
   }
   .collapse-btn {
     border: none;
     background: transparent;
     color: var(--fg);
     cursor: pointer;
-    width: 1.2em;
+    width: 24px;
+    height: 28px;
     padding: 0;
     font-weight: 600;
     font-size: 14px;
     text-align: center;
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
   }
   .collapse-spacer {
     display: inline-block;
-    width: 1.2em;
+    width: 24px;
+    flex-shrink: 0;
   }
   .deck-link {
+    flex: 1;
+    min-width: 0;
+    min-height: 32px;
     border: none;
     background: transparent;
     color: var(--fg);
     font-family: inherit;
     font-size: inherit;
-    padding: 0 4px;
+    padding: 4px 6px;
     cursor: pointer;
     text-align: left;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
   }
-  .deck-link:hover {
+  .deck-name-text {
+    flex: 1;
+    min-width: 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    word-break: break-word;
+    line-height: 1.3;
+  }
+  .deck-link:hover .deck-name-text {
     text-decoration: underline;
   }
   .deck-link.filtered {
@@ -495,9 +532,14 @@
     background: transparent;
     color: var(--fg-subtle);
     cursor: pointer;
-    font-size: 15px;
-    padding: 0 4px;
-    opacity: 0.45;
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    opacity: 0.55;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
   }
   .deck-row:hover .gear-btn,
   .deck-row.current .gear-btn,
@@ -539,29 +581,42 @@
       padding: 10px 8px 16px;
     }
     .deck-table-wrap {
-      padding: 0;
+      padding: 6px 4px;
     }
     .deck-table {
       font-size: 13.5px;
     }
-    .decktd {
-      min-width: 0;
-      max-width: calc(100vw - 160px);
-    }
-    th {
-      padding: 4px 6px 6px;
+    .deck-header-row {
+      padding: 4px 2px 6px 8px;
       font-size: 12px;
+      gap: 4px;
     }
-    .deck-row td {
-      padding: 9px 6px;
+    .deck-row {
+      padding: 2px 0 2px 4px;
+    }
+    .collapse-btn {
+      width: 32px;
+      min-height: 44px;
+    }
+    .collapse-spacer {
+      width: 12px;
+    }
+    .deck-link {
+      min-height: 44px;
+      padding: 8px 4px;
+      gap: 6px;
     }
     .col-count {
-      min-width: 2.2em;
+      width: 2.3em;
+      font-size: 12.5px;
+    }
+    .col-opts {
+      width: 44px;
     }
     .gear-btn {
       opacity: 0.85;
-      padding: 4px 6px;
-      font-size: 16px;
+      min-width: 44px;
+      min-height: 44px;
     }
     .bottom-bar {
       padding: 8px 12px;
