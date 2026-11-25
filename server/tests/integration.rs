@@ -1491,3 +1491,165 @@ async fn user_registration_guest_session_and_media_cas() {
     assert!(!state.user_registry.has_user(guest_uname));
 }
 
+#[tokio::test]
+async fn fsrs6_params_and_backward_compat_work() {
+    let h = TestHarness::new();
+    let (cookie, token) = h.login("alice", "secret123").await;
+
+    // 1. Fetch Basic notetype ID and add a test note in Default deck
+    let (status, bytes) = h.rpc_raw(&cookie, &token, "getNotetypeNames", vec![]).await;
+    assert_eq!(status, StatusCode::OK);
+    let nt_names = NotetypeNames::decode(bytes.as_slice()).unwrap();
+    let basic_id = nt_names
+        .entries
+        .iter()
+        .find(|e| e.name == "Basic")
+        .expect("Basic notetype exists")
+        .id;
+
+    let (status, bytes) = h
+        .rpc_raw(
+            &cookie,
+            &token,
+            "addNote",
+            anki_proto::notes::AddNoteRequest {
+                note: Some(anki_proto::notes::Note {
+                    id: 0,
+                    guid: String::new(),
+                    notetype_id: basic_id,
+                    mtime_secs: 0,
+                    usn: 0,
+                    tags: vec![],
+                    fields: vec!["FSRS-6 Front".into(), "FSRS-6 Back".into()],
+                }),
+                deck_id: 1,
+            }
+            .encode_to_vec(),
+        )
+        .await;
+    assert_eq!(status, StatusCode::OK, "addNote failed: {}", String::from_utf8_lossy(&bytes));
+
+    // 2. Configure 21-parameter FSRS-6 weights on default deck config
+    let (status, bytes) = h
+        .rpc_raw(
+            &cookie,
+            &token,
+            "getDeckConfig",
+            anki_proto::generic::Int64 { val: 1 }.encode_to_vec(),
+        )
+        .await;
+    assert_eq!(status, StatusCode::OK);
+    let mut dconf = anki_proto::deck_config::DeckConfig::decode(bytes.as_slice()).unwrap();
+    let fsrs6_weights: Vec<f32> = vec![
+        0.212, 1.2931, 2.3065, 8.2956, 6.4133, 0.8334, 3.0194, 0.001, 1.8722, 0.1666, 0.796,
+        1.4835, 0.0614, 0.2629, 1.6483, 0.6014, 1.8729, 0.5425, 0.0912, 0.0658, 0.1542,
+    ];
+    assert_eq!(fsrs6_weights.len(), 21);
+    if let Some(ref mut cfg) = dconf.config {
+        cfg.fsrs_params_6 = fsrs6_weights.clone();
+    }
+    let (status, _) = h
+        .rpc_raw(
+            &cookie,
+            &token,
+            "updateDeckConfigs",
+            anki_proto::deck_config::UpdateDeckConfigsRequest {
+                target_deck_id: 1,
+                configs: vec![dconf],
+                fsrs: true,
+                ..Default::default()
+            }
+            .encode_to_vec(),
+        )
+        .await;
+    assert_eq!(status, StatusCode::OK);
+
+    // Verify 21 FSRS-6 parameters persisted
+    let (status, bytes) = h
+        .rpc_raw(
+            &cookie,
+            &token,
+            "getDeckConfig",
+            anki_proto::generic::Int64 { val: 1 }.encode_to_vec(),
+        )
+        .await;
+    assert_eq!(status, StatusCode::OK);
+    let reloaded = anki_proto::deck_config::DeckConfig::decode(bytes.as_slice()).unwrap();
+    assert_eq!(reloaded.config.as_ref().unwrap().fsrs_params_6.len(), 21);
+
+    // 4. Verify scheduling & answering a card under FSRS-6 works
+    let (status, bytes) = h
+        .rpc_raw(
+            &cookie,
+            &token,
+            "getQueuedCards",
+            anki_proto::scheduler::GetQueuedCardsRequest {
+                fetch_limit: 5,
+                intraday_learning_only: false,
+            }
+            .encode_to_vec(),
+        )
+        .await;
+    assert_eq!(status, StatusCode::OK);
+    let queued = anki_proto::scheduler::QueuedCards::decode(bytes.as_slice()).unwrap();
+    assert!(!queued.cards.is_empty());
+    let top = &queued.cards[0];
+    let card_id = top.card.as_ref().unwrap().id;
+    let states = top.states.as_ref().unwrap();
+
+    let (status, _) = h
+        .rpc_raw(
+            &cookie,
+            &token,
+            "answerCard",
+            anki_proto::scheduler::CardAnswer {
+                card_id,
+                current_state: states.current.clone(),
+                new_state: states.good.clone(),
+                rating: anki_proto::scheduler::card_answer::Rating::Good as i32,
+                answered_at_millis: 1_700_000_000_000,
+                milliseconds_taken: 1500,
+            }
+            .encode_to_vec(),
+        )
+        .await;
+    assert_eq!(status, StatusCode::OK);
+
+    // 5. Verify backward compatibility with 19-parameter FSRS-5 weights
+    let mut dconf_v5 = reloaded;
+    if let Some(ref mut cfg) = dconf_v5.config {
+        cfg.fsrs_params_6.clear();
+        cfg.fsrs_params_5 = fsrs6_weights[..19].to_vec();
+    }
+    let (status, _) = h
+        .rpc_raw(
+            &cookie,
+            &token,
+            "updateDeckConfigs",
+            anki_proto::deck_config::UpdateDeckConfigsRequest {
+                target_deck_id: 1,
+                configs: vec![dconf_v5],
+                fsrs: true,
+                ..Default::default()
+            }
+            .encode_to_vec(),
+        )
+        .await;
+    assert_eq!(status, StatusCode::OK);
+
+    let (status, _) = h
+        .rpc_raw(
+            &cookie,
+            &token,
+            "getQueuedCards",
+            anki_proto::scheduler::GetQueuedCardsRequest {
+                fetch_limit: 5,
+                intraday_learning_only: false,
+            }
+            .encode_to_vec(),
+        )
+        .await;
+    assert_eq!(status, StatusCode::OK);
+}
+
+
