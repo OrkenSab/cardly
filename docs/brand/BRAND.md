@@ -135,7 +135,7 @@ Copy and paste these badges into READMEs, documentation, or external articles:
 ```markdown
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-blue.svg)](./LICENSE)
 [![Anki Upstream](https://img.shields.io/badge/Anki_Core-ankitects%2Fanki-orange.svg)](https://github.com/ankitects/anki)
-[![FSRS Enabled](https://img.shields.io/badge/FSRS-v4%20%26%20v5-amber.svg)](https://github.com/open-spaced-repetition/fsrs4anki)
+[![FSRS-6 Enabled](https://img.shields.io/badge/FSRS-6-amber.svg)](https://github.com/open-spaced-repetition/fsrs4anki)
 [![Docker Ready](https://img.shields.io/badge/Docker-Quickstart-2496ED.svg?logo=docker&logoColor=white)](./docker-compose.yml)
 [![PWA Installable](https://img.shields.io/badge/PWA-Installable-purple.svg?logo=pwa&logoColor=white)]()
 [![Tests](https://img.shields.io/badge/Tests-Rust%20%26%20Playwright%20Passing-brightgreen.svg)]()
@@ -144,6 +144,6 @@ Copy and paste these badges into READMEs, documentation, or external articles:
 ### Preview:
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-blue.svg)](./LICENSE)
 [![Anki Upstream](https://img.shields.io/badge/Anki_Core-ankitects%2Fanki-orange.svg)](https://github.com/ankitects/anki)
-[![FSRS Enabled](https://img.shields.io/badge/FSRS-v4%20%26%20v5-amber.svg)](https://github.com/open-spaced-repetition/fsrs4anki)
+[![FSRS-6 Enabled](https://img.shields.io/badge/FSRS-6-amber.svg)](https://github.com/open-spaced-repetition/fsrs4anki)
 [![Docker Ready](https://img.shields.io/badge/Docker-Quickstart-2496ED.svg?logo=docker&logoColor=white)](./docker-compose.yml)
 [![PWA Installable](https://img.shields.io/badge/PWA-Installable-purple.svg?logo=pwa&logoColor=white)]()

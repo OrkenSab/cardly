@@ -1,6 +1,6 @@
 # Cardly AI Card Generator Guide
 
-> **Cardly AI Card Generator** turns lecture transcripts, textbook excerpts, research articles, and photos/diagrams into clean, atomic spaced repetition flashcards optimized for the **FSRS v4/v5** scheduler.
+> **Cardly AI Card Generator** turns lecture transcripts, textbook excerpts, research articles, and photos/diagrams into clean, atomic spaced repetition flashcards for the **FSRS-6** scheduler (same as upstream Anki 26.09.4).
 
 ---
 

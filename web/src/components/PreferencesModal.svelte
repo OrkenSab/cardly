@@ -377,7 +377,7 @@
         <div class="sync-card">
           <h4>Self-Hosted Sync Server</h4>
           <p class="muted">
-            Cardly includes a built-in sync server compatible with AnkiDroid, AnkiMobile, and Desktop clients.
+            Cardly uses Anki's own sync protocol (verified with Anki Desktop). AnkiDroid and AnkiMobile: not yet tested, reports welcome.
             Point your mobile or desktop app's <strong>Self-hosted sync server</strong> URL to:
           </p>
           <div class="copy-row">

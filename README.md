@@ -15,7 +15,7 @@
   <a href="https://github.com/ankitects/anki"><img src="https://img.shields.io/badge/Anki%20Core-upstream%20rslib-orange.svg?style=flat-square" alt="Anki Upstream Core"></a>
   <a href="https://my-cardly.duckdns.org"><img src="https://img.shields.io/badge/Live%20Demo-Try%20Now-success?style=flat-square&logo=google-chrome&logoColor=white" alt="Live Demo"></a>
   <a href="#quickstart"><img src="https://img.shields.io/badge/Docker-Ready-2496ED.svg?style=flat-square&logo=docker&logoColor=white" alt="Docker Ready"></a>
-  <a href="./docs/PARITY.md"><img src="https://img.shields.io/badge/FSRS-v4%20%2F%20v5-purple.svg?style=flat-square" alt="FSRS Supported"></a>
+  <a href="./docs/PARITY.md"><img src="https://img.shields.io/badge/FSRS-6-purple.svg?style=flat-square" alt="FSRS-6 Supported"></a>
 </p>
 
 <p align="center">
@@ -88,10 +88,10 @@ Desktop Anki is reliable, but requires installing Python and Qt dependencies on 
 
 Cardly gives you a complete, self-hosted web workspace running on your own server:
 
-- **Official Anki Rust Core (`rslib`)**: We do not approximate or rewrite spaced repetition algorithms in JavaScript. Interval calculation, fuzzing, retention curves, and FSRS v4/v5 calculations run through upstream Anki Rust code.
+- **Official Anki Rust Core (`rslib`, Anki 26.09.4)**: We do not approximate or rewrite spaced repetition algorithms in JavaScript. Interval calculation, fuzzing, retention curves, and the **FSRS-6 scheduler, same as upstream Anki 26.09.4** (backward compatible with older FSRS v4/v5 parameters) run through upstream Anki Rust code.
 - **Desktop-Grade Card Browser**: Virtualized 3-pane browser built for large collections (100,000+ notes). Supports Anki search queries (`deck:`, `tag:`, `is:due`, `prop:reps>5`), saved searches, and batch operations (suspend, tag, find & replace, export).
-- **Built-in Sync Server**: Connect AnkiDroid (Android) and AnkiMobile (iOS) directly to your self-hosted instance using their native custom sync server settings. No third-party sync plugins required.
-- **In-Browser FSRS Optimizer**: Train personalized 19-parameter FSRS weights and run retention simulations directly from your review logs.
+- **Built-in Sync Server**: Uses Anki's own sync protocol (`/sync/*` and `/msync/*`, verified with Anki Desktop). AnkiDroid and AnkiMobile: not yet tested, reports welcome (see [docs/SYNC_TESTING.md](docs/SYNC_TESTING.md)).
+- **In-Browser FSRS Optimizer**: Train personalized 21-parameter FSRS-6 weights (or keep existing 17/19-parameter FSRS v4/v5 weights) and run retention simulations directly from your review logs.
 - **Card Templates & Media**: Client-side MathJax 3, nested cloze deletions (`{{c1::...}}`), HTML5 audio/video, image occlusion, and a split-screen HTML/CSS template editor with live preview.
 - **AI Card Generator**: Create atomic Q&A or cloze cards from lecture notes or textbook photos using local Ollama models or cloud providers (Gemini, OpenAI, OpenRouter).
 - **Self-Hosted Data Ownership**: Multi-user accounts with isolated SQLite collections (`collection.anki2`) and media stores. Automatic rolling snapshots before sync and schema changes.
@@ -120,7 +120,7 @@ Cardly gives you a complete, self-hosted web workspace running on your own serve
 | :--- | :--- | :--- | :--- |
 | **Environment** | Local desktop (Python / PyQt6) | Proprietary cloud service | Self-hosted web app & PWA |
 | **Core Scheduling** | Upstream `rslib` (Rust) | Custom web backend | Upstream `rslib` (Rust) linked directly |
-| **FSRS v4 / v5** | Scheduler + Optimizer + Simulator | Review only | Scheduler + Optimizer + Simulator |
+| **FSRS-6** | Scheduler + Optimizer + Simulator | Review only | Scheduler + Optimizer + Simulator (same as Anki 26.09.4) |
 | **Card Browser** | Full 3-pane browser | Basic search list | Full 3-pane virtualized browser |
 | **Template Editor** | Split HTML/CSS editor | Limited | Split HTML/CSS editor with live preview |
 | **Math & Media** | MathJax, LaTeX, audio/video | MathJax, basic audio | MathJax 3, HTML5 audio/video, Web TTS |
@@ -133,7 +133,7 @@ Cardly gives you a complete, self-hosted web workspace running on your own serve
 
 ## Mobile Sync
 
-Cardly implements the official Anki sync protocol (`/sync/*` and `/msync/*`). You can use standard Anki mobile apps with your server:
+Cardly uses Anki's own sync protocol (`/sync/*` and `/msync/*`, verified with Anki Desktop). AnkiDroid and AnkiMobile: not yet tested, reports welcome (see [docs/SYNC_TESTING.md](docs/SYNC_TESTING.md)):
 
 ### AnkiDroid (Android)
 1. Open **AnkiDroid** &rarr; **Settings** &rarr; **Syncing** &rarr; **Custom sync server**.

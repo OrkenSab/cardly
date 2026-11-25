@@ -6,7 +6,7 @@
     <title>Cardly — The Open-Source Spaced Repetition App for Web & Mobile</title>
     <meta
       name="description"
-      content="Anki Desktop web client powered directly by official Anki Rust core (rslib). FSRS v4/v5 scheduling, mobile PWA, and built-in AnkiDroid sync."
+      content="Anki Desktop web client powered directly by official Anki Rust core (rslib, Anki 26.09.4). FSRS-6 scheduler, mobile PWA, and Anki-compatible sync server."
     />
 
     <!-- Open Graph -->
@@ -14,7 +14,7 @@
     <meta property="og:title" content="Cardly — The Open-Source Spaced Repetition App" />
     <meta
       property="og:description"
-      content="Anki Desktop web client powered directly by official Anki Rust core (rslib). FSRS v4/v5 scheduling, mobile PWA, and built-in AnkiDroid sync."
+      content="Anki Desktop web client powered directly by official Anki Rust core (rslib, Anki 26.09.4). FSRS-6 scheduler, mobile PWA, and Anki-compatible sync server."
     />
     <meta property="og:image" content="https://orkensab.github.io/cardly/assets/social-preview.png" />
     <meta property="og:image:width" content="1280" />
@@ -25,7 +25,7 @@
     <meta name="twitter:title" content="Cardly — The Open-Source Spaced Repetition App" />
     <meta
       name="twitter:description"
-      content="Anki Desktop web client powered directly by official Anki Rust core (rslib). FSRS v4/v5 scheduling, mobile PWA, and built-in AnkiDroid sync."
+      content="Anki Desktop web client powered directly by official Anki Rust core (rslib, Anki 26.09.4). FSRS-6 scheduler, mobile PWA, and Anki-compatible sync server."
     />
     <meta name="twitter:image" content="https://orkensab.github.io/cardly/assets/social-preview.png" />
 
@@ -98,7 +98,7 @@
           <!-- Badges -->
           <div class="badge-row">
             <span class="pill-badge pill-blue" data-i18n="badge_anki">Anki Core Compatible</span>
-            <span class="pill-badge pill-amber" data-i18n="badge_fsrs">FSRS v4/v5 Core</span>
+            <span class="pill-badge pill-amber" data-i18n="badge_fsrs">FSRS-6 Core</span>
             <span class="pill-badge pill-emerald" data-i18n="badge_selfhosted">Self-Hosted Docker</span>
             <span class="pill-badge pill-purple" data-i18n="badge_agpl">GNU AGPL-3.0</span>
           </div>
@@ -220,7 +220,7 @@
         <div class="section-container">
           <div class="section-heading">
             <span class="kicker" data-i18n="feat_kicker">CORE CAPABILITIES</span>
-            <h2 data-i18n="feat_title">Engineered with Zero Compromises</h2>
+            <h2 data-i18n="feat_title">Built on Upstream Anki Core</h2>
             <p data-i18n="feat_desc">Cardly does not rewrite or approximate Anki's algorithms. It links directly against upstream Rust binaries and reusable Svelte components.</p>
           </div>
 
@@ -244,7 +244,7 @@
                   <polyline points="12 6 12 12 16 14"></polyline>
                 </svg>
               </div>
-              <h3 data-i18n="feat_2_title">FSRS v4 / v5 Scheduler</h3>
+              <h3 data-i18n="feat_2_title">FSRS-6 Scheduler</h3>
               <p data-i18n="feat_2_desc">Full support for the modern Free Spaced Repetition Scheduler with live in-browser weight optimization and future retention simulation.</p>
             </div>
 
@@ -337,7 +337,7 @@
                   <td data-i18n="r_engine_desktop">Native Rust <code class="inline-code">rslib</code></td>
                 </tr>
                 <tr>
-                  <td class="row-name" data-i18n="r_fsrs">FSRS v4/v5 &amp; Optimizer</td>
+                  <td class="row-name" data-i18n="r_fsrs">FSRS-6 &amp; Optimizer</td>
                   <td class="col-cardly" data-i18n="r_fsrs_cardly">Full support + online optimizer &amp; simulator</td>
                   <td data-i18n="r_fsrs_ankiweb">Review only (no optimizer)</td>
                   <td data-i18n="r_fsrs_desktop">Full support + optimizer</td>

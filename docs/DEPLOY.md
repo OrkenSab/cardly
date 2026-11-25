@@ -188,6 +188,8 @@ When `CARDLY_DEMO_MODE=true` is set:
 
 ## 6. Mobile Synchronization (AnkiDroid & AnkiMobile)
 
+Uses Anki's own sync protocol (verified with Anki Desktop). AnkiDroid and AnkiMobile: not yet tested, reports welcome (see [SYNC_TESTING.md](./SYNC_TESTING.md)).
+
 Once deployed behind HTTPS:
 - **Custom Sync Server URL:** `https://<YOUR_DOMAIN>/sync/`
 - **Media Sync URL:** `https://<YOUR_DOMAIN>/msync/`

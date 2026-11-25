@@ -4,6 +4,15 @@ All notable changes to Cardly will be documented in this file.
 
 ## [Unreleased]
 
+### FSRS-6 Verification, Claims Audit & Mobile Polish (2026-11-25)
+- **FSRS-6 & Upstream Anki `26.09.4`:**
+  - Verified `anki-upstream` (`26.09.4`, `fsrs 6.6.2`) includes FSRS-6 (21 parameters) with backward compatibility for FSRS v4/v5 parameters.
+  - Added Rust integration test (`fsrs6_params_and_backward_compat_work`) covering 21-parameter FSRS-6 scheduling and 19-parameter FSRS-5 backward compatibility.
+  - Corrected FSRS-6, Anki `26.09.4`, and sync compatibility wording across `README.md`, `docs/i18n/README.{ru,kk}.md`, `landing/`, `web/index.html`, `docs/PARITY.md`, `docs/AI_GENERATOR.md`, and `docs/brand/BRAND.md`.
+- **Documentation & CI Guardrails:**
+  - Added [docs/UPGRADING_ANKI.md](./docs/UPGRADING_ANKI.md) and [docs/SYNC_TESTING.md](./docs/SYNC_TESTING.md).
+  - Added non-blocking `submodule-pin-check` job in `ci.yml` and weekly `check-anki-release.yml` workflow.
+
 ### Phase 3 — Polish, Mobile PWA & Production Deployment (2026-11-18)
 - **PWA & Standalone App Support:**
   - Added Web App Manifest (`web/public/manifest.webmanifest`) with full metadata, standalone mode, and app shortcuts (Study, Add, Browse).

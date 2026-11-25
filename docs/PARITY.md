@@ -1,5 +1,7 @@
 # Cardly — Feature Parity Checklist
 
+Built on upstream **Anki `26.09.4`** (`rslib`, `fsrs 6.6.2` / **FSRS-6** with backward compatibility for FSRS v4/v5 parameters).
+
 Status legend:
 - `done` — Implemented and verified against Desktop Anki (screenshots & tests).
 - `partial` — Working, but with known visual or behavioral gaps noted below.
@@ -99,7 +101,8 @@ Status legend:
 - [x] (`done`) Syncing (sync endpoint & credentials info) & Backups (create/download/restore)
 
 ### 10. Sync
-- [x] (`done`) Sync compatibility verified with Anki client (collection + media sync)
+- [x] (`done`) Uses Anki's own sync protocol (`/sync/*`, `/msync/*`, verified with Anki Desktop & upstream `HttpSyncClient`)
+- [ ] (`partial`) AnkiDroid and AnkiMobile: not yet tested on real devices, reports welcome (see [SYNC_TESTING.md](./SYNC_TESTING.md))
 
 ## Phase 3 — Polish, Mobile PWA & QA
 - [x] (`done`) Light/Dark theme visual parity matching Desktop Anki (verified with 13 desktop + 6 mobile screenshots)
