@@ -619,4 +619,9 @@ impl UserManager {
         guard.insert(username.to_string(), rt.clone());
         Ok(rt)
     }
+
+    pub fn remove(&self, username: &str) -> Option<Arc<UserRuntime>> {
+        let mut guard = self.runtimes.lock().unwrap();
+        guard.remove(username)
+    }
 }

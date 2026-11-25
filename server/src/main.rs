@@ -52,22 +52,37 @@ async fn main() -> anyhow::Result<()> {
         cardly_server::demo::start_demo_reset_task(state.clone(), interval);
     }
 
-    // Media CAS deduplication background pass
+    // Media CAS deduplication and stale guest cleanup background pass
     let cas_data_dir = state.config.data_dir.clone();
+    let is_demo_mode = state.config.demo_mode;
     tokio::task::spawn_blocking(move || {
         let users_dir = cas_data_dir.join("users");
         if let Ok(entries) = std::fs::read_dir(&users_dir) {
             let mut total_deduped = 0;
+            let mut stale_guest_dirs = 0;
             for entry in entries.flatten() {
-                let media_dir = entry.path().join("media");
+                let p = entry.path();
+                let file_name = p.file_name().and_then(|n| n.to_str()).unwrap_or("");
+                if is_demo_mode && file_name.starts_with("guest_") {
+                    let _ = std::fs::remove_dir_all(&p);
+                    stale_guest_dirs += 1;
+                    continue;
+                }
+                let media_dir = p.join("media");
                 if media_dir.is_dir() {
                     if let Ok(n) = cardly_server::cas::deduplicate_media_in_dir(&cas_data_dir, &media_dir) {
                         total_deduped += n;
                     }
                 }
             }
-            if total_deduped > 0 {
-                info!(deduped_files = total_deduped, "Completed startup media CAS deduplication sweep");
+            let pruned_cas = cardly_server::cas::prune_orphaned_cas_blobs(&cas_data_dir).unwrap_or(0);
+            if total_deduped > 0 || stale_guest_dirs > 0 || pruned_cas > 0 {
+                info!(
+                    deduped_files = total_deduped,
+                    purged_guest_dirs = stale_guest_dirs,
+                    pruned_cas_blobs = pruned_cas,
+                    "Completed startup maintenance sweep"
+                );
             }
         }
     });

@@ -212,14 +212,7 @@ pub async fn login_handler(
     let (signed, claims) = sign_session(&state.config.session_secret, &user.username);
     let cookie = build_session_cookie(&signed, SESSION_TTL_SECS as i64, state.config.cookie_secure);
 
-    let is_demo = state.config.demo_mode
-        && (state
-            .config
-            .demo_user
-            .as_deref()
-            .map(|u| u == user.username)
-            .unwrap_or(false)
-            || state.user_registry.is_guest(&user.username));
+    let is_demo = state.is_demo_user(&user.username);
 
     let mut resp = Json(AuthMeResponse {
         authenticated: true,
@@ -262,8 +255,9 @@ pub async fn register_handler(
         }
     };
 
-    // Ensure collection.anki2 is cleanly created
+    // Ensure collection.anki2 is cleanly created with a quickstart welcome deck
     let _ = runtime.acquire_web_backend().await;
+    let _ = crate::demo::seed_welcome_deck_if_empty(&state, &runtime).await;
 
     let (signed, claims) = sign_session(&state.config.session_secret, &creds.username);
     let cookie = build_session_cookie(&signed, SESSION_TTL_SECS as i64, state.config.cookie_secure);
@@ -355,14 +349,7 @@ pub async fn me_handler(State(state): State<Arc<AppState>>, headers: HeaderMap) 
         }
     };
 
-    let is_demo = state.config.demo_mode
-        && (state
-            .config
-            .demo_user
-            .as_deref()
-            .map(|u| u == claims.u)
-            .unwrap_or(false)
-            || state.user_registry.is_guest(&claims.u));
+    let is_demo = state.is_demo_user(&claims.u);
 
     Json(AuthMeResponse {
         authenticated: true,

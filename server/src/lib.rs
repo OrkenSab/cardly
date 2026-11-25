@@ -59,6 +59,35 @@ impl AppState {
             ai_quota,
         })
     }
+
+    pub fn is_demo_user(&self, username: &str) -> bool {
+        self.config.demo_mode
+            && (self
+                .config
+                .demo_user
+                .as_deref()
+                .map(|u| u == username)
+                .unwrap_or(false)
+                || self.user_registry.is_guest(username))
+    }
+
+    pub async fn cleanup_stale_guests(&self, max_age_secs: u64) -> usize {
+        let stale = self.user_registry.cleanup_stale_guests(max_age_secs);
+        let count = stale.len();
+        for uname in stale {
+            if let Some(rt) = self.users.remove(&uname) {
+                let _ = rt.with_closed_collection(|_| Ok(())).await;
+                let _ = std::fs::remove_dir_all(&rt.folder);
+            } else {
+                let user_dir = self.config.data_dir.join("users").join(&uname);
+                let _ = std::fs::remove_dir_all(user_dir);
+            }
+        }
+        if count > 0 {
+            let _ = crate::cas::prune_orphaned_cas_blobs(&self.config.data_dir);
+        }
+        count
+    }
 }
 
 async fn healthz_handler() -> impl IntoResponse {

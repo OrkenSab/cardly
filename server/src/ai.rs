@@ -362,6 +362,23 @@ fn parse_llm_cards_json(raw: &str) -> Result<Vec<GeneratedCard>, String> {
         trimmed.to_string()
     };
 
+    fn filter_unique(cards: Vec<GeneratedCard>) -> Vec<GeneratedCard> {
+        let mut unique = Vec::with_capacity(cards.len());
+        let mut seen = std::collections::HashSet::new();
+        for c in cards {
+            let key = if !c.front.trim().is_empty() {
+                c.front.trim().to_lowercase()
+            } else {
+                c.cloze.trim().to_lowercase()
+            };
+            if !key.is_empty() && !seen.insert(key) {
+                continue;
+            }
+            unique.push(c);
+        }
+        unique
+    }
+
     // 1. Check { "cards": [...] } or { "flashcards": [...] }
     if let Ok(val) = serde_json::from_str::<serde_json::Value>(&unquoted) {
         if let Some(arr) = val
@@ -372,12 +389,12 @@ fn parse_llm_cards_json(raw: &str) -> Result<Vec<GeneratedCard>, String> {
             if let Ok(cards) =
                 serde_json::from_value::<Vec<GeneratedCard>>(serde_json::Value::Array(arr.clone()))
             {
-                return Ok(cards);
+                return Ok(filter_unique(cards));
             }
         }
         // 2. Check direct array [...]
         if let Ok(cards) = serde_json::from_value::<Vec<GeneratedCard>>(val) {
-            return Ok(cards);
+            return Ok(filter_unique(cards));
         }
     }
 
@@ -398,11 +415,12 @@ fn build_prompts(req: &AiGenerateRequest, target_count: usize) -> (String, Strin
             "You are an expert spaced repetition flashcard author for Cardly (Anki-compatible). \
 Generate exactly {target_count} high-retention atomic cloze deletion flashcards. \
 Guidelines: \
-1. Use standard Anki cloze syntax: {{{{c1::hidden text}}}}, {{{{c2::hidden text}}}}. \
-2. Cloze deletions MUST hide key terms, definitions, formulas, or numbers, leaving sufficient context to answer. \
-3. Keep each card focused on ONE fact (Minimum Information Principle). \
-4. Output in {lang}. \
-5. Provide 1 to 3 relevant lowercase tags per card. \
+1. Every generated card must be completely unique and distinct; do not repeat facts or cloze prompts. \
+2. Use standard Anki cloze syntax: {{{{c1::hidden text}}}}, {{{{c2::hidden text}}}}. \
+3. Cloze deletions MUST hide key terms, definitions, formulas, or numbers, leaving sufficient context to answer. \
+4. Keep each card focused on ONE fact (Minimum Information Principle). \
+5. Output in {lang}. \
+6. Provide 1 to 3 relevant lowercase tags per card. \
 Return ONLY a valid JSON object matching this schema: \
 {{\"cards\": [{{\"cloze\": \"Sentence with {{{{c1::cloze deletion}}}}\", \"tags\": [\"tag1\", \"tag2\"]}}]}}"
         )
@@ -411,11 +429,12 @@ Return ONLY a valid JSON object matching this schema: \
             "You are an expert spaced repetition flashcard author for Cardly (Anki-compatible). \
 Generate exactly {target_count} high-retention atomic question-and-answer flashcards. \
 Guidelines: \
-1. 'front': A clear, unambiguous question or prompt. \
-2. 'back': A concise, accurate, direct answer. \
-3. Keep each card focused on ONE concept (Minimum Information Principle). Avoid long paragraphs. \
-4. Output in {lang}. \
-5. Provide 1 to 3 relevant lowercase tags per card. \
+1. Every generated card must be completely unique and distinct; do not generate duplicate or redundant questions. \
+2. 'front': A clear, unambiguous question or prompt. \
+3. 'back': A concise, accurate, direct answer. \
+4. Keep each card focused on ONE concept (Minimum Information Principle). Avoid long paragraphs. \
+5. Output in {lang}. \
+6. Provide 1 to 3 relevant lowercase tags per card. \
 Return ONLY a valid JSON object matching this schema: \
 {{\"cards\": [{{\"front\": \"Question\", \"back\": \"Answer\", \"tags\": [\"tag1\", \"tag2\"]}}]}}"
         )
@@ -647,13 +666,7 @@ pub async fn ai_generate_handler(
         return text_err(StatusCode::FORBIDDEN, "Missing or invalid Cardly API token");
     }
 
-    let is_demo = state.config.demo_mode
-        && state
-            .config
-            .demo_user
-            .as_deref()
-            .map(|u| u == claims.u)
-            .unwrap_or(false);
+    let is_demo = state.is_demo_user(&claims.u);
 
     if let Err((status, msg)) =
         crate::demo::validate_demo_action(&claims.u, is_demo, "/api/ai/generate", Some(client_ip))
@@ -774,13 +787,7 @@ pub async fn ai_batch_add_handler(
             .into_response();
     }
 
-    let is_demo = state.config.demo_mode
-        && state
-            .config
-            .demo_user
-            .as_deref()
-            .map(|u| u == claims.u)
-            .unwrap_or(false);
+    let is_demo = state.is_demo_user(&claims.u);
 
     if let Err((status, msg)) =
         crate::demo::validate_demo_action(&claims.u, is_demo, "/api/ai/batch-add", None)

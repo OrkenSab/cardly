@@ -64,10 +64,14 @@
     </button>
   </div>
   <div class="right-tray">
-    {#if store.demoMode}
-      <div class="demo-pill" title="Cardly Demo Mode: sample collection resets automatically every hour">
+    {#if store.isDemoUser}
+      <div class="demo-pill" title="Cardly Demo Mode: sample collection resets automatically every {Math.max(1, Math.round(store.demoResetIntervalMinutes / 60))} hour{Math.round(store.demoResetIntervalMinutes / 60) > 1 ? 's' : ''}">
         <span class="demo-dot"></span>
-        <span class="demo-text">Demo Mode (resets hourly)</span>
+        <span class="demo-text">Demo Guest</span>
+      </div>
+    {:else if store.username}
+      <div class="user-pill" title="Signed in as {store.username}">
+        <span class="user-text">👤 {store.username}</span>
       </div>
     {/if}
   </div>
@@ -101,11 +105,28 @@
     background: var(--accent-info, #0075ca);
     box-shadow: 0 0 6px var(--accent-info, #0075ca);
   }
+  .user-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 10px;
+    margin-right: 12px;
+    margin-top: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--fg-subtle);
+    background: var(--canvas-subtle, rgba(125, 125, 125, 0.08));
+    border: 1px solid var(--border-subtle);
+    border-radius: 999px;
+    user-select: none;
+  }
   @media (max-width: 640px) {
-    .demo-text {
+    .demo-text,
+    .user-text {
       display: none;
     }
-    .demo-pill {
+    .demo-pill,
+    .user-pill {
       padding: 4px 6px;
       margin-right: 6px;
     }

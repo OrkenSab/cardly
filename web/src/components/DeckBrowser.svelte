@@ -295,7 +295,7 @@
   <footer class="bottom-bar">
     <button class="anki-btn" onclick={handleCreateDeck}>Create Deck</button>
     <button class="anki-btn" onclick={() => store.openImport("pick")}>Import File</button>
-    {#if store.demoMode}
+    {#if store.isDemoUser}
       <div class="demo-footer-info">
         <span>Demo resets every {Math.max(1, Math.round(store.demoResetIntervalMinutes / 60))}h • </span>
         <a href="https://github.com/OrkenSab/cardly" target="_blank" rel="noopener noreferrer">Source Code</a>

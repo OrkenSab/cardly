@@ -241,7 +241,7 @@
   <LoginView />
 {:else}
   <div class="app-shell">
-    {#if store.demoMode}
+    {#if store.isDemoUser}
       <div class="demo-banner-top" role="region" aria-label="Demo notice">
         <span class="demo-banner-text">
           ⚡ <strong>Demo Mode</strong>: data resets every {Math.max(1, Math.round(store.demoResetIntervalMinutes / 60))} hour{Math.round(store.demoResetIntervalMinutes / 60) > 1 ? "s" : ""}. Free guest trial.

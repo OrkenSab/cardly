@@ -235,13 +235,7 @@ pub async fn handle_anki_rpc(
         );
     }
 
-    let is_demo = state.config.demo_mode
-        && state
-            .config
-            .demo_user
-            .as_deref()
-            .map(|u| u == claims.u)
-            .unwrap_or(false);
+    let is_demo = state.is_demo_user(&claims.u);
 
     if let Err((status, msg)) =
         crate::demo::validate_demo_action(&claims.u, is_demo, &format!("/_anki/{method}"), Some(client_ip))
@@ -320,6 +314,8 @@ fn mirror_media_mutation(runtime: &UserRuntime, method: &str, input: &[u8], outp
         "addMediaFile" => {
             if let Ok(fname) = generic::String::decode(output) {
                 if !fname.val.is_empty() {
+                    let path = runtime.media_dir.join(&fname.val);
+                    let _ = crate::cas::deduplicate_file_in_place(&runtime.base_data_dir, &path);
                     runtime.media_sync.lock().unwrap().record_web_file_added(&fname.val);
                 }
             }
@@ -328,6 +324,8 @@ fn mirror_media_mutation(runtime: &UserRuntime, method: &str, input: &[u8], outp
             if let Ok(resp) = AddMediaFromUrlResponse::decode(output) {
                 if let Some(fname) = resp.filename {
                     if !fname.is_empty() {
+                        let path = runtime.media_dir.join(&fname);
+                        let _ = crate::cas::deduplicate_file_in_place(&runtime.base_data_dir, &path);
                         runtime.media_sync.lock().unwrap().record_web_file_added(&fname);
                     }
                 }
@@ -487,6 +485,7 @@ async fn handle_import_apkg(
     req.encode(&mut buf).unwrap();
     match call_rslib_method(state, runtime, "importAnkiPackage", buf).await {
         Ok(out) => {
+            let _ = crate::cas::deduplicate_media_in_dir(&runtime.base_data_dir, &runtime.media_dir);
             runtime.media_sync.lock().unwrap().reconcile_directory();
             binary_response(out)
         }
@@ -534,6 +533,8 @@ async fn handle_add_media_from_path(
         Ok(out) => {
             if let Ok(fname) = generic::String::decode(out.as_slice()) {
                 if !fname.val.is_empty() {
+                    let dest = runtime.media_dir.join(&fname.val);
+                    let _ = crate::cas::deduplicate_file_in_place(&runtime.base_data_dir, &dest);
                     runtime.media_sync.lock().unwrap().record_web_file_added(&fname.val);
                 }
             }

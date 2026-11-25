@@ -170,21 +170,23 @@
       </button>
     </form>
 
-    <div class="divider">
-      <span>or explore instantly</span>
-    </div>
+    {#if store.demoMode}
+      <div class="divider">
+        <span>or explore instantly</span>
+      </div>
 
-    <button
-      type="button"
-      class="anki-btn demo-btn"
-      disabled={submitting}
-      onclick={handleGuestDemo}
-    >
-      ⚡ Try Live Demo / Continue as Guest
-    </button>
-    <p class="demo-caption">
-      Experience flashcards, AI generation, and study sessions with sample decks without registration.
-    </p>
+      <button
+        type="button"
+        class="anki-btn demo-btn"
+        disabled={submitting}
+        onclick={handleGuestDemo}
+      >
+        ⚡ Try Live Demo / Continue as Guest
+      </button>
+      <p class="demo-caption">
+        Instant guest access: explore preloaded decks, cards, and study sessions without registration.
+      </p>
+    {/if}
   </div>
 </div>
 

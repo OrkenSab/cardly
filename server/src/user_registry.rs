@@ -54,6 +54,7 @@ struct RegistryInner {
     users_by_name: HashMap<String, UserCredentials>,
     users_by_hkey: HashMap<String, UserCredentials>,
     stored_records: HashMap<String, StoredUserRecord>,
+    ephemeral_guests: HashMap<String, u64>,
 }
 
 pub struct UserRegistry {
@@ -89,7 +90,13 @@ impl UserRegistry {
                             path = %storage_path.display(),
                             "Loaded registered user accounts from persistent storage"
                         );
+                        let mut needs_resave = false;
                         for rec in records {
+                            if rec.is_guest {
+                                // Clean up stale guest records accidentally stored by previous versions
+                                needs_resave = true;
+                                continue;
+                            }
                             let creds = UserCredentials {
                                 username: rec.username.clone(),
                                 password_hash: rec.password_hash.clone(),
@@ -98,6 +105,9 @@ impl UserRegistry {
                             inner.users_by_hkey.insert(creds.hkey.clone(), creds.clone());
                             inner.users_by_name.insert(creds.username.clone(), creds);
                             inner.stored_records.insert(rec.username.clone(), rec);
+                        }
+                        if needs_resave {
+                            let _ = Self::save_to_disk_locked(&storage_path, &inner);
                         }
                     }
                     Err(e) => {
@@ -201,26 +211,54 @@ impl UserRegistry {
 
         let creds = UserCredentials {
             username: guest_user.clone(),
-            password_hash: password_hash.clone(),
-            hkey: hkey.clone(),
-        };
-
-        let record = StoredUserRecord {
-            username: guest_user.clone(),
             password_hash,
             hkey: hkey.clone(),
-            created_at: now_unix_secs(),
-            is_guest: true,
         };
 
         let mut guard = self.inner.write().map_err(|_| anyhow!("lock poisoned"))?;
         guard.users_by_name.insert(guest_user.clone(), creds.clone());
         guard.users_by_hkey.insert(hkey, creds.clone());
-        guard.stored_records.insert(guest_user.clone(), record);
+        guard.ephemeral_guests.insert(guest_user.clone(), now_unix_secs());
 
-        let _ = Self::save_to_disk_locked(&self.storage_path, &guard);
+        // Ephemeral guests are intentionally in-memory only (NOT persisted to users.json)
         info!(user = %guest_user, "Created ephemeral guest account");
         Ok(creds)
+    }
+
+    pub fn cleanup_stale_guests(&self, max_age_secs: u64) -> Vec<String> {
+        let now = now_unix_secs();
+        let mut guard = match self.inner.write() {
+            Ok(g) => g,
+            Err(_) => return Vec::new(),
+        };
+        let mut to_remove = Vec::new();
+        for (name, created_at) in &guard.ephemeral_guests {
+            if now.saturating_sub(*created_at) >= max_age_secs {
+                to_remove.push(name.clone());
+            }
+        }
+        for name in &to_remove {
+            guard.ephemeral_guests.remove(name);
+            if let Some(creds) = guard.users_by_name.remove(name) {
+                guard.users_by_hkey.remove(&creds.hkey);
+            }
+            guard.stored_records.remove(name);
+        }
+        to_remove
+    }
+
+    pub fn remove_user(&self, username: &str) -> Result<bool> {
+        let mut guard = self.inner.write().map_err(|_| anyhow!("lock poisoned"))?;
+        guard.ephemeral_guests.remove(username);
+        let removed = guard.users_by_name.remove(username);
+        if let Some(creds) = &removed {
+            guard.users_by_hkey.remove(&creds.hkey);
+        }
+        let had_record = guard.stored_records.remove(username).is_some();
+        if had_record {
+            Self::save_to_disk_locked(&self.storage_path, &guard)?;
+        }
+        Ok(removed.is_some() || had_record)
     }
 
     pub fn verify_credentials(&self, username: &str, password: &str) -> Option<UserCredentials> {
@@ -280,10 +318,11 @@ impl UserRegistry {
         self.inner
             .read()
             .map(|g| {
-                g.stored_records
-                    .get(username)
-                    .map(|r| r.is_guest)
-                    .unwrap_or(false)
+                g.ephemeral_guests.contains_key(username)
+                    || g.stored_records
+                        .get(username)
+                        .map(|r| r.is_guest)
+                        .unwrap_or(false)
             })
             .unwrap_or(false)
     }
@@ -336,12 +375,24 @@ mod tests {
     }
 
     #[test]
-    fn test_ephemeral_guest_creation() {
+    fn test_ephemeral_guest_creation_and_cleanup() {
         let dir = tempdir().unwrap();
         let reg = UserRegistry::new(dir.path(), vec![]).unwrap();
         let guest = reg.register_ephemeral_guest().unwrap();
         assert!(guest.username.starts_with("guest_"));
         assert!(reg.has_user(&guest.username));
         assert!(reg.is_guest(&guest.username));
+
+        // Guest accounts must NOT be stored in users.json on disk!
+        let users_file = dir.path().join("users.json");
+        if users_file.is_file() {
+            let content = fs::read_to_string(&users_file).unwrap();
+            assert!(!content.contains(&guest.username), "Guest should not be written to users.json");
+        }
+
+        // Cleanup with max_age = 0 should immediately reap the guest
+        let reaped = reg.cleanup_stale_guests(0);
+        assert_eq!(reaped, vec![guest.username.clone()]);
+        assert!(!reg.has_user(&guest.username));
     }
 }

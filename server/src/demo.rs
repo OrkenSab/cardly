@@ -473,6 +473,69 @@ pub async fn seed_demo_collection_if_empty(
     Ok(())
 }
 
+pub async fn seed_welcome_deck_if_empty(
+    state: &AppState,
+    runtime: &Arc<UserRuntime>,
+) -> Result<()> {
+    let _guard = runtime.acquire_web_backend().await?;
+
+    let search_req = SearchRequest {
+        search: "".to_string(),
+        order: None,
+    };
+    let out = call_rslib_method(state, runtime, "searchNotes", search_req.encode_to_vec())
+        .await
+        .map_err(|(s, m)| anyhow!("searchNotes failed ({s}): {m}"))?;
+    let notes = SearchResponse::decode(out.as_slice())
+        .context("decode SearchResponse")?;
+
+    if !notes.ids.is_empty() {
+        return Ok(());
+    }
+
+    let nt_out = call_rslib_method(state, runtime, "getNotetypeNames", vec![])
+        .await
+        .map_err(|(s, m)| anyhow!("getNotetypeNames failed ({s}): {m}"))?;
+    let nt_names = NotetypeNames::decode(nt_out.as_slice())
+        .context("decode NotetypeNames")?;
+
+    let basic_id = nt_names
+        .entries
+        .iter()
+        .find(|e| e.name == "Basic")
+        .map(|e| e.id)
+        .ok_or_else(|| anyhow!("Basic notetype missing"))?;
+
+    let welcome_deck_id = get_or_create_deck(state, runtime, "Cardly Quickstart").await?;
+
+    add_sample_note(
+        state,
+        runtime,
+        welcome_deck_id,
+        basic_id,
+        vec!["quickstart", "welcome"],
+        vec![
+            "Welcome to Cardly! How do you create new flashcards?",
+            "Click <b>Add</b> (or press <b>A</b>) in the top toolbar to create cards with rich text, MathJax, Cloze deletions, or image occlusions.",
+        ],
+    ).await?;
+
+    add_sample_note(
+        state,
+        runtime,
+        welcome_deck_id,
+        basic_id,
+        vec!["quickstart", "shortcuts"],
+        vec![
+            "What are the primary review hotkeys in Cardly?",
+            "• <b>Space / Enter</b>: Show Answer & Good<br>• <b>1 / 2 / 3 / 4</b>: Again / Hard / Good / Easy<br>• <b>Z</b>: Undo last review<br>• <b>E</b>: Edit current card",
+        ],
+    ).await?;
+
+    info!(user = %runtime.username, "Quickstart welcome deck seeded successfully!");
+    Ok(())
+}
+
 // ============================================================================
 // Automated Reset Routine
 // ============================================================================
@@ -517,6 +580,22 @@ pub async fn reset_demo_collection(state: &AppState) -> Result<()> {
 
     // Re-seed sample decks
     seed_demo_collection_if_empty(state, &runtime).await?;
+
+    // Garbage-collect stale guest accounts and prune orphaned CAS media blobs
+    let interval = state
+        .config
+        .demo_reset_interval_secs
+        .unwrap_or(DEFAULT_RESET_INTERVAL_SECS);
+    let reaped = state.cleanup_stale_guests(interval).await;
+    let pruned = crate::cas::prune_orphaned_cas_blobs(&state.config.data_dir).unwrap_or(0);
+    if reaped > 0 || pruned > 0 {
+        info!(
+            reaped_guests = reaped,
+            pruned_cas_blobs = pruned,
+            "Garbage-collected stale demo guests and CAS blobs"
+        );
+    }
+
     update_reset_timestamp();
     info!(user = %demo_username, "Demo collection reset and re-seeded successfully");
     Ok(())

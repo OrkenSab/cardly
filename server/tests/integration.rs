@@ -1433,8 +1433,21 @@ async fn user_registration_guest_session_and_media_cas() {
         .next()
         .unwrap();
 
-    // Verify guest has sample decks seeded
+    // Verify abuse protection works for guest user (colpkg import forbidden)
     let guest_tok = guest_resp["api_token"].as_str().unwrap();
+    let (status, _, _) = h
+        .send(
+            Request::post("/api/import/colpkg")
+                .header(header::COOKIE, guest_cookie)
+                .header(API_TOKEN_HEADER, guest_tok)
+                .header(header::CONTENT_TYPE, "application/json")
+                .body(Body::from(serde_json::json!({ "upload_id": "fake" }).to_string()))
+                .unwrap(),
+        )
+        .await;
+    assert_eq!(status, StatusCode::FORBIDDEN, "Guest must be subject to demo mode restrictions");
+
+    // Verify guest has sample decks seeded
     let (status, bytes) = h
         .rpc_raw(
             guest_cookie,
@@ -1451,7 +1464,7 @@ async fn user_registration_guest_session_and_media_cas() {
     let deck_names = anki_proto::decks::DeckNames::decode(bytes.as_slice()).unwrap();
     assert!(deck_names.entries.iter().any(|d| d.name == "General Knowledge"));
 
-    // 9. Media CAS deduplication test
+    // 9. Media CAS deduplication and orphan pruning test
     let u1_dir = state.config.data_dir.join("users/charlie/media");
     let u2_dir = state.config.data_dir.join(format!("users/{guest_uname}/media"));
     let test_media_data = b"Shared deck audio sound byte [sound:pronounce.mp3]";
@@ -1471,5 +1484,10 @@ async fn user_registration_guest_session_and_media_cas() {
         let m2 = std::fs::metadata(&f2).unwrap();
         assert_eq!(m1.ino(), m2.ino(), "Deduplicated files across users must share the same inode");
     }
+
+    // 10. Ephemeral guest cleanup
+    let reaped = state.cleanup_stale_guests(0).await;
+    assert!(reaped >= 1, "Stale guest should be reaped");
+    assert!(!state.user_registry.has_user(guest_uname));
 }
 

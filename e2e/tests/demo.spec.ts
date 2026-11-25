@@ -17,8 +17,12 @@ test.describe("Cardly Demo Mode E2E Suite", () => {
     const errors: string[] = [];
     page.on("pageerror", (e) => errors.push(e.message));
 
-    // 1. Visit root - In Demo Mode, must open directly into DeckBrowser without login screen
+    // 1. Visit root - In Demo Mode, click "Continue as Guest" if login view is presented
     await page.goto("/");
+    const demoGuestBtn = page.locator("button.demo-btn");
+    if (await demoGuestBtn.isVisible({ timeout: 3_000 }).catch(() => false)) {
+      await demoGuestBtn.click();
+    }
 
     // Top banner must be visible with demo notice and AGPL/affiliation links
     const banner = page.locator(".demo-banner-top");

@@ -112,7 +112,14 @@ pub fn deduplicate_file_in_place(data_dir: &Path, file_path: &Path) -> io::Resul
         let _ = fs::rename(&tmp_file, &cas_file);
     }
 
-    let tmp_dest = file_path.with_extension("tmp_cas_link");
+    let parent = file_path.parent().unwrap_or_else(|| Path::new("."));
+    let mut rand_bytes = [0u8; 8];
+    rand::fill(&mut rand_bytes);
+    let tmp_dest = parent.join(format!(
+        ".tmp_cas_{}_{}",
+        hex::encode(rand_bytes),
+        std::process::id()
+    ));
     if fs::hard_link(&cas_file, &tmp_dest).is_ok() {
         if fs::rename(&tmp_dest, file_path).is_ok() {
             return Ok(true);
@@ -136,6 +143,43 @@ pub fn deduplicate_media_in_dir(data_dir: &Path, media_dir: &Path) -> io::Result
         }
     }
     Ok(count)
+}
+
+/// Prunes master CAS blobs that have no user file hardlinks pointing to them.
+/// On Unix, an unreferenced blob has `nlink() <= 1` (the CAS directory entry itself is the 1 link).
+pub fn prune_orphaned_cas_blobs(data_dir: &Path) -> io::Result<usize> {
+    let cas_dir = get_cas_dir(data_dir);
+    if !cas_dir.is_dir() {
+        return Ok(0);
+    }
+    let mut pruned = 0;
+    if let Ok(entries) = fs::read_dir(&cas_dir) {
+        for entry in entries.flatten() {
+            let path = entry.path();
+            if !path.is_file() {
+                continue;
+            }
+            if path
+                .file_name()
+                .map(|n| n.to_string_lossy().starts_with('.'))
+                .unwrap_or(false)
+            {
+                continue;
+            }
+            #[cfg(unix)]
+            {
+                use std::os::unix::fs::MetadataExt;
+                if let Ok(meta) = path.metadata() {
+                    if meta.nlink() <= 1 {
+                        if fs::remove_file(&path).is_ok() {
+                            pruned += 1;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    Ok(pruned)
 }
 
 #[cfg(test)]
@@ -169,6 +213,38 @@ mod tests {
             let m2 = f2.metadata().unwrap();
             assert_eq!(m1.ino(), m2.ino(), "Inodes must match for deduplicated files");
             assert_eq!(m1.nlink(), 3); // CAS blob + f1 + f2 = 3 links
+        }
+
+        // Test orphaned CAS pruning
+        fs::remove_file(&f1).unwrap();
+        fs::remove_file(&f2).unwrap();
+        // Now master CAS blob is the only remaining link (nlink == 1)
+        let pruned = prune_orphaned_cas_blobs(data_dir).unwrap();
+        #[cfg(unix)]
+        assert_eq!(pruned, 1, "Orphaned CAS blob must be pruned");
+    }
+
+    #[test]
+    fn test_deduplicate_in_place_same_stem_collision() {
+        let dir = tempdir().unwrap();
+        let data_dir = dir.path();
+        let media_dir = data_dir.join("users/u1/media");
+        fs::create_dir_all(&media_dir).unwrap();
+
+        let f1 = media_dir.join("sound.mp3");
+        let f2 = media_dir.join("sound.png");
+        fs::write(&f1, b"identical data").unwrap();
+        fs::write(&f2, b"identical data").unwrap();
+
+        assert!(deduplicate_file_in_place(data_dir, &f1).unwrap());
+        assert!(deduplicate_file_in_place(data_dir, &f2).unwrap());
+
+        #[cfg(unix)]
+        {
+            use std::os::unix::fs::MetadataExt;
+            let m1 = f1.metadata().unwrap();
+            let m2 = f2.metadata().unwrap();
+            assert_eq!(m1.ino(), m2.ino());
         }
     }
 }

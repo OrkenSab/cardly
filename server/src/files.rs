@@ -89,13 +89,7 @@ pub async fn upload_file_handler(
         return text_err(StatusCode::FORBIDDEN, "Missing or invalid Cardly API token");
     }
 
-    let is_demo = state.config.demo_mode
-        && state
-            .config
-            .demo_user
-            .as_deref()
-            .map(|u| u == claims.u)
-            .unwrap_or(false);
+    let is_demo = state.is_demo_user(&claims.u);
 
     if let Err((status, msg)) =
         crate::demo::validate_demo_action(&claims.u, is_demo, "/api/uploads", Some(client_ip))
@@ -184,13 +178,7 @@ pub async fn import_colpkg_handler(
         return text_err(StatusCode::FORBIDDEN, "Missing or invalid Cardly API token");
     }
 
-    let is_demo = state.config.demo_mode
-        && state
-            .config
-            .demo_user
-            .as_deref()
-            .map(|u| u == claims.u)
-            .unwrap_or(false);
+    let is_demo = state.is_demo_user(&claims.u);
 
     if let Err((status, msg)) =
         crate::demo::validate_demo_action(&claims.u, is_demo, "/api/import/colpkg", None)
@@ -311,13 +299,7 @@ pub async fn export_handler(
         return text_err(StatusCode::FORBIDDEN, "Missing or invalid Cardly API token");
     }
 
-    let is_demo = state.config.demo_mode
-        && state
-            .config
-            .demo_user
-            .as_deref()
-            .map(|u| u == claims.u)
-            .unwrap_or(false);
+    let is_demo = state.is_demo_user(&claims.u);
 
     if let Err((status, msg)) =
         crate::demo::validate_demo_action(&claims.u, is_demo, "/api/export", None)
@@ -530,13 +512,7 @@ pub async fn create_backup_handler(
         return text_err(StatusCode::FORBIDDEN, "Missing or invalid Cardly API token");
     }
 
-    let is_demo = state.config.demo_mode
-        && state
-            .config
-            .demo_user
-            .as_deref()
-            .map(|u| u == claims.u)
-            .unwrap_or(false);
+    let is_demo = state.is_demo_user(&claims.u);
 
     if let Err((status, msg)) =
         crate::demo::validate_demo_action(&claims.u, is_demo, "/api/backups/create", None)
@@ -613,13 +589,7 @@ pub async fn restore_backup_handler(
         return text_err(StatusCode::FORBIDDEN, "Missing or invalid Cardly API token");
     }
 
-    let is_demo = state.config.demo_mode
-        && state
-            .config
-            .demo_user
-            .as_deref()
-            .map(|u| u == claims.u)
-            .unwrap_or(false);
+    let is_demo = state.is_demo_user(&claims.u);
 
     if let Err((status, msg)) =
         crate::demo::validate_demo_action(&claims.u, is_demo, "/api/backups/restore", None)
