@@ -28,7 +28,7 @@ test.describe("Cardly Demo Mode E2E Suite", () => {
     const banner = page.locator(".demo-banner-top");
     await expect(banner).toBeVisible({ timeout: 15_000 });
     await expect(banner).toContainText(/Demo Mode.*data resets/i);
-    await expect(banner.locator("a")).toHaveAttribute("href", "https://github.com/OrkenSab/cardly");
+    await expect(banner.locator("a")).toHaveAttribute("href", "https://github.com/cardly-anki/cardly");
     await expect(banner).toContainText("Not affiliated with Anki / Ankitects");
 
     // Decks button and DeckBrowser must be visible

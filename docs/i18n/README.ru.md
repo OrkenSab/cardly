@@ -47,7 +47,7 @@
 Опробуйте Cardly прямо в браузере без установки на свой компьютер:
 
 👉 **[Открыть Live Demo](https://my-cardly.duckdns.org)** *(Мгновенный гостевой вход без регистрации)*  
-🌐 **[Лендинг проекта](https://orkensab.github.io/cardly/)**
+🌐 **[Лендинг проекта](https://cardly-anki.github.io/cardly/)**
 
 > [!NOTE]
 > **Ограничения демо-режима:**
@@ -63,7 +63,7 @@
 
 ```bash
 # 1. Клонирование репозитория вместе с субмодулями
-git clone --recurse-submodules https://github.com/OrkenSab/cardly.git
+git clone --recurse-submodules https://github.com/cardly-anki/cardly.git
 cd cardly
 
 # 2. Создание файла настроек

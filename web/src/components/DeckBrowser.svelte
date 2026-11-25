@@ -302,7 +302,7 @@
     {#if store.isDemoUser}
       <div class="demo-footer-info">
         <span>Demo resets every {Math.max(1, Math.round(store.demoResetIntervalMinutes / 60))}h • </span>
-        <a href="https://github.com/OrkenSab/cardly" target="_blank" rel="noopener noreferrer">Source Code</a>
+        <a href="https://github.com/cardly-anki/cardly" target="_blank" rel="noopener noreferrer">Source Code</a>
         <span> • Not affiliated with Anki / Ankitects</span>
       </div>
     {/if}

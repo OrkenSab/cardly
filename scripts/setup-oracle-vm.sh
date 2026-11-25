@@ -116,7 +116,7 @@ cat << 'EOF' > "${DEPLOY_DIR}/deploy/docker-compose.prod.yml"
 # Cardly Production Docker Compose for Oracle Cloud (1 GB RAM / 1 vCPU)
 services:
   cardly:
-    image: ${CARDLY_IMAGE:-ghcr.io/orkensab/cardly:latest}
+    image: ${CARDLY_IMAGE:-ghcr.io/cardly-anki/cardly:latest}
     container_name: cardly-app
     restart: unless-stopped
     env_file:
@@ -228,7 +228,7 @@ if [[ ! -f "${DEPLOY_DIR}/.env" ]]; then
   cat << EOF > "${DEPLOY_DIR}/.env"
 DOMAIN=${DOMAIN}
 CADDY_EMAIL=
-CARDLY_IMAGE=ghcr.io/orkensab/cardly:latest
+CARDLY_IMAGE=ghcr.io/cardly-anki/cardly:latest
 CARDLY_HOST=0.0.0.0
 CARDLY_PORT=8080
 CARDLY_DATA_DIR=/data

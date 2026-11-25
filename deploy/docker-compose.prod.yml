@@ -3,7 +3,7 @@
 # Optimized for 1 GB RAM / 1 vCPU VMs (resource limits, swap safety, log rotation)
 services:
   cardly:
-    image: ${CARDLY_IMAGE:-ghcr.io/orkensab/cardly:latest}
+    image: ${CARDLY_IMAGE:-ghcr.io/cardly-anki/cardly:latest}
     container_name: cardly-app
     restart: unless-stopped
     env_file:

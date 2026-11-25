@@ -314,7 +314,7 @@
         <button class="sheet-item" onclick={() => run(() => (store.aboutOpen = true))}>About Cardly</button>
         <a
           class="sheet-item"
-          href="https://github.com/OrkenSab/cardly"
+          href="https://github.com/cardly-anki/cardly"
           target="_blank"
           rel="noopener noreferrer"
           onclick={() => (mobileSheetOpen = false)}

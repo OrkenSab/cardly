@@ -51,7 +51,7 @@ test("Landing Page Visual Test & Interaction Suite", async ({ page }) => {
   await expect(liveDemoBtn).toBeVisible();
   const githubBtn = page.locator(".btn-view-github");
   await expect(githubBtn).toBeVisible();
-  await expect(githubBtn).toHaveAttribute("href", "https://github.com/OrkenSab/cardly");
+  await expect(githubBtn).toHaveAttribute("href", "https://github.com/cardly-anki/cardly");
   await expect(page.locator(".demo-reset-badge")).toBeVisible();
 
   // 5. Interactive FAQ Accordion

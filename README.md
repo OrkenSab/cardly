@@ -47,7 +47,7 @@
 Experience Cardly directly in your browser without local installation:
 
 👉 **[Try the Live Demo](https://my-cardly.duckdns.org)** *(Instant guest access — no sign-up needed)*  
-🌐 **[Project Showcase & Landing](https://orkensab.github.io/cardly/)**
+🌐 **[Project Showcase & Landing](https://cardly-anki.github.io/cardly/)**
 
 > [!NOTE]
 > **Demo Environment Limits:**
@@ -63,7 +63,7 @@ Run Cardly with Docker Compose:
 
 ```bash
 # 1. Clone repository with upstream submodule
-git clone --recurse-submodules https://github.com/OrkenSab/cardly.git
+git clone --recurse-submodules https://github.com/cardly-anki/cardly.git
 cd cardly
 
 # 2. Configure credentials

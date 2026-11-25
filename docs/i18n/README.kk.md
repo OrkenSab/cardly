@@ -47,7 +47,7 @@
 Cardly мүмкіндіктерін бағдарламаны орнатпай-ақ браузерде көріңіз:
 
 👉 **[Демо нұсқасын қосу](https://my-cardly.duckdns.org)** *(Тіркелусіз бірден кіру)*  
-🌐 **[Жоба лендингі](https://orkensab.github.io/cardly/)**
+🌐 **[Жоба лендингі](https://cardly-anki.github.io/cardly/)**
 
 > [!NOTE]
 > **Демо-режим ерекшеліктері:**
@@ -63,7 +63,7 @@ Docker Compose арқылы іске қосу:
 
 ```bash
 # 1. Репозиторийді субмодульдерімен бірге көшіріп алу
-git clone --recurse-submodules https://github.com/OrkenSab/cardly.git
+git clone --recurse-submodules https://github.com/cardly-anki/cardly.git
 cd cardly
 
 # 2. Баптау файлын дайындау

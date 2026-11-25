@@ -16,7 +16,7 @@ Cardly's Rust backend (`rslib`) and static Svelte 5 frontend are designed for hi
 
 > [!WARNING]
 > **Do NOT compile Rust or run `cargo build` on a 1 GB RAM VM.**
-> Compiling upstream Anki's `rslib` and Cardly requires 3–4 GB of memory during linking and will immediately crash low-memory VMs with an Out Of Memory (OOM) kernel panic. Always pull pre-built Docker containers from **GitHub Container Registry (`ghcr.io/orkensab/cardly:latest`)**.
+> Compiling upstream Anki's `rslib` and Cardly requires 3–4 GB of memory during linking and will immediately crash low-memory VMs with an Out Of Memory (OOM) kernel panic. Always pull pre-built Docker containers from **GitHub Container Registry (`ghcr.io/cardly-anki/cardly:latest`)**.
 
 ---
 
@@ -68,7 +68,7 @@ Run the automated provisioning script directly on the VM:
 
 ```bash
 # 1. Download setup script
-curl -fsSL https://raw.githubusercontent.com/OrkenSab/cardly/main/scripts/setup-oracle-vm.sh -o setup-oracle-vm.sh
+curl -fsSL https://raw.githubusercontent.com/cardly-anki/cardly/main/scripts/setup-oracle-vm.sh -o setup-oracle-vm.sh
 
 # 2. Execute with your domain
 sudo bash setup-oracle-vm.sh <YOUR_SUBDOMAIN>.duckdns.org
@@ -127,7 +127,7 @@ If a newly pulled image causes issues, roll back to a specific previous containe
 cd /opt/cardly
 docker compose -f deploy/docker-compose.prod.yml down
 # Edit CARDLY_IMAGE in /opt/cardly/.env or override on command line:
-CARDLY_IMAGE=ghcr.io/orkensab/cardly:<PREVIOUS_GIT_SHA> docker compose -f deploy/docker-compose.prod.yml up -d
+CARDLY_IMAGE=ghcr.io/cardly-anki/cardly:<PREVIOUS_GIT_SHA> docker compose -f deploy/docker-compose.prod.yml up -d
 ```
 
 ---
@@ -136,7 +136,7 @@ CARDLY_IMAGE=ghcr.io/orkensab/cardly:<PREVIOUS_GIT_SHA> docker compose -f deploy
 
 The repository includes an opt-in GitHub Actions workflow (`.github/workflows/deploy-demo.yml`).
 Whenever changes land on the `main` branch:
-1. GitHub Actions builds the multi-stage Docker container and publishes it to `ghcr.io/orkensab/cardly:latest`.
+1. GitHub Actions builds the multi-stage Docker container and publishes it to `ghcr.io/cardly-anki/cardly:latest`.
 2. If SSH repository secrets are configured, it automatically logs into the Oracle Cloud VM and restarts the services.
 
 ### Setting up Repository Secrets (Optional):

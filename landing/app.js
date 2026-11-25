@@ -10,7 +10,7 @@ const CONFIG = {
   // Public live demo URL (HTTPS required for PWA installation on mobile)
   DEMO_URL: "https://my-cardly.duckdns.org",
   // Official open-source repository
-  REPO_URL: "https://github.com/OrkenSab/cardly",
+  REPO_URL: "https://github.com/cardly-anki/cardly",
   // Frequency of demo data purge & sample re-seeding
   RESET_INTERVAL_HOURS: 2,
 };
