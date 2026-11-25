@@ -407,4 +407,18 @@
   .muted {
     color: var(--fg-subtle);
   }
+  @media (max-width: 640px) {
+    .top-row {
+      flex-direction: column;
+    }
+    .side-btns {
+      width: 100%;
+      flex-direction: row;
+      flex-wrap: wrap;
+    }
+    .side-btns .anki-btn {
+      flex: 1;
+      min-width: 90px;
+    }
+  }
 </style>

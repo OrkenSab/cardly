@@ -75,6 +75,29 @@ function pickLocalFile(extensions: string[]): Promise<File | null> {
   });
 }
 
+/**
+ * Inject minimal responsive CSS into same-origin upstream Anki iframes
+ * so narrow mobile viewports do not overflow horizontally or auto-zoom inputs.
+ * Kept in one place for easy removal if upstream adds native mobile styles.
+ */
+export function injectMobileResponsiveCss(doc: Document | null | undefined): void {
+  if (!doc || !doc.head) return;
+  const id = "cardly-mobile-responsive";
+  if (doc.getElementById(id)) return;
+  const style = doc.createElement("style");
+  style.id = id;
+  style.textContent = `
+    html, body { max-width: 100% !important; overflow-x: hidden !important; box-sizing: border-box !important; }
+    img, video, svg, canvas { max-width: 100% !important; height: auto; }
+    table { max-width: 100% !important; }
+    @media (max-width: 640px) {
+      input, textarea, select { font-size: 16px !important; max-width: 100% !important; }
+      .container, .container-fluid { padding-left: 10px !important; padding-right: 10px !important; }
+    }
+  `;
+  doc.head.appendChild(style);
+}
+
 export function playMediaFile(filename: string): void {
   if (!filename) return;
   if (activeAudio) {

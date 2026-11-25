@@ -1712,9 +1712,23 @@
     font-size: 10px;
   }
   @media (max-width: 768px) {
+    .browser-window {
+      width: 100%;
+      max-width: 100%;
+      height: 100dvh;
+      max-height: 100dvh;
+    }
+    .browser-topbar {
+      padding: calc(6px + var(--safe-top)) calc(10px + var(--safe-right)) 6px calc(10px + var(--safe-left));
+    }
+    .browser-body {
+      min-width: 0;
+      max-width: 100%;
+      overflow: hidden;
+    }
     .sidebar {
       position: absolute;
-      top: 40px;
+      top: calc(44px + var(--safe-top));
       bottom: 0;
       left: 0;
       width: min(280px, 85vw);
@@ -1724,23 +1738,31 @@
     }
     .right-area {
       flex-direction: column !important;
+      min-width: 0;
+      max-width: 100%;
     }
     .table-pane {
       flex: 1;
       min-height: 220px;
+      min-width: 0;
+      max-width: 100%;
+      overflow: auto;
     }
     .editor-pane {
       flex: 1;
       min-height: 220px;
+      min-width: 0;
+      max-width: 100%;
     }
     .search-bar {
       padding: 6px 8px;
       flex-wrap: wrap;
+      min-width: 0;
     }
     .search-input {
       order: 3;
       width: 100%;
-      min-width: 100%;
+      min-width: 0;
     }
   }
 </style>

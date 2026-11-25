@@ -469,6 +469,8 @@
     padding: 0 12px;
     gap: 2px;
     flex-shrink: 0;
+    overflow-x: auto;
+    scrollbar-width: none;
   }
   .pref-tab {
     border: none;
@@ -479,6 +481,8 @@
     cursor: pointer;
     border-bottom: 2px solid transparent;
     margin-bottom: -1px;
+    white-space: nowrap;
+    flex-shrink: 0;
   }
   .pref-tab:hover {
     color: var(--fg);
@@ -640,5 +644,18 @@
   }
   .pad {
     padding: 14px;
+  }
+  @media (max-width: 640px) {
+    .form-row {
+      flex-wrap: wrap;
+    }
+    .form-row label {
+      min-width: 0;
+      width: 100%;
+    }
+    .bk-row {
+      flex-direction: column;
+      align-items: flex-start;
+    }
   }
 </style>

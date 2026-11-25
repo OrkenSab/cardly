@@ -996,4 +996,23 @@
   @keyframes spin {
     to { transform: rotate(360deg); }
   }
+
+  @media (max-width: 640px) {
+    .modal-window {
+      width: 100% !important;
+      max-width: 100% !important;
+      height: 100dvh !important;
+      max-height: 100dvh !important;
+      border-radius: 0 !important;
+    }
+    .provider-row {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 8px;
+    }
+    .text-input,
+    .notes-textarea {
+      font-size: 16px;
+    }
+  }
 </style>

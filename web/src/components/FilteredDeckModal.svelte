@@ -317,4 +317,11 @@
   .muted {
     color: var(--fg-subtle);
   }
+  @media (max-width: 640px) {
+    .form-row {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 4px;
+    }
+  }
 </style>

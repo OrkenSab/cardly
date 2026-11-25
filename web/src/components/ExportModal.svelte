@@ -216,4 +216,14 @@
     margin: 5px 0;
     cursor: pointer;
   }
+  @media (max-width: 640px) {
+    .form-row {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 4px;
+    }
+    .form-row label {
+      width: auto;
+    }
+  }
 </style>

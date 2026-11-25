@@ -264,6 +264,8 @@
     font-size: 20px;
     font-weight: 700;
     text-align: center;
+    max-width: 100%;
+    word-break: break-word;
   }
   .overview-card {
     display: flex;

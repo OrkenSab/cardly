@@ -268,4 +268,18 @@
   .pad {
     padding: 16px;
   }
+  @media (max-width: 640px) {
+    .nt-body {
+      flex-direction: column;
+    }
+    .nt-actions {
+      width: 100%;
+      flex-direction: row;
+      flex-wrap: wrap;
+    }
+    .nt-actions .anki-btn {
+      flex: 1;
+      min-width: 90px;
+    }
+  }
 </style>

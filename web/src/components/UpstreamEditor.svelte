@@ -1,5 +1,6 @@
 <script lang="ts">
   import { getNote } from "@generated/backend";
+  import { injectMobileResponsiveCss } from "../lib/bridge";
   import { store } from "../lib/store.svelte";
 
   interface Props {
@@ -44,6 +45,7 @@
         doc.body.style.backgroundColor = dark ? "var(--canvas, #2c2c2c)" : "var(--canvas, #f5f5f5)";
         doc.body.style.color = dark ? "var(--fg, #fcfcfc)" : "var(--fg, #020202)";
       }
+      injectMobileResponsiveCss(doc);
     } catch {
       // ignore
     }

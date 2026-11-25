@@ -198,8 +198,9 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 24px;
+    padding: calc(16px + var(--safe-top)) calc(16px + var(--safe-right)) calc(16px + var(--safe-bottom)) calc(16px + var(--safe-left));
     background: var(--canvas);
+    overflow-y: auto;
   }
   .login-card {
     width: 100%;
