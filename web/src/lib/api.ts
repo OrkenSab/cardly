@@ -375,3 +375,92 @@ export async function importColpkgUpload(uploadId: string): Promise<void> {
   if (!resp.ok) throw new Error(await resp.text());
   store.bumpOpRevision();
 }
+
+export interface StoredExternalPluginDto {
+  manifest: Record<string, unknown>;
+  code: string;
+  updated_at: number;
+}
+
+export interface StoredPluginStateDto {
+  enabled?: boolean;
+  config?: Record<string, unknown> | null;
+  storage?: Record<string, unknown>;
+}
+
+export interface PluginsListDto {
+  plugins: StoredExternalPluginDto[];
+  states: Record<string, StoredPluginStateDto>;
+}
+
+export async function fetchUserPlugins(): Promise<PluginsListDto> {
+  const resp = await fetch("/api/plugins");
+  if (!resp.ok) throw new Error(await resp.text());
+  return (await resp.json()) as PluginsListDto;
+}
+
+export async function saveExternalPlugin(
+  id: string,
+  manifest: Record<string, unknown>,
+  code: string
+): Promise<StoredExternalPluginDto> {
+  const resp = await fetch(`/api/plugins/${encodeURIComponent(id)}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ manifest, code }),
+  });
+  if (!resp.ok) {
+    const data = await resp.json().catch(() => null);
+    throw new Error(data?.error || (await resp.text()) || "Failed to save plugin");
+  }
+  return (await resp.json()) as StoredExternalPluginDto;
+}
+
+export async function deleteExternalPlugin(id: string): Promise<void> {
+  const resp = await fetch(`/api/plugins/${encodeURIComponent(id)}`, {
+    method: "DELETE",
+  });
+  if (!resp.ok) {
+    const data = await resp.json().catch(() => null);
+    throw new Error(data?.error || (await resp.text()) || "Failed to delete plugin");
+  }
+}
+
+export async function savePluginState(
+  id: string,
+  state: StoredPluginStateDto
+): Promise<void> {
+  const resp = await fetch(`/api/plugins/${encodeURIComponent(id)}/state`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(state),
+  });
+  if (!resp.ok) {
+    const data = await resp.json().catch(() => null);
+    throw new Error(data?.error || (await resp.text()) || "Failed to save plugin state");
+  }
+}
+
+export interface HeatmapStatsDto {
+  history: Record<string, number>;
+  forecast: Record<string, number>;
+  today: string;
+  todayCount: number;
+  dailyAverage: number;
+  daysLearnedPercent: number;
+  currentStreak: number;
+  longestStreak: number;
+}
+
+export async function fetchHeatmapStats(deckId?: number): Promise<HeatmapStatsDto> {
+  const query =
+    typeof deckId === "number" && Number.isFinite(deckId) && deckId > 0
+      ? `?deck_id=${encodeURIComponent(String(deckId))}`
+      : "";
+  const resp = await fetch(`/api/stats/heatmap${query}`);
+  if (!resp.ok) {
+    const data = await resp.json().catch(() => null);
+    throw new Error(data?.error || (await resp.text()) || "Failed to fetch heatmap stats");
+  }
+  return (await resp.json()) as HeatmapStatsDto;
+}

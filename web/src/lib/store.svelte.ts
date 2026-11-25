@@ -151,6 +151,7 @@ class CardlyStore {
     notetypeId: 0,
   });
   manageNotetypesOpen = $state<boolean>(false);
+  addonsOpen = $state<boolean>(false);
   fieldsModal = $state<FieldsModalState>({ open: false, notetypeId: 0 });
   cardTemplates = $state<CardTemplatesModalState>({ open: false, notetypeId: 0 });
   importModal = $state<ImportModalState>({ open: false, mode: "pick" });
@@ -243,6 +244,7 @@ class CardlyStore {
       this.cardInfo.open ||
       this.changeNotetype.open ||
       this.manageNotetypesOpen ||
+      this.addonsOpen ||
       this.fieldsModal.open ||
       this.cardTemplates.open ||
       this.importModal.open ||

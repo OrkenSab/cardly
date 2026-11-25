@@ -8,8 +8,10 @@ pub mod config;
 pub mod demo;
 pub mod files;
 pub mod media;
+pub mod plugins;
 pub mod rpc;
 pub mod static_assets;
+pub mod stats;
 pub mod sync_server;
 pub mod user_registry;
 pub mod user_runtime;
@@ -21,6 +23,7 @@ use axum::http::StatusCode;
 use axum::response::IntoResponse;
 use axum::routing::get;
 use axum::routing::post;
+use axum::routing::put;
 use axum::Json;
 use axum::Router;
 use tower_http::trace::TraceLayer;
@@ -143,6 +146,21 @@ pub fn build_router(state: Arc<AppState>) -> Router {
         .route(
             "/api/backups/{name}/restore",
             post(files::restore_backup_handler),
+        )
+        // Per-user Statistics API
+        .route("/api/stats/heatmap", get(stats::get_heatmap_stats_handler))
+        // Per-user Plugins API
+        .route("/api/plugins", get(plugins::list_plugins_handler))
+        .route(
+            "/api/plugins/{id}",
+            put(plugins::put_plugin_handler)
+                .delete(plugins::delete_plugin_handler)
+                .layer(DefaultBodyLimit::max(plugins::MAX_PLUGIN_BYTES + 64 * 1024)),
+        )
+        .route(
+            "/api/plugins/{id}/state",
+            put(plugins::put_plugin_state_handler)
+                .layer(DefaultBodyLimit::max(plugins::MAX_PLUGIN_BYTES + 64 * 1024)),
         )
         // Upstream Anki protobuf-over-HTTP RPC bridge + injected web bridge script/theme
         .route(

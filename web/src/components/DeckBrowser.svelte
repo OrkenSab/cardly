@@ -13,6 +13,7 @@
   } from "@generated/backend";
   import { SetDeckCollapsedRequest_Scope } from "@generated/anki/decks_pb";
   import type { DeckTreeNode } from "@generated/anki/decks_pb";
+  import { PluginSlot, pluginManager } from "../lib/plugins";
   import { store } from "../lib/store.svelte";
   import Icon from "./Icon.svelte";
 
@@ -60,6 +61,10 @@
       store.currentDeckId = currentDeckId;
       studiedText = studied.val;
       error = "";
+      pluginManager.emit("decks:updated", {
+        count: rows.length,
+        currentDeckId,
+      });
     } catch (err) {
       error = err instanceof Error ? err.message : "Failed to load decks";
     } finally {
@@ -192,6 +197,8 @@
       <div class="error-banner">{error}</div>
     {/if}
 
+    <PluginSlot id="decks:top" class="deck-plugin-slot deck-plugin-top" />
+
     <div class="deck-table-wrap">
       <div class="deck-table" role="table" aria-label="Decks">
         <div class="deck-thead" role="rowgroup">
@@ -294,6 +301,8 @@
     {#if studiedText}
       <div class="studied-today">{@html studiedText}</div>
     {/if}
+
+    <PluginSlot id="decks:bottom" class="deck-plugin-slot deck-plugin-bottom" />
   </div>
 
   <footer class="bottom-bar">
@@ -556,6 +565,17 @@
     font-size: 13.5px;
     color: var(--fg-subtle);
     text-align: center;
+  }
+  :global(.deck-plugin-slot) {
+    width: min(820px, 100%);
+    max-width: 100%;
+    justify-content: center;
+  }
+  :global(.deck-plugin-top) {
+    margin-bottom: 14px;
+  }
+  :global(.deck-plugin-bottom) {
+    margin-top: 16px;
   }
   .bottom-bar {
     flex-shrink: 0;

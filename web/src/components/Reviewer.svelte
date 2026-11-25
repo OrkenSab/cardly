@@ -32,6 +32,7 @@
   } from "@generated/anki/scheduler_pb";
   import type { QueuedCards_QueuedCard, SchedulingStates } from "@generated/anki/scheduler_pb";
   import { performUndo } from "../lib/api";
+  import { PluginSlot, pluginManager } from "../lib/plugins";
   import { nodesToHtml } from "../lib/renderCard";
   import { store } from "../lib/store.svelte";
   import Icon from "./Icon.svelte";
@@ -582,6 +583,12 @@
     }
 
     scheduleAutoAdvanceForQuestion();
+    pluginManager.emit("card:shown", {
+      cardId: Number(card.id),
+      noteId: Number(card.noteId),
+      deckId: Number(card.deckId),
+      phase: "question",
+    });
   }
 
   async function revealAnswer() {
@@ -652,6 +659,14 @@
         rating,
         answeredAtMillis: BigInt(Date.now()),
         millisecondsTaken: takenMs,
+      });
+
+      pluginManager.emit("card:answered", {
+        cardId: Number(card.id),
+        noteId: Number(card.noteId),
+        deckId: Number(card.deckId),
+        ease,
+        takenMs,
       });
 
       if (nextState) {
@@ -970,6 +985,8 @@
     ></iframe>
   </div>
 
+  <PluginSlot id="card:after" class="card-after-slot" />
+
   <footer class="reviewer-bottom" class:hidden={store.hideBottomBar}>
     <div class="bottom-left">
       <button
@@ -980,6 +997,7 @@
       >
         Edit
       </button>
+      <PluginSlot id="reviewer:actions" class="reviewer-actions-slot" />
     </div>
 
     <div class="bottom-center">
@@ -1195,6 +1213,20 @@
   }
   .bottom-left {
     justify-self: start;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    min-width: 0;
+  }
+  :global(.card-after-slot) {
+    justify-content: center;
+    padding: 6px 16px;
+    border-top: 1px solid var(--border-subtle);
+    background: var(--canvas);
+  }
+  :global(.reviewer-actions-slot) {
+    gap: 6px;
   }
   .bottom-center {
     justify-self: center;

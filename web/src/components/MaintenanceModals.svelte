@@ -10,6 +10,7 @@
   } from "@generated/backend";
   import type { EmptyCardsReport } from "@generated/anki/card_rendering_pb";
   import type { CheckMediaResponse } from "@generated/anki/media_pb";
+  import { pluginManager } from "../lib/plugins";
   import { store } from "../lib/store.svelte";
 
   // Check Database
@@ -277,6 +278,10 @@
           class="anki-btn primary"
           onclick={() => {
             store.bumpOpRevision();
+            pluginManager.emit("sync:completed", {
+              source: "manual-refresh",
+              timestamp: Date.now(),
+            });
             store.syncInfoOpen = false;
             store.toast("Collection refreshed");
           }}

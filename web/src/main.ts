@@ -1,6 +1,7 @@
 import { mount } from "svelte";
 import "./styles/anki-tokens.css";
 import App from "./App.svelte";
+import { initPlugins } from "./lib/plugins";
 import { store } from "./lib/store.svelte";
 
 // Register Service Worker for offline support and PWA
@@ -43,6 +44,8 @@ window.addEventListener("error", (ev) => {
 window.addEventListener("unhandledrejection", (ev) => {
   console.error("Cardly Unhandled Rejection:", ev.reason);
 });
+
+initPlugins();
 
 mount(App, {
   target: document.getElementById("app")!,

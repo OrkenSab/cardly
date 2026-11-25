@@ -34,8 +34,8 @@ self.addEventListener('fetch', (event) => {
   const req = event.request;
   const url = new URL(req.url);
 
-  // 1. Never cache non-GET requests or mutation / sync / api endpoints
-  if (req.method !== 'GET') {
+  // 1. Never intercept cross-origin requests, non-GET, or mutation / sync / api endpoints
+  if (url.origin !== self.location.origin || req.method !== 'GET') {
     return;
   }
   if (

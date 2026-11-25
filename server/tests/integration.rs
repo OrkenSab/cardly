@@ -1652,4 +1652,412 @@ async fn fsrs6_params_and_backward_compat_work() {
     assert_eq!(status, StatusCode::OK);
 }
 
+#[tokio::test]
+async fn plugins_api_crud_validation_isolation_and_limits() {
+    let h = TestHarness::new();
+    let (alice_cookie, alice_token) = h.login("alice", "secret123").await;
+    let (bob_cookie, bob_token) = h.login("bob", "otherpass").await;
+
+    // 1. Unauthenticated / missing API token rejected
+    let (status, _, _) = h
+        .send(Request::get("/api/plugins").body(Body::empty()).unwrap())
+        .await;
+    assert_eq!(status, StatusCode::UNAUTHORIZED);
+
+    let (status, _, _) = h
+        .send(
+            Request::put("/api/plugins/my-plugin")
+                .header(header::COOKIE, &alice_cookie)
+                .header(header::CONTENT_TYPE, "application/json")
+                .body(Body::from("{}"))
+                .unwrap(),
+        )
+        .await;
+    assert_eq!(status, StatusCode::FORBIDDEN);
+
+    // 2. Path traversal and invalid IDs rejected
+    for bad_id in ["..", "x", "UpperCase", "bad_underscore", "foo.bar", "a/b", "a\\b", "a%2Fb"] {
+        assert!(
+            !cardly_server::plugins::is_valid_plugin_id(bad_id),
+            "is_valid_plugin_id must reject {bad_id}"
+        );
+        let payload = serde_json::json!({
+            "manifest": { "id": bad_id, "name": "Bad", "version": "1.0.0" },
+            "code": "export default { onLoad() {} };"
+        })
+        .to_string();
+        let (status, _, _) = h
+            .send(
+                Request::put(format!("/api/plugins/{bad_id}"))
+                    .header(header::COOKIE, &alice_cookie)
+                    .header(API_TOKEN_HEADER, &alice_token)
+                    .header(header::CONTENT_TYPE, "application/json")
+                    .body(Body::from(payload))
+                    .unwrap(),
+            )
+            .await;
+        assert!(
+            status == StatusCode::BAD_REQUEST
+                || status == StatusCode::NOT_FOUND
+                || status == StatusCode::METHOD_NOT_ALLOWED,
+            "expected rejection for id {bad_id}, got {status}"
+        );
+    }
+
+    // 3. Size limit > 2 MiB rejected
+    let oversized_code = "x".repeat(cardly_server::plugins::MAX_PLUGIN_BYTES + 128);
+    let oversized_payload = serde_json::json!({
+        "manifest": { "id": "huge-plugin", "name": "Huge", "version": "1.0.0" },
+        "code": oversized_code
+    })
+    .to_string();
+    let (status, _, _) = h
+        .send(
+            Request::put("/api/plugins/huge-plugin")
+                .header(header::COOKIE, &alice_cookie)
+                .header(API_TOKEN_HEADER, &alice_token)
+                .header(header::CONTENT_TYPE, "application/json")
+                .body(Body::from(oversized_payload))
+                .unwrap(),
+        )
+        .await;
+    assert_eq!(status, StatusCode::PAYLOAD_TOO_LARGE);
+
+    // 3b. Permissions validation: unknown permission rejected with 400, valid permissions persisted
+    let bad_perm_payload = serde_json::json!({
+        "manifest": {
+            "id": "bad-perm-plugin",
+            "name": "Bad Perm",
+            "version": "1.0.0",
+            "permissions": ["ui:decks", "system:shell"]
+        },
+        "code": "export default { onLoad() {} };"
+    })
+    .to_string();
+    let (status, _, bytes) = h
+        .send(
+            Request::put("/api/plugins/bad-perm-plugin")
+                .header(header::COOKIE, &alice_cookie)
+                .header(API_TOKEN_HEADER, &alice_token)
+                .header(header::CONTENT_TYPE, "application/json")
+                .body(Body::from(bad_perm_payload))
+                .unwrap(),
+        )
+        .await;
+    assert_eq!(status, StatusCode::BAD_REQUEST);
+    assert!(String::from_utf8_lossy(&bytes).contains("Unknown plugin permission"));
+
+    // Non-array permissions rejected
+    let non_arr_perm_payload = serde_json::json!({
+        "manifest": {
+            "id": "bad-perm-plugin",
+            "name": "Bad Perm",
+            "version": "1.0.0",
+            "permissions": "ui:decks"
+        },
+        "code": "export default { onLoad() {} };"
+    })
+    .to_string();
+    let (status, _, _) = h
+        .send(
+            Request::put("/api/plugins/bad-perm-plugin")
+                .header(header::COOKIE, &alice_cookie)
+                .header(API_TOKEN_HEADER, &alice_token)
+                .header(header::CONTENT_TYPE, "application/json")
+                .body(Body::from(non_arr_perm_payload))
+                .unwrap(),
+        )
+        .await;
+    assert_eq!(status, StatusCode::BAD_REQUEST);
+
+    // 4. Put valid external plugin (with valid permissions) + state for built-in and external plugins
+    let valid_payload = serde_json::json!({
+        "manifest": {
+            "id": "hello-deck",
+            "name": "Hello Deck",
+            "version": "1.0.0",
+            "description": "Test plugin",
+            "permissions": ["ui:decks", "stats:read", "storage", "ui:decks"],
+            "builtIn": true
+        },
+        "code": "export default { onLoad(sdk) {} };"
+    })
+    .to_string();
+    let (status, _, bytes) = h
+        .send(
+            Request::put("/api/plugins/hello-deck")
+                .header(header::COOKIE, &alice_cookie)
+                .header(API_TOKEN_HEADER, &alice_token)
+                .header(header::CONTENT_TYPE, "application/json")
+                .body(Body::from(valid_payload))
+                .unwrap(),
+        )
+        .await;
+    assert_eq!(status, StatusCode::OK);
+    let saved_json: serde_json::Value = serde_json::from_slice(&bytes).unwrap();
+    // Server must force builtIn=false and deduplicate validated permissions
+    assert_eq!(saved_json["manifest"]["builtIn"], false);
+    assert_eq!(
+        saved_json["manifest"]["permissions"],
+        serde_json::json!(["ui:decks", "stats:read", "storage"])
+    );
+
+    // Save state for built-in session-streak
+    let state_payload = serde_json::json!({
+        "enabled": false,
+        "config": { "showStreak": false, "minStreakToShow": 3 },
+        "storage": { "today": { "date": "2026-11-26", "reviewed": 5, "streak": 2 } }
+    })
+    .to_string();
+    let (status, _, _) = h
+        .send(
+            Request::put("/api/plugins/session-streak/state")
+                .header(header::COOKIE, &alice_cookie)
+                .header(API_TOKEN_HEADER, &alice_token)
+                .header(header::CONTENT_TYPE, "application/json")
+                .body(Body::from(state_payload))
+                .unwrap(),
+        )
+        .await;
+    assert_eq!(status, StatusCode::OK);
+
+    // GET /api/plugins returns alice's plugin & state, isolated from bob
+    let (status, _, bytes) = h
+        .send(
+            Request::get("/api/plugins")
+                .header(header::COOKIE, &alice_cookie)
+                .body(Body::empty())
+                .unwrap(),
+        )
+        .await;
+    assert_eq!(status, StatusCode::OK);
+    let list: serde_json::Value = serde_json::from_slice(&bytes).unwrap();
+    assert_eq!(list["plugins"].as_array().unwrap().len(), 1);
+    assert_eq!(list["plugins"][0]["manifest"]["id"], "hello-deck");
+    assert_eq!(list["states"]["session-streak"]["enabled"], false);
+    assert_eq!(list["states"]["session-streak"]["config"]["minStreakToShow"], 3);
+
+    // Bob sees empty plugins and states
+    let (status, _, bytes) = h
+        .send(
+            Request::get("/api/plugins")
+                .header(header::COOKIE, &bob_cookie)
+                .body(Body::empty())
+                .unwrap(),
+        )
+        .await;
+    assert_eq!(status, StatusCode::OK);
+    let bob_list: serde_json::Value = serde_json::from_slice(&bytes).unwrap();
+    assert_eq!(bob_list["plugins"].as_array().unwrap().len(), 0);
+    assert!(bob_list["states"].as_object().unwrap().is_empty());
+
+    // 5. Delete external plugin
+    let (status, _, _) = h
+        .send(
+            Request::delete("/api/plugins/hello-deck")
+                .header(header::COOKIE, &alice_cookie)
+                .header(API_TOKEN_HEADER, &alice_token)
+                .body(Body::empty())
+                .unwrap(),
+        )
+        .await;
+    assert_eq!(status, StatusCode::OK);
+
+    let (status, _, bytes) = h
+        .send(
+            Request::get("/api/plugins")
+                .header(header::COOKIE, &alice_cookie)
+                .body(Body::empty())
+                .unwrap(),
+        )
+        .await;
+    assert_eq!(status, StatusCode::OK);
+    let list_after: serde_json::Value = serde_json::from_slice(&bytes).unwrap();
+    assert_eq!(list_after["plugins"].as_array().unwrap().len(), 0);
+
+    // 6. Enforce 25 external plugins limit per user (on bob)
+    for i in 0..cardly_server::plugins::MAX_EXTERNAL_PLUGINS {
+        let id = format!("ext-{i:02}");
+        let p = serde_json::json!({
+            "manifest": { "id": id, "name": format!("Ext {i}"), "version": "1.0.0" },
+            "code": "export default { onLoad() {} };"
+        })
+        .to_string();
+        let (status, _, _) = h
+            .send(
+                Request::put(format!("/api/plugins/{id}"))
+                    .header(header::COOKIE, &bob_cookie)
+                    .header(API_TOKEN_HEADER, &bob_token)
+                    .header(header::CONTENT_TYPE, "application/json")
+                    .body(Body::from(p))
+                    .unwrap(),
+            )
+            .await;
+        assert_eq!(status, StatusCode::OK);
+    }
+
+    // 26th plugin fails
+    let extra = serde_json::json!({
+        "manifest": { "id": "ext-extra", "name": "Extra", "version": "1.0.0" },
+        "code": "export default { onLoad() {} };"
+    })
+    .to_string();
+    let (status, _, _) = h
+        .send(
+            Request::put("/api/plugins/ext-extra")
+                .header(header::COOKIE, &bob_cookie)
+                .header(API_TOKEN_HEADER, &bob_token)
+                .header(header::CONTENT_TYPE, "application/json")
+                .body(Body::from(extra))
+                .unwrap(),
+        )
+        .await;
+    assert_eq!(status, StatusCode::BAD_REQUEST);
+
+    // Updating existing plugin at limit 25 still succeeds
+    let update_existing = serde_json::json!({
+        "manifest": { "id": "ext-00", "name": "Ext 0 Updated", "version": "1.1.0" },
+        "code": "export default { onLoad() {} };"
+    })
+    .to_string();
+    let (status, _, _) = h
+        .send(
+            Request::put("/api/plugins/ext-00")
+                .header(header::COOKIE, &bob_cookie)
+                .header(API_TOKEN_HEADER, &bob_token)
+                .header(header::CONTENT_TYPE, "application/json")
+                .body(Body::from(update_existing))
+                .unwrap(),
+        )
+        .await;
+    assert_eq!(status, StatusCode::OK);
+}
+
+#[tokio::test]
+async fn stats_heatmap_endpoint_reads_revlog_and_forecast() {
+    let h = TestHarness::new();
+    let (cookie, token) = h.login("alice", "secret123").await;
+
+    // 1. Unauthenticated request rejected
+    let (status, _, _) = h
+        .send(Request::get("/api/stats/heatmap").body(Body::empty()).unwrap())
+        .await;
+    assert_eq!(status, StatusCode::UNAUTHORIZED);
+
+    // 2. Empty collection returns empty history/forecast and zero metrics
+    let (status, _, bytes) = h
+        .send(
+            Request::get("/api/stats/heatmap")
+                .header(header::COOKIE, &cookie)
+                .body(Body::empty())
+                .unwrap(),
+        )
+        .await;
+    assert_eq!(status, StatusCode::OK);
+    let empty_stats: serde_json::Value = serde_json::from_slice(&bytes).unwrap();
+    assert!(empty_stats["history"].as_object().unwrap().is_empty());
+    assert!(empty_stats["forecast"].as_object().unwrap().is_empty());
+    assert_eq!(empty_stats["todayCount"], 0);
+    assert_eq!(empty_stats["currentStreak"], 0);
+
+    // 3. Add a note and answer its card via Anki RPC
+    let (status, bytes) = h
+        .rpc_raw(&cookie, &token, "getNotetypeNames", Vec::new())
+        .await;
+    assert_eq!(status, StatusCode::OK);
+    let nts = anki_proto::notetypes::NotetypeNames::decode(bytes.as_slice()).unwrap();
+    let basic_ntid = nts
+        .entries
+        .iter()
+        .find(|e| e.name == "Basic")
+        .expect("Basic notetype exists")
+        .id;
+
+    let (status, _) = h
+        .rpc_raw(
+            &cookie,
+            &token,
+            "addNote",
+            anki_proto::notes::AddNoteRequest {
+                note: Some(anki_proto::notes::Note {
+                    id: 0,
+                    guid: String::new(),
+                    notetype_id: basic_ntid,
+                    mtime_secs: 0,
+                    usn: 0,
+                    tags: vec![],
+                    fields: vec!["Heatmap Q".into(), "Heatmap A".into()],
+                }),
+                deck_id: 1,
+            }
+            .encode_to_vec(),
+        )
+        .await;
+    assert_eq!(status, StatusCode::OK);
+
+    let (status, bytes) = h
+        .rpc_raw(
+            &cookie,
+            &token,
+            "getQueuedCards",
+            anki_proto::scheduler::GetQueuedCardsRequest {
+                fetch_limit: 5,
+                intraday_learning_only: false,
+            }
+            .encode_to_vec(),
+        )
+        .await;
+    assert_eq!(status, StatusCode::OK);
+    let queued = anki_proto::scheduler::QueuedCards::decode(bytes.as_slice()).unwrap();
+    let top = &queued.cards[0];
+    let card_id = top.card.as_ref().unwrap().id;
+    let states = top.states.as_ref().unwrap();
+
+    let now_ms = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .unwrap()
+        .as_millis() as i64;
+    let (status, _) = h
+        .rpc_raw(
+            &cookie,
+            &token,
+            "answerCard",
+            anki_proto::scheduler::CardAnswer {
+                card_id,
+                current_state: states.current.clone(),
+                new_state: states.easy.clone(),
+                rating: anki_proto::scheduler::card_answer::Rating::Easy as i32,
+                answered_at_millis: now_ms,
+                milliseconds_taken: 900,
+            }
+            .encode_to_vec(),
+        )
+        .await;
+    assert_eq!(status, StatusCode::OK);
+
+    // 4. Heatmap endpoint now reflects today's review and future due forecast
+    let (status, _, bytes) = h
+        .send(
+            Request::get("/api/stats/heatmap?deck_id=1")
+                .header(header::COOKIE, &cookie)
+                .body(Body::empty())
+                .unwrap(),
+        )
+        .await;
+    assert_eq!(
+        status,
+        StatusCode::OK,
+        "heatmap failed: {}",
+        String::from_utf8_lossy(&bytes)
+    );
+    let stats: serde_json::Value = serde_json::from_slice(&bytes).unwrap();
+    let today_key = stats["today"].as_str().unwrap();
+    assert_eq!(stats["todayCount"], 1);
+    assert_eq!(stats["currentStreak"], 1);
+    assert_eq!(stats["longestStreak"], 1);
+    assert_eq!(stats["history"][today_key], 1);
+    assert!(!stats["forecast"].as_object().unwrap().is_empty());
+}
+
+
 

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { onMount } from "svelte";
+  import { onMount, untrack } from "svelte";
   import {
     checkAuth,
     installFetchInterceptor,
@@ -7,9 +7,11 @@
     performUndo,
   } from "./lib/api";
   import { installUpstreamBridge } from "./lib/bridge";
+  import { pluginManager } from "./lib/plugins";
   import { store } from "./lib/store.svelte";
 
   import AudioRecorderModal from "./components/AudioRecorderModal.svelte";
+  import AddonsModal from "./components/AddonsModal.svelte";
   import AiCardGeneratorModal from "./components/AiCardGeneratorModal.svelte";
   import Browser from "./components/Browser.svelte";
   import CardPreviewerModal from "./components/CardPreviewerModal.svelte";
@@ -53,6 +55,17 @@
     installUpstreamBridge();
     store.initTheme();
     void checkAuth();
+  });
+
+  $effect(() => {
+    const status = store.authStatus;
+    untrack(() => {
+      if (status === "authenticated") {
+        void pluginManager.syncFromServer();
+      } else if (status === "unauthenticated") {
+        void pluginManager.resetExternalPlugins();
+      }
+    });
   });
 
   function isEditableTarget(target: EventTarget | null): boolean {
@@ -99,6 +112,10 @@
       }
       if (store.manageNotetypesOpen) {
         store.manageNotetypesOpen = false;
+        return;
+      }
+      if (store.addonsOpen) {
+        store.addonsOpen = false;
         return;
       }
       if (store.deckOptions.open) {
@@ -201,6 +218,11 @@
       if (key === "n" && ev.shiftKey) {
         ev.preventDefault();
         store.manageNotetypesOpen = true;
+        return;
+      }
+      if (key === "a" && ev.shiftKey) {
+        ev.preventDefault();
+        store.addonsOpen = true;
         return;
       }
       if (key === "g" && ev.shiftKey) {
@@ -463,6 +485,10 @@
 
   {#if store.manageNotetypesOpen}
     <ManageNotetypesModal />
+  {/if}
+
+  {#if store.addonsOpen}
+    <AddonsModal />
   {/if}
 
   {#if store.fieldsModal.open}

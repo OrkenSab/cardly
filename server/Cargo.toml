@@ -18,6 +18,7 @@ axum = { version = "0.8.4", features = ["multipart", "macros"] }
 axum-client-ip = "1.1.3"
 base64 = "0.22"
 bytes = "1"
+chrono = { version = "0.4.41", default-features = false, features = ["std", "clock"] }
 hex = "0.4.3"
 image = { version = "0.25", default-features = false, features = ["png", "jpeg", "webp", "gif", "bmp"] }
 inflections = "1.1.1"
@@ -27,6 +28,7 @@ prost-reflect = "0.16.5"
 rand = "0.10.1"
 regex = "1.11.1"
 reqwest = { version = "0.12", default-features = false, features = ["json", "default-tls"] }
+rusqlite = { version = "0.41.1", default-features = false, features = ["trace", "functions", "collation", "bundled", "fallible_uint", "cache"] }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 sha1 = "0.11.0"

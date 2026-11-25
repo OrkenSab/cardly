@@ -272,6 +272,7 @@ pub struct UserRuntime {
     pub media_db_client: PathBuf,
     pub backups_dir: PathBuf,
     pub tmp_dir: PathBuf,
+    pub plugins_dir: PathBuf,
     pub profile_path: PathBuf,
     pub meta_path: PathBuf,
     /// Upstream `rslib` Backend running in `server: true` mode so web mutations emit positive USNs.
@@ -281,6 +282,7 @@ pub struct UserRuntime {
     pub mode: RwLock<CollectionMode>,
     pub media_sync: Mutex<MediaSyncStore>,
     pub settings_lock: Mutex<()>,
+    pub plugins_lock: Mutex<()>,
 }
 
 impl UserRuntime {
@@ -289,9 +291,11 @@ impl UserRuntime {
         let media_dir = folder.join("media");
         let backups_dir = folder.join("backups");
         let tmp_dir = folder.join("tmp");
+        let plugins_dir = folder.join("plugins");
         fs::create_dir_all(&media_dir)?;
         fs::create_dir_all(&backups_dir)?;
         fs::create_dir_all(&tmp_dir)?;
+        fs::create_dir_all(&plugins_dir)?;
 
         let col_path = folder.join("collection.anki2");
         let media_db_client = folder.join("collection.media.db2");
@@ -311,6 +315,7 @@ impl UserRuntime {
             media_db_client,
             backups_dir,
             tmp_dir,
+            plugins_dir,
             profile_path,
             meta_path,
             backend,
@@ -321,6 +326,7 @@ impl UserRuntime {
             }),
             media_sync: Mutex::new(media_sync),
             settings_lock: Mutex::new(()),
+            plugins_lock: Mutex::new(()),
         })
     }
 

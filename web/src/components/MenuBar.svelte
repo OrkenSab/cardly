@@ -145,6 +145,10 @@
             <span>Empty Cards...</span>
           </button>
           <div class="context-menu-sep"></div>
+          <button class="context-menu-item" role="menuitem" onclick={() => run(() => (store.addonsOpen = true))}>
+            <span>Add-ons...</span><span class="shortcut">Ctrl+Shift+A</span>
+          </button>
+          <div class="context-menu-sep"></div>
           <button
             class="context-menu-item"
             role="menuitem"
@@ -296,6 +300,7 @@
         <button class="sheet-item" onclick={() => run(() => (store.checkDbOpen = true))}>Check Database</button>
         <button class="sheet-item" onclick={() => run(() => (store.checkMediaOpen = true))}>Check Media...</button>
         <button class="sheet-item" onclick={() => run(() => (store.emptyCardsOpen = true))}>Empty Cards...</button>
+        <button class="sheet-item" onclick={() => run(() => (store.addonsOpen = true))}>Add-ons...</button>
         <button class="sheet-item" onclick={() => run(() => (store.manageNotetypesOpen = true))}>Manage Note Types...</button>
 
         <div class="sheet-sep"></div>
