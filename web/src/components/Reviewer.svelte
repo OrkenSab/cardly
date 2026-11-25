@@ -34,6 +34,7 @@
   import { performUndo } from "../lib/api";
   import { nodesToHtml } from "../lib/renderCard";
   import { store } from "../lib/store.svelte";
+  import Icon from "./Icon.svelte";
 
   const FLAG_NAMES = ["No Flag", "Red", "Orange", "Green", "Blue", "Pink", "Turquoise", "Purple"];
   const FLAG_COLORS = [
@@ -108,12 +109,17 @@
 <html>
 <head>
 <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <base href="${window.location.origin}/">
 <link rel="stylesheet" href="/_anki/css/webview.css">
 <link rel="stylesheet" href="/_anki/css/reviewer.css">
 <style>
-  html, body { margin: 0; padding: 16px 20px; min-height: 100%; box-sizing: border-box; }
+  html, body { margin: 0; padding: 16px 20px; min-height: 100%; box-sizing: border-box; overflow-x: hidden; word-wrap: break-word; -webkit-user-select: text; user-select: text; }
   .card { margin: 0 auto; max-width: 900px; }
+  .card img, .card video, .card svg { max-width: 100%; height: auto; }
+  .card table { max-width: 100%; display: block; overflow-x: auto; }
+  .card pre, .card code { max-width: 100%; overflow-x: auto; }
+  @media (max-width: 640px) { html, body { padding: 12px 14px; } #typeans { max-width: 100%; font-size: 16px !important; } }
   .replay-button { display: inline-flex; align-items: center; justify-content: center; cursor: pointer; vertical-align: middle; margin: 0 3px; text-decoration: none; }
   .replay-button svg { width: 32px; height: 32px; }
   .typeGood { background: #0f0; color: #000; }
@@ -1029,106 +1035,124 @@
           </div>
         {/if}
         <button
-          class="anki-btn"
+          class="anki-btn more-trigger-btn"
           title="Shortcut: M"
           onclick={(e) => {
             e.stopPropagation();
             moreMenuOpen = !moreMenuOpen;
           }}
         >
-          More ▾
+          <span>More</span>
+          <Icon name="chevron-down" size={14} />
         </button>
 
         {#if moreMenuOpen}
           <!-- svelte-ignore a11y_click_events_have_key_events -->
           <!-- svelte-ignore a11y_no_static_element_interactions -->
-          <div class="more-menu context-menu" onclick={(e) => e.stopPropagation()} role="menu">
-            <div class="flag-row">
-              <span class="flag-heading">Flag:</span>
-              {#each [0, 1, 2, 3, 4, 5, 6, 7] as f}
+          <div class="more-backdrop" onclick={() => (moreMenuOpen = false)}>
+            <div class="more-menu context-menu" onclick={(e) => e.stopPropagation()} role="menu">
+              <div class="more-sheet-header">
+                <span class="more-sheet-title">Card Options</span>
                 <button
-                  class="flag-dot"
-                  class:active={card && (card.flags & 7) === f}
-                  style={f === 0 ? "" : `background: ${FLAG_COLORS[f]}`}
-                  title={f === 0 ? "No Flag" : `${FLAG_NAMES[f]} (Ctrl+${f})`}
-                  onclick={() => setFlag(f)}
+                  type="button"
+                  class="more-sheet-close"
+                  aria-label="Close options"
+                  onclick={() => (moreMenuOpen = false)}
                 >
-                  {f === 0 ? "×" : ""}
+                  <Icon name="x" size={18} />
                 </button>
-              {/each}
-            </div>
-            <div class="context-menu-sep"></div>
-            <button class="context-menu-item" onclick={toggleMark}>
-              <span>{note?.tags.some((t) => t.toLowerCase() === "marked") ? "Unmark Note" : "Mark Note"}</span>
-              <span class="shortcut">*</span>
-            </button>
-            <button class="context-menu-item" onclick={() => buryCardOrNote(false)}>
-              <span>Bury Card</span><span class="shortcut">-</span>
-            </button>
-            <button class="context-menu-item" onclick={() => buryCardOrNote(true)}>
-              <span>Bury Note</span><span class="shortcut">=</span>
-            </button>
-            <button class="context-menu-item" onclick={() => suspendCardOrNote(false)}>
-              <span>Suspend Card</span><span class="shortcut">@</span>
-            </button>
-            <button class="context-menu-item" onclick={() => suspendCardOrNote(true)}>
-              <span>Suspend Note</span><span class="shortcut">!</span>
-            </button>
-            <div class="context-menu-sep"></div>
-            <button class="context-menu-item" onclick={forgetCurrentCard}>
-              <span>Forget...</span><span class="shortcut">Ctrl+Alt+N</span>
-            </button>
-            <button class="context-menu-item" onclick={handleSetDueDate}>
-              <span>Set Due Date...</span><span class="shortcut">Ctrl+Shift+D</span>
-            </button>
-            <button class="context-menu-item" onclick={deleteCurrentNote}>
-              <span style="color: var(--accent-danger)">Delete Note</span>
-              <span class="shortcut">Ctrl+Del</span>
-            </button>
-            <div class="context-menu-sep"></div>
-            <button
-              class="context-menu-item"
-              onclick={() => {
-                moreMenuOpen = false;
-                if (card) store.openCardInfo(Number(card.id));
-              }}
-            >
-              <span>Card Info...</span><span class="shortcut">I</span>
-            </button>
-            {#if previousCardId}
+              </div>
+              <div class="flag-row">
+                <span class="flag-heading">Flag:</span>
+                {#each [0, 1, 2, 3, 4, 5, 6, 7] as f}
+                  <button
+                    class="flag-dot"
+                    class:active={card && (card.flags & 7) === f}
+                    style={f === 0 ? "" : `background: ${FLAG_COLORS[f]}`}
+                    title={f === 0 ? "No Flag" : `${FLAG_NAMES[f]} (Ctrl+${f})`}
+                    aria-label={f === 0 ? "No Flag" : FLAG_NAMES[f]}
+                    onclick={() => setFlag(f)}
+                  >
+                    {#if f === 0}<Icon name="x" size={12} />{/if}
+                  </button>
+                {/each}
+              </div>
+              <div class="context-menu-sep"></div>
+              <button class="context-menu-item" onclick={toggleMark}>
+                <span>{note?.tags.some((t) => t.toLowerCase() === "marked") ? "Unmark Note" : "Mark Note"}</span>
+                <span class="shortcut">*</span>
+              </button>
+              <button class="context-menu-item" onclick={() => buryCardOrNote(false)}>
+                <span>Bury Card</span><span class="shortcut">-</span>
+              </button>
+              <button class="context-menu-item" onclick={() => buryCardOrNote(true)}>
+                <span>Bury Note</span><span class="shortcut">=</span>
+              </button>
+              <button class="context-menu-item" onclick={() => suspendCardOrNote(false)}>
+                <span>Suspend Card</span><span class="shortcut">@</span>
+              </button>
+              <button class="context-menu-item" onclick={() => suspendCardOrNote(true)}>
+                <span>Suspend Note</span><span class="shortcut">!</span>
+              </button>
+              <div class="context-menu-sep"></div>
+              <button class="context-menu-item" onclick={forgetCurrentCard}>
+                <span>Forget...</span><span class="shortcut">Ctrl+Alt+N</span>
+              </button>
+              <button class="context-menu-item" onclick={handleSetDueDate}>
+                <span>Set Due Date...</span><span class="shortcut">Ctrl+Shift+D</span>
+              </button>
+              <button class="context-menu-item" onclick={deleteCurrentNote}>
+                <span style="color: var(--accent-danger)">Delete Note</span>
+                <span class="shortcut">Ctrl+Del</span>
+              </button>
+              <div class="context-menu-sep"></div>
               <button
                 class="context-menu-item"
                 onclick={() => {
                   moreMenuOpen = false;
-                  store.openCardInfo(previousCardId, "Previous Card Info");
+                  if (card) store.openCardInfo(Number(card.id));
                 }}
               >
-                <span>Previous Card Info...</span><span class="shortcut">Ctrl+Alt+I</span>
+                <span>Card Info...</span><span class="shortcut">I</span>
               </button>
-            {/if}
-            <button
-              class="context-menu-item"
-              onclick={() => {
-                moreMenuOpen = false;
-                if (card) store.openDeckOptions(Number(card.deckId));
-              }}
-            >
-              <span>Options...</span><span class="shortcut">O</span>
-            </button>
-            <div class="context-menu-sep"></div>
-            <button
-              class="context-menu-item"
-              onclick={() => {
-                moreMenuOpen = false;
-                replayAudio();
-              }}
-            >
-              <span>Replay Audio</span><span class="shortcut">R</span>
-            </button>
-            <button class="context-menu-item" onclick={toggleAutoAdvance}>
-              <span>{autoAdvanceEnabled ? "✓ Auto Advance" : "Auto Advance"}</span>
-              <span class="shortcut">Shift+A</span>
-            </button>
+              {#if previousCardId}
+                <button
+                  class="context-menu-item"
+                  onclick={() => {
+                    moreMenuOpen = false;
+                    store.openCardInfo(previousCardId, "Previous Card Info");
+                  }}
+                >
+                  <span>Previous Card Info...</span><span class="shortcut">Ctrl+Alt+I</span>
+                </button>
+              {/if}
+              <button
+                class="context-menu-item"
+                onclick={() => {
+                  moreMenuOpen = false;
+                  if (card) store.openDeckOptions(Number(card.deckId));
+                }}
+              >
+                <span>Options...</span><span class="shortcut">O</span>
+              </button>
+              <div class="context-menu-sep"></div>
+              <button
+                class="context-menu-item"
+                onclick={() => {
+                  moreMenuOpen = false;
+                  replayAudio();
+                }}
+              >
+                <span>Replay Audio</span><span class="shortcut">R</span>
+              </button>
+              <button class="context-menu-item" onclick={toggleAutoAdvance}>
+                <span class="menu-label-with-icon">
+                  {#if autoAdvanceEnabled}<Icon name="check" size={14} />{/if}
+                  <span>Auto Advance</span>
+                </span>
+                <span class="shortcut">Shift+A</span>
+              </button>
+            </div>
           </div>
         {/if}
       </div>
@@ -1240,6 +1264,17 @@
     color: var(--accent-danger);
     font-weight: 600;
   }
+  .more-backdrop {
+    display: contents;
+  }
+  .more-sheet-header {
+    display: none;
+  }
+  .menu-label-with-icon {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
   .more-menu {
     position: absolute;
     bottom: calc(100% + 6px);
@@ -1282,22 +1317,30 @@
   }
   @media (max-width: 640px) {
     .reviewer-bottom {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      padding: 6px 10px calc(8px + env(safe-area-inset-bottom, 0));
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      align-items: center;
+      gap: 8px;
+      padding: 8px calc(10px + var(--safe-right)) calc(10px + var(--safe-bottom)) calc(10px + var(--safe-left));
       min-height: auto;
     }
-    .bottom-left,
+    .bottom-left {
+      justify-self: start;
+      order: 1;
+    }
     .bottom-right {
-      width: 100%;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
+      justify-self: end;
+      order: 1;
     }
     .bottom-center {
+      grid-column: 1 / -1;
       width: 100%;
       order: 2;
+    }
+    .more-anchor {
+      flex-direction: row;
+      align-items: center;
+      gap: 8px;
     }
     .show-answer-wrap {
       width: 100%;
@@ -1313,6 +1356,7 @@
     }
     .ease-col {
       flex: 1;
+      min-width: 0;
     }
     .ease-btn {
       width: 100%;
@@ -1324,10 +1368,69 @@
     .ivl-label {
       font-size: 11px;
     }
+  }
+
+  @media (max-width: 640px), (hover: none) and (pointer: coarse) {
+    .more-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.48);
+      z-index: 2500;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+    }
     .more-menu {
-      right: 0;
-      bottom: calc(100% + 4px);
-      max-width: 92vw;
+      position: static;
+      width: 100%;
+      max-width: 540px;
+      max-height: 82dvh;
+      overflow-y: auto;
+      border-radius: 16px 16px 0 0;
+      border-bottom: none;
+      padding: 0 8px calc(12px + var(--safe-bottom));
+      box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.3);
+    }
+    .more-sheet-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 8px;
+      border-bottom: 1px solid var(--border-subtle);
+      position: sticky;
+      top: 0;
+      background: var(--canvas-overlay);
+      z-index: 1;
+    }
+    .more-sheet-title {
+      font-size: 15px;
+      font-weight: 700;
+    }
+    .more-sheet-close {
+      border: none;
+      background: transparent;
+      color: var(--fg-subtle);
+      min-width: 44px;
+      min-height: 44px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    .more-menu .context-menu-item {
+      min-height: 44px;
+      padding: 10px 12px;
+      font-size: 15px;
+    }
+    .flag-row {
+      padding: 10px 8px;
+      justify-content: space-between;
+      flex-wrap: wrap;
+    }
+    .flag-dot {
+      width: 30px;
+      height: 30px;
     }
   }
 </style>
