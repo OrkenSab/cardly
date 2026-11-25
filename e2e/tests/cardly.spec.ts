@@ -55,7 +55,7 @@ test.describe("Cardly Phase 2 E2E", () => {
     // 2. Verify Default deck shows 1 New card in Deck Browser
     const defaultRow = page.locator(".deck-row", { hasText: "Default" });
     await expect(defaultRow).toBeVisible();
-    await expect(defaultRow.locator('td[data-col="new"]')).toHaveText("1");
+    await expect(defaultRow.locator('[data-col="new"]')).toHaveText("1");
 
     // 3. Click Default -> Deck Overview -> Study Now
     await defaultRow.locator(".deck-link").click();
@@ -84,13 +84,13 @@ test.describe("Cardly Phase 2 E2E", () => {
     await page.getByRole("button", { name: "Decks", exact: true }).click();
     await expect(defaultRow).toBeVisible();
     // New count must now be 0 (moved to Learn or Done)
-    await expect(defaultRow.locator('td[data-col="new"]')).toHaveText("0");
+    await expect(defaultRow.locator('[data-col="new"]')).toHaveText("0");
     // Studied today footer should mention at least 1 card
     await expect(page.locator(".studied-today")).toContainText(/Studied\s+.*1.*card/i);
 
     // 6. Undo with Ctrl+Z should restore New count to 1
     await page.keyboard.press("Control+z");
-    await expect(defaultRow.locator('td[data-col="new"]')).toHaveText("1");
+    await expect(defaultRow.locator('[data-col="new"]')).toHaveText("1");
 
     expect(errors).toEqual([]);
   });

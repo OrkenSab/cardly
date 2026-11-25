@@ -19,6 +19,21 @@ export default defineConfig({
     baseURL: process.env.CARDLY_BASE_URL ?? "http://127.0.0.1:8091",
     viewport: { width: 1280, height: 840 },
     headless: true,
-    launchOptions: systemChromium ? { executablePath: systemChromium } : undefined,
   },
+  projects: [
+    {
+      name: "chromium",
+      use: {
+        browserName: "chromium",
+        launchOptions: systemChromium ? { executablePath: systemChromium } : undefined,
+      },
+    },
+    {
+      name: "webkit",
+      testMatch: /mobile-layout\.spec\.ts/,
+      use: {
+        browserName: "webkit",
+      },
+    },
+  ],
 });

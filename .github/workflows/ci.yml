@@ -167,7 +167,7 @@ jobs:
         run: |
           cd e2e
           npm ci
-          npx playwright install --with-deps chromium
+          npx playwright install --with-deps chromium webkit
 
       - name: Start Cardly server
         run: |
