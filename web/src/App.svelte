@@ -491,7 +491,7 @@
 
 <style>
   .boot-screen {
-    height: 100vh;
+    height: 100dvh;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -515,18 +515,21 @@
     }
   }
   .app-shell {
-    height: 100vh;
+    height: 100dvh;
     display: flex;
     flex-direction: column;
     background: var(--canvas);
     color: var(--fg);
     overflow: hidden;
+    min-width: 0;
+    max-width: 100%;
   }
   .main-area {
     flex: 1;
     display: flex;
     flex-direction: column;
     min-height: 0;
+    min-width: 0;
     overflow: hidden;
   }
   .add-window {
@@ -596,10 +599,10 @@
     .deck-opts-window,
     .card-info-window,
     .change-nt-window {
-      width: 100vw !important;
-      max-width: 100vw !important;
-      height: 100% !important;
-      max-height: 100vh !important;
+      width: 100% !important;
+      max-width: 100% !important;
+      height: 100dvh !important;
+      max-height: 100dvh !important;
       border-radius: 0 !important;
     }
   }
