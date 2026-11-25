@@ -1,0 +1,67 @@
+name: Check Upstream Anki Release
+
+on:
+  schedule:
+    # Weekly on Monday at 09:00 UTC
+    - cron: "0 9 * * 1"
+  workflow_dispatch:
+
+permissions:
+  issues: write
+  contents: read
+
+jobs:
+  check-anki-release:
+    name: Check for new stable ankitects/anki release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: false
+
+      - name: Compare pinned Anki version with latest stable release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          PINNED=""
+          if [ -f anki-upstream/.version ]; then
+            PINNED=$(tr -d '[:space:]' < anki-upstream/.version)
+          else
+            PINNED=$(curl -fsSL "https://api.github.com/repos/${{ github.repository }}/contents/anki-upstream" \
+              -H "Accept: application/vnd.github+json" | jq -r '.sha // empty')
+          fi
+
+          LATEST_TAG=$(curl -fsSL "https://api.github.com/repos/ankitects/anki/releases?per_page=20" \
+            | jq -r '[.[] | select(.prerelease == false and .draft == false)][0].tag_name // empty')
+
+          if [ -z "$LATEST_TAG" ]; then
+            echo "Could not determine latest stable ankitects/anki release."
+            exit 0
+          fi
+
+          echo "Latest stable ankitects/anki release: $LATEST_TAG"
+
+          # Check if submodule commit matches the dereferenced commit of the latest stable tag
+          SUBMODULE_SHA=$(git ls-tree HEAD anki-upstream | awk '{print $3}')
+          TAG_SHA=$(git ls-remote --tags https://github.com/ankitects/anki.git "refs/tags/${LATEST_TAG}^{}" | awk '{print $1}')
+          if [ -z "$TAG_SHA" ]; then
+            TAG_SHA=$(git ls-remote --tags https://github.com/ankitects/anki.git "refs/tags/${LATEST_TAG}" | awk '{print $1}')
+          fi
+
+          if [ -n "$SUBMODULE_SHA" ] && [ "$SUBMODULE_SHA" = "$TAG_SHA" ]; then
+            echo "anki-upstream is already at $LATEST_TAG."
+            exit 0
+          fi
+
+          # Avoid duplicate open issues for the same release
+          EXISTING=$(gh issue list --repo "${{ github.repository }}" --state open --search "New stable Anki release: $LATEST_TAG in:title" --json number --jq 'length')
+          if [ "${EXISTING:-0}" -gt 0 ]; then
+            echo "Issue for $LATEST_TAG already exists."
+            exit 0
+          fi
+
+          gh issue create \
+            --repo "${{ github.repository }}" \
+            --title "New stable Anki release: $LATEST_TAG" \
+            --body "A new stable release **$LATEST_TAG** is available on [ankitects/anki](https://github.com/ankitects/anki/releases/tag/$LATEST_TAG).\n\nCurrent submodule commit: \`$SUBMODULE_SHA\`.\n\nSee \`docs/UPGRADING_ANKI.md\` for the upgrade and verification checklist."

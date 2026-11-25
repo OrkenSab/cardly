@@ -30,6 +30,28 @@ env:
   PROTOC_BINARY: /usr/bin/protoc
 
 jobs:
+  submodule-pin-check:
+    name: Check anki-upstream Submodule Pin
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: false
+
+      - name: Warn if anki-upstream is not pinned to a stable release tag
+        run: |
+          PIN_SHA=$(git ls-tree HEAD anki-upstream | awk '{print $3}')
+          TAG_MATCH=$(git ls-remote --tags https://github.com/ankitects/anki.git | awk -v sha="$PIN_SHA" '$1 == sha { sub("refs/tags/", "", $2); sub("\\^\\{\\}$", "", $2); print $2 }' | head -n 1)
+          if [ -z "$TAG_MATCH" ]; then
+            echo "::warning::anki-upstream ($PIN_SHA) is not pinned to an exact release tag. See docs/UPGRADING_ANKI.md."
+          elif echo "$TAG_MATCH" | grep -qiE '(b[0-9]+|rc[0-9]*|alpha|beta)'; then
+            echo "::warning::anki-upstream is pinned to pre-release tag '$TAG_MATCH' rather than a stable release."
+          else
+            echo "anki-upstream is pinned to stable tag: $TAG_MATCH"
+          fi
+
   rust-tests:
     name: Rust Server Tests
     runs-on: ubuntu-latest
