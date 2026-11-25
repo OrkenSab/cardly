@@ -1,10 +1,52 @@
 <script lang="ts">
+  import { onMount } from "svelte";
   import { store } from "../lib/store.svelte";
+  import Icon from "./Icon.svelte";
 
   const isFlat = $derived(store.view === "review");
+
+  let inputFocused = $state(false);
+
+  function isTextInput(el: EventTarget | null): boolean {
+    if (!(el instanceof HTMLElement)) return false;
+    const tag = el.tagName;
+    if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") {
+      const type = (el as HTMLInputElement).type;
+      return !["button", "submit", "reset", "checkbox", "radio", "file"].includes(type);
+    }
+    return el.isContentEditable;
+  }
+
+  onMount(() => {
+    const onFocusIn = (e: FocusEvent) => {
+      if (isTextInput(e.target)) inputFocused = true;
+    };
+    const onFocusOut = () => {
+      // Defer check until focus settles on next element
+      requestAnimationFrame(() => {
+        inputFocused = isTextInput(document.activeElement);
+      });
+    };
+    document.addEventListener("focusin", onFocusIn, true);
+    document.addEventListener("focusout", onFocusOut, true);
+    return () => {
+      document.removeEventListener("focusin", onFocusIn, true);
+      document.removeEventListener("focusout", onFocusOut, true);
+    };
+  });
+
+  // Hide mobile bottom tab bar in Reviewer, Add/Editor & full-screen modals, or while typing
+  const hideMobileBar = $derived(
+    store.view === "review" || store.hasOpenModal || inputFocused
+  );
 </script>
 
-<header class="top-bar" class:flat={isFlat} class:hidden={store.view === "review" && store.hideTopBar}>
+<header
+  class="top-bar"
+  class:flat={isFlat}
+  class:hidden={store.view === "review" && store.hideTopBar}
+  class:mobile-hidden={hideMobileBar}
+>
   <div class="left-tray"></div>
   <div class="toolbar" role="navigation" aria-label="Main views">
     <button
@@ -15,7 +57,8 @@
         store.view = "decks";
       }}
     >
-      Decks
+      <span class="tab-icon"><Icon name="layers" size={18} /></span>
+      <span class="tab-label">Decks</span>
     </button>
     <button
       class="hitem"
@@ -24,7 +67,8 @@
         store.addCardsOpen = true;
       }}
     >
-      Add
+      <span class="tab-icon"><Icon name="plus" size={18} /></span>
+      <span class="tab-label">Add</span>
     </button>
     <button
       class="hitem ai-toolbar-btn"
@@ -33,7 +77,8 @@
         store.aiGeneratorOpen = true;
       }}
     >
-      ✨ AI
+      <span class="ai-icon"><Icon name="sparkles" size={15} /></span>
+      <span class="tab-label">AI</span>
     </button>
     <button
       class="hitem"
@@ -42,7 +87,8 @@
         store.openBrowser("");
       }}
     >
-      Browse
+      <span class="tab-icon"><Icon name="search" size={18} /></span>
+      <span class="tab-label">Browse</span>
     </button>
     <button
       class="hitem"
@@ -51,7 +97,8 @@
         store.statsOpen = true;
       }}
     >
-      Stats
+      <span class="tab-icon"><Icon name="bar-chart" size={18} /></span>
+      <span class="tab-label">Stats</span>
     </button>
     <button
       class="hitem"
@@ -60,7 +107,8 @@
         store.syncInfoOpen = true;
       }}
     >
-      Sync
+      <span class="tab-icon"><Icon name="refresh-cw" size={18} /></span>
+      <span class="tab-label">Sync</span>
     </button>
   </div>
   <div class="right-tray">
@@ -71,7 +119,8 @@
       </div>
     {:else if store.username}
       <div class="user-pill" title="Signed in as {store.username}">
-        <span class="user-text">👤 {store.username}</span>
+        <Icon name="user" size={13} />
+        <span class="user-text">{store.username}</span>
       </div>
     {/if}
   </div>
@@ -108,7 +157,7 @@
   .user-pill {
     display: inline-flex;
     align-items: center;
-    gap: 6px;
+    gap: 5px;
     padding: 3px 10px;
     margin-right: 12px;
     margin-top: 4px;
@@ -119,17 +168,6 @@
     border: 1px solid var(--border-subtle);
     border-radius: 999px;
     user-select: none;
-  }
-  @media (max-width: 640px) {
-    .demo-text,
-    .user-text {
-      display: none;
-    }
-    .demo-pill,
-    .user-pill {
-      padding: 4px 6px;
-      margin-right: 6px;
-    }
   }
   .top-bar {
     display: grid;
@@ -173,6 +211,17 @@
     border: 1px solid transparent;
     cursor: pointer;
     line-height: 1.3;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+  }
+  .tab-icon {
+    display: none;
+  }
+  .ai-icon {
+    display: inline-flex;
+    align-items: center;
   }
   .hitem:first-child {
     padding-left: 18px;
@@ -198,30 +247,70 @@
   :global(body.minimalist) .top-bar {
     grid-template-columns: 0 1fr 0;
   }
+
   @media (max-width: 640px) {
     .top-bar {
-      grid-template-columns: 0 1fr 0;
+      order: 10;
+      display: flex;
       width: 100%;
+      padding: 0;
+      padding-bottom: var(--safe-bottom);
+      padding-left: var(--safe-left);
+      padding-right: var(--safe-right);
+      background: var(--canvas-elevated);
+      border-top: 1px solid var(--border-subtle);
+      z-index: 150;
+    }
+    .top-bar.mobile-hidden {
+      display: none;
+    }
+    .left-tray,
+    .right-tray {
+      display: none;
     }
     .toolbar {
       width: 100%;
       border-radius: 0;
-      border-left: none;
-      border-right: none;
-      display: flex;
-      justify-content: space-around;
+      border: none;
+      box-shadow: none;
+      background: transparent;
+      display: grid;
+      grid-template-columns: repeat(6, minmax(0, 1fr));
     }
     .hitem {
-      padding: 8px 4px;
-      font-size: 13px;
-      flex: 1;
-      text-align: center;
+      flex-direction: column;
+      gap: 2px;
+      min-height: 50px;
+      padding: 6px 2px;
+      font-size: 10.5px;
+      font-weight: 600;
+      border: none;
+      color: var(--fg-subtle);
+      min-width: 0;
     }
-    .hitem:first-child {
-      padding-left: 4px;
+    .hitem.active {
+      color: var(--button-primary-bg);
     }
+    .hitem:first-child,
     .hitem:last-child {
-      padding-right: 4px;
+      padding-left: 2px;
+      padding-right: 2px;
+    }
+    .tab-icon,
+    .ai-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .ai-icon :global(svg) {
+      width: 18px;
+      height: 18px;
+    }
+    .tab-label {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 100%;
     }
   }
 </style>

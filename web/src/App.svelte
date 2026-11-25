@@ -22,6 +22,7 @@
   import ExportModal from "./components/ExportModal.svelte";
   import FieldsModal from "./components/FieldsModal.svelte";
   import FilteredDeckModal from "./components/FilteredDeckModal.svelte";
+  import Icon from "./components/Icon.svelte";
   import ImportModal from "./components/ImportModal.svelte";
   import LoginView from "./components/LoginView.svelte";
   import MaintenanceModals from "./components/MaintenanceModals.svelte";
@@ -33,6 +34,19 @@
   import TopToolbar from "./components/TopToolbar.svelte";
   import UpstreamEditor from "./components/UpstreamEditor.svelte";
   import UpstreamFrame from "./components/UpstreamFrame.svelte";
+
+  let demoBannerDismissed = $state(
+    typeof sessionStorage !== "undefined" && sessionStorage.getItem("cardly_demo_banner_dismissed") === "1"
+  );
+
+  function dismissDemoBanner() {
+    demoBannerDismissed = true;
+    try {
+      sessionStorage.setItem("cardly_demo_banner_dismissed", "1");
+    } catch {
+      // ignore storage errors
+    }
+  }
 
   onMount(() => {
     installFetchInterceptor();
@@ -241,20 +255,35 @@
   <LoginView />
 {:else}
   <div class="app-shell">
-    {#if store.isDemoUser}
-      <div class="demo-banner-top" role="region" aria-label="Demo notice">
+    {#if store.isDemoUser && !demoBannerDismissed}
+      <div
+        class="demo-banner-top"
+        class:needs-safe-top={store.view === "review" && store.hideTopBar}
+        role="region"
+        aria-label="Demo notice"
+      >
         <span class="demo-banner-text">
-          ⚡ <strong>Demo Mode</strong>: data resets every {Math.max(1, Math.round(store.demoResetIntervalMinutes / 60))} hour{Math.round(store.demoResetIntervalMinutes / 60) > 1 ? "s" : ""}. Free guest trial.
+          <Icon name="zap" size={14} />
+          <strong>Demo Mode</strong>: resets every {Math.max(1, Math.round(store.demoResetIntervalMinutes / 60))}h.
         </span>
         <div class="demo-banner-links">
           <a href="https://github.com/OrkenSab/cardly" target="_blank" rel="noopener noreferrer">Source Code</a>
           <span class="banner-sep">•</span>
           <span class="banner-disclaimer">Not affiliated with Anki / Ankitects</span>
+          <button
+            type="button"
+            class="demo-banner-close"
+            title="Dismiss demo notice"
+            aria-label="Dismiss demo notice"
+            onclick={dismissDemoBanner}
+          >
+            <Icon name="x" size={14} />
+          </button>
         </div>
       </div>
     {/if}
     {#if !(store.view === "review" && store.hideTopBar)}
-      <MenuBar />
+      <MenuBar demoBannerVisible={store.isDemoUser && !demoBannerDismissed} />
       <TopToolbar />
     {/if}
 
@@ -556,7 +585,8 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 6px 14px;
+    gap: 10px;
+    padding: calc(6px + var(--safe-top)) calc(14px + var(--safe-right)) 6px calc(14px + var(--safe-left));
     background: #1e293b;
     color: #f1f5f9;
     font-size: 12px;
@@ -564,10 +594,17 @@
     z-index: 100;
     flex-shrink: 0;
   }
+  .demo-banner-text {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    min-width: 0;
+  }
   .demo-banner-top a {
     color: #38bdf8;
     text-decoration: underline;
     font-weight: 500;
+    white-space: nowrap;
   }
   .demo-banner-top a:hover {
     color: #7dd3fc;
@@ -578,13 +615,27 @@
     gap: 8px;
     font-size: 11px;
     color: #94a3b8;
+    flex-shrink: 0;
+  }
+  .demo-banner-close {
+    border: none;
+    background: transparent;
+    color: #94a3b8;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 4px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .demo-banner-close:hover {
+    color: #f1f5f9;
+    background: rgba(255, 255, 255, 0.1);
   }
   @media (max-width: 640px) {
     .demo-banner-top {
-      flex-direction: column;
-      gap: 3px;
-      text-align: center;
-      padding: 6px 10px;
+      padding: calc(5px + var(--safe-top)) calc(10px + var(--safe-right)) 5px calc(10px + var(--safe-left));
+      font-size: 11.5px;
     }
     .banner-disclaimer {
       display: none;
