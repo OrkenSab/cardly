@@ -50,6 +50,21 @@ export function hasExpandedPermissions(
   return (next ?? []).some((p) => !prevSet.has(p));
 }
 
+export function sanitizeIconUrl(raw: unknown, baseUrl = CARDLY_MARKETPLACE_URL): string | undefined {
+  if (typeof raw !== "string") return undefined;
+  const trimmed = raw.trim();
+  if (!trimmed) return undefined;
+  try {
+    const resolved = new URL(trimmed, baseUrl);
+    if (resolved.protocol === "https:" || resolved.protocol === "http:") {
+      return resolved.toString();
+    }
+  } catch {
+    // Ignore invalid URLs
+  }
+  return undefined;
+}
+
 export function validatePluginManifest(raw: unknown): PluginManifest {
   if (!raw || typeof raw !== "object" || Array.isArray(raw)) {
     throw new Error("Invalid plugin manifest: expected JSON object");
@@ -79,6 +94,7 @@ export function validatePluginManifest(raw: unknown): PluginManifest {
     description: typeof obj.description === "string" ? obj.description : "",
     author: typeof obj.author === "string" ? obj.author : undefined,
     homepage: typeof obj.homepage === "string" ? obj.homepage : undefined,
+    iconUrl: sanitizeIconUrl(obj.iconUrl),
     updateUrl: typeof obj.updateUrl === "string" ? obj.updateUrl : undefined,
     builtIn: false,
     defaultEnabled: typeof obj.defaultEnabled === "boolean" ? obj.defaultEnabled : true,
@@ -258,11 +274,17 @@ export async function fetchRegistryEntries(
     throw new Error(`Registry unavailable (${resp.status} ${resp.statusText})`);
   }
   const data = (await resp.json()) as unknown;
+  const normalizeEntries = (list: RegistryPluginEntry[]): RegistryPluginEntry[] =>
+    list.map((entry) => ({
+      ...entry,
+      iconUrl: sanitizeIconUrl(entry.iconUrl),
+    }));
+
   if (Array.isArray(data)) {
-    return data as RegistryPluginEntry[];
+    return normalizeEntries(data as RegistryPluginEntry[]);
   }
   if (data && typeof data === "object" && Array.isArray((data as { plugins?: unknown }).plugins)) {
-    return (data as { plugins: RegistryPluginEntry[] }).plugins;
+    return normalizeEntries((data as { plugins: RegistryPluginEntry[] }).plugins);
   }
   throw new Error("Invalid registry format: expected `{ plugins: [...] }`");
 }
@@ -299,6 +321,7 @@ export async function fetchPluginFromSource(
       description: entry.description ?? "",
       author: entry.author,
       homepage: entry.homepage,
+      iconUrl: entry.iconUrl,
       updateUrl,
       defaultEnabled: entry.defaultEnabled,
       permissions: entry.permissions,
@@ -324,6 +347,7 @@ export async function fetchPluginFromSource(
       description: entry.description ?? fetched.manifest.description,
       author: entry.author ?? fetched.manifest.author,
       homepage: entry.homepage ?? fetched.manifest.homepage,
+      iconUrl: entry.iconUrl ?? fetched.manifest.iconUrl,
       updateUrl,
       permissions: entry.permissions ?? fetched.manifest.permissions,
     }),

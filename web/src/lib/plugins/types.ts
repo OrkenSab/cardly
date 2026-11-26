@@ -70,6 +70,7 @@ export interface PluginManifest {
   readonly description: string;
   readonly author?: string;
   readonly homepage?: string;
+  readonly iconUrl?: string;
   readonly updateUrl?: string;
   readonly builtIn?: boolean;
   readonly defaultEnabled?: boolean;
@@ -185,6 +186,7 @@ export interface RegistryPluginEntry {
   readonly description?: string;
   readonly author?: string;
   readonly homepage?: string;
+  readonly iconUrl?: string;
   readonly updateUrl?: string;
   readonly packageUrl?: string;
   readonly codeUrl?: string;

@@ -657,7 +657,14 @@
                   onclick={(e) => handleItemClick(p.manifest.id, e)}
                   ondblclick={handleConfig}
                 >
-                  <span class="addon-item-name">{formatListName(p)}</span>
+                  <span class="addon-item-left">
+                    {#if p.manifest.iconUrl}
+                      <img src={p.manifest.iconUrl} alt="" class="addon-mini-icon" />
+                    {:else}
+                      <span class="addon-mini-fallback" aria-hidden="true">❖</span>
+                    {/if}
+                    <span class="addon-item-name">{formatListName(p)}</span>
+                  </span>
                   <span class="addon-item-ver">v{p.manifest.version}</span>
                 </button>
               {/each}
@@ -797,6 +804,11 @@
               {@const hasUpdate = Boolean(existing && compareSemver(entry.version, existing.manifest.version) > 0)}
               {@const isBusy = marketplaceBusyId === entry.id}
               <div class="mp-card">
+                {#if entry.iconUrl}
+                  <img src={entry.iconUrl} alt="{entry.name} icon" class="mp-card-icon" />
+                {:else}
+                  <div class="mp-card-icon mp-card-icon-fallback" aria-hidden="true">❖</div>
+                {/if}
                 <div class="mp-card-main">
                   <div class="mp-card-head">
                     <span class="mp-name">{entry.name}</span>
@@ -879,16 +891,23 @@
       </div>
       <div class="modal-body perm-body">
         <div class="perm-summary">
-          <div class="perm-summary-title">
-            <strong>{req.manifest.name}</strong>
-            <span class="addon-tag">v{req.manifest.version}</span>
-            {#if req.manifest.author}
-              <span class="mp-author">by {req.manifest.author}</span>
+          <div class="perm-summary-head">
+            {#if req.manifest.iconUrl}
+              <img src={req.manifest.iconUrl} alt="" class="perm-summary-icon" />
             {/if}
+            <div class="perm-summary-head-text">
+              <div class="perm-summary-title">
+                <strong>{req.manifest.name}</strong>
+                <span class="addon-tag">v{req.manifest.version}</span>
+                {#if req.manifest.author}
+                  <span class="mp-author">by {req.manifest.author}</span>
+                {/if}
+              </div>
+              {#if req.manifest.description}
+                <div class="perm-summary-desc">{req.manifest.description}</div>
+              {/if}
+            </div>
           </div>
-          {#if req.manifest.description}
-            <div class="perm-summary-desc">{req.manifest.description}</div>
-          {/if}
           <div class="perm-source">Source: <code>{req.source}</code></div>
         </div>
 
@@ -1262,6 +1281,29 @@
     background: var(--button-primary-bg);
     color: #ffffff;
   }
+  .addon-item-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+  }
+  .addon-mini-icon,
+  .addon-mini-fallback {
+    width: 18px;
+    height: 18px;
+    border-radius: 5px;
+    flex-shrink: 0;
+    object-fit: cover;
+  }
+  .addon-mini-fallback {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    background: var(--canvas-elevated);
+    border: 1px solid var(--border-subtle);
+    color: var(--fg-subtle);
+  }
   .addon-item-name {
     min-width: 0;
     overflow: hidden;
@@ -1410,6 +1452,22 @@
     border-radius: var(--border-radius);
     background: var(--canvas-elevated);
   }
+  .mp-card-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    flex-shrink: 0;
+    object-fit: cover;
+    border: 1px solid var(--border);
+    background: var(--canvas-inset);
+  }
+  .mp-card-icon-fallback {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    color: var(--fg-subtle);
+  }
   .mp-card-main {
     display: flex;
     flex-direction: column;
@@ -1469,6 +1527,25 @@
     display: flex;
     flex-direction: column;
     gap: 4px;
+  }
+  .perm-summary-head {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  .perm-summary-icon {
+    width: 38px;
+    height: 38px;
+    border-radius: 9px;
+    object-fit: cover;
+    border: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+  .perm-summary-head-text {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    min-width: 0;
   }
   .perm-summary-title {
     display: flex;
