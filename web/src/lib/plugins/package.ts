@@ -16,6 +16,7 @@ export const DEFAULT_REGISTRY_URL =
   "https://raw.githubusercontent.com/cardly-anki/plugins/main/registry.json";
 
 export const CARDLY_PLUGINS_REPO_URL = "https://github.com/cardly-anki/plugins";
+export const CARDLY_MARKETPLACE_URL = "https://cardly-anki.github.io/plugins/";
 
 export function validatePermissions(raw: unknown): PluginPermission[] {
   if (raw === undefined || raw === null) {

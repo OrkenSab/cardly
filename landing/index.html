@@ -49,6 +49,7 @@
         <nav class="nav-menu">
           <a href="#features" data-i18n="nav_features">Features</a>
           <a href="#demo" data-i18n="nav_demo">Showcase</a>
+          <a href="https://cardly-anki.github.io/plugins/" target="_blank" rel="noopener noreferrer" class="nav-marketplace" data-i18n="nav_marketplace">Marketplace</a>
           <a href="#comparison" data-i18n="nav_comparison">Comparison</a>
           <a href="#faq" data-i18n="nav_faq">FAQ</a>
         </nav>
@@ -301,6 +302,45 @@
         </div>
       </section>
 
+      <!-- Plugin Marketplace Showcase -->
+      <section class="marketplace-section" id="marketplace">
+        <div class="section-container">
+          <div class="marketplace-card">
+            <div class="marketplace-copy">
+              <span class="kicker" data-i18n="mp_kicker">PLUGIN ECOSYSTEM</span>
+              <h2 data-i18n="mp_title">Cardly Plugin Marketplace &amp; Review Heatmap</h2>
+              <p data-i18n="mp_desc">
+                Extend Cardly with permission-gated JavaScript plugins. Browse the web marketplace, download offline
+                <code class="inline-code">.cardlyaddon</code> / <code class="inline-code">.zip</code> packages, or install add-ons like Glutanimate-style
+                <strong>Review Heatmap</strong> in one click.
+              </p>
+              <div class="marketplace-actions">
+                <a
+                  href="https://cardly-anki.github.io/plugins/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="btn btn-primary btn-marketplace-open"
+                  data-i18n="mp_cta_open"
+                >
+                  Open Plugin Marketplace
+                </a>
+                <a
+                  href="https://cardly-anki.github.io/plugins/packages/review-heatmap.cardlyaddon"
+                  download
+                  class="btn btn-secondary"
+                  data-i18n="mp_cta_download"
+                >
+                  Download Review Heatmap (.cardlyaddon)
+                </a>
+              </div>
+            </div>
+            <div class="marketplace-preview">
+              <img src="assets/review-heatmap-dark.png" alt="Review Heatmap plugin inside Cardly" loading="lazy" />
+            </div>
+          </div>
+        </div>
+      </section>
+
       <!-- Comparison Matrix -->
       <section class="comparison-section" id="comparison">
         <div class="section-container">
@@ -368,7 +408,7 @@
                 </tr>
                 <tr>
                   <td class="row-name" data-i18n="r_addons">Add-on Support</td>
-                  <td class="col-cardly" data-i18n="r_addons_cardly">Web-safe components &amp; Svelte extensions</td>
+                  <td class="col-cardly" data-i18n="r_addons_cardly">JS plugin system, permissions &amp; Marketplace</td>
                   <td data-i18n="r_addons_ankiweb">No add-ons</td>
                   <td data-i18n="r_addons_desktop">Full Python / PyQt add-ons</td>
                 </tr>
@@ -471,6 +511,7 @@
           <div class="link-col">
             <h4 data-i18n="col_project">Project</h4>
             <a href="https://github.com/cardly-anki/cardly" target="_blank" rel="noopener noreferrer">Cardly Repository</a>
+            <a href="https://cardly-anki.github.io/plugins/" target="_blank" rel="noopener noreferrer">Plugin Marketplace</a>
             <a href="https://github.com/cardly-anki/cardly#readme" target="_blank" rel="noopener noreferrer">English README</a>
             <a href="https://github.com/cardly-anki/cardly/blob/main/docs/i18n/README.ru.md" target="_blank" rel="noopener noreferrer">README (Русский)</a>
             <a href="https://github.com/cardly-anki/cardly/blob/main/docs/i18n/README.kk.md" target="_blank" rel="noopener noreferrer">README (Қазақша)</a>

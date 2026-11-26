@@ -54,6 +54,13 @@ test("Landing Page Visual Test & Interaction Suite", async ({ page }) => {
   await expect(githubBtn).toHaveAttribute("href", "https://github.com/cardly-anki/cardly");
   await expect(page.locator(".demo-reset-badge")).toBeVisible();
 
+  // 4c. Marketplace nav tab & showcase section
+  const navMarketplace = page.locator(".nav-menu .nav-marketplace");
+  await expect(navMarketplace).toHaveAttribute("href", "https://cardly-anki.github.io/plugins/");
+  const mpSectionBtn = page.locator(".btn-marketplace-open");
+  await expect(mpSectionBtn).toBeVisible();
+  await expect(mpSectionBtn).toHaveAttribute("href", "https://cardly-anki.github.io/plugins/");
+
   // 5. Interactive FAQ Accordion
   const firstAccordion = page.locator(".accordion-trigger").first();
   await expect(firstAccordion).toHaveAttribute("aria-expanded", "false");

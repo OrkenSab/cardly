@@ -54,6 +54,17 @@
     installFetchInterceptor();
     installUpstreamBridge();
     store.initTheme();
+
+    const params = new URLSearchParams(window.location.search);
+    const installId = params.get("install-addon")?.trim();
+    if (installId) {
+      store.pendingInstallAddonId = installId;
+      params.delete("install-addon");
+      const qs = params.toString();
+      const nextUrl = window.location.pathname + (qs ? `?${qs}` : "") + window.location.hash;
+      window.history.replaceState({}, "", nextUrl);
+    }
+
     void checkAuth();
   });
 
@@ -61,7 +72,11 @@
     const status = store.authStatus;
     untrack(() => {
       if (status === "authenticated") {
-        void pluginManager.syncFromServer();
+        void pluginManager.syncFromServer().then(() => {
+          if (store.pendingInstallAddonId) {
+            store.addonsOpen = true;
+          }
+        });
       } else if (status === "unauthenticated") {
         void pluginManager.resetExternalPlugins();
       }

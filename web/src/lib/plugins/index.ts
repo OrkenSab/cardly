@@ -5,6 +5,7 @@ export { pluginManager, PluginManager } from "./manager.svelte";
 export { default as PluginSlot } from "./PluginSlot.svelte";
 export {
   buildPluginZipBytes,
+  CARDLY_MARKETPLACE_URL,
   CARDLY_PLUGINS_REPO_URL,
   compareSemver,
   DEFAULT_REGISTRY_URL,

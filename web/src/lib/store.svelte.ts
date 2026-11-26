@@ -152,6 +152,7 @@ class CardlyStore {
   });
   manageNotetypesOpen = $state<boolean>(false);
   addonsOpen = $state<boolean>(false);
+  pendingInstallAddonId = $state<string | null>(null);
   fieldsModal = $state<FieldsModalState>({ open: false, notetypeId: 0 });
   cardTemplates = $state<CardTemplatesModalState>({ open: false, notetypeId: 0 });
   importModal = $state<ImportModalState>({ open: false, mode: "pick" });

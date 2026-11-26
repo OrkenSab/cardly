@@ -2,6 +2,7 @@
   import { untrack } from "svelte";
   import {
     buildPluginZipBytes,
+    CARDLY_MARKETPLACE_URL,
     CARDLY_PLUGINS_REPO_URL,
     compareSemver,
     DEFAULT_REGISTRY_URL,
@@ -148,6 +149,34 @@
     if (activeTab === "marketplace") {
       untrack(() => {
         void loadMarketplace(false);
+      });
+    }
+  });
+
+  $effect(() => {
+    const pendingId = store.pendingInstallAddonId;
+    if (pendingId) {
+      untrack(() => {
+        store.pendingInstallAddonId = null;
+        activeTab = "marketplace";
+        void (async () => {
+          try {
+            const { manifest, code } = await fetchPluginFromSource(pendingId);
+            const info = await installWithPermissionPrompt(
+              manifest,
+              code,
+              "Cardly Marketplace"
+            );
+            if (info) {
+              store.toast(`Installed ${info.manifest.name} v${info.manifest.version}`);
+            }
+          } catch (err) {
+            await store.alert(
+              err instanceof Error ? err.message : String(err),
+              "Add-on installation error"
+            );
+          }
+        })();
       });
     }
   });
@@ -946,7 +975,7 @@
       <div class="modal-footer get-addons-footer">
         <a
           class="anki-btn"
-          href={CARDLY_PLUGINS_REPO_URL}
+          href={CARDLY_MARKETPLACE_URL}
           target="_blank"
           rel="noopener noreferrer"
         >
